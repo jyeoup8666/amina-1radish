@@ -10,7 +10,7 @@
     
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
         
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
@@ -27,8 +27,8 @@
         .delete-btn:hover { background: #c82333; }
         .sync-btn { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #dee2e6; padding: 10px; text-align: center; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px; text-align: center; vertical-align: middle; }
         th { background: #2b569a; color: white; }
         
         .info-box { background: #eef5ff; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
@@ -40,13 +40,19 @@
         .stat-title { font-size: 13px; color: #6c757d; font-weight: bold; margin-bottom: 5px; }
         .stat-value { font-size: 20px; font-weight: bold; color: #333; }
         
-        .date-tag { display: inline-block; background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
-        .date-tag:hover { background: #dc3545; color: white; }
+        /* 날짜 태그 스타일 (X/기본: 빨강, O: 초록) */
+        .date-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
+        .date-tag.repair-x { background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; }
+        .date-tag.repair-x:hover { background: #dc3545; color: white; }
+        .date-tag.repair-o { background: #e6f4ea; color: #137333; border: 1px solid #ceedd6; }
+        .date-tag.repair-o:hover { background: #137333; color: white; }
         
-        .img-preview { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; display: block; margin: 5px auto; cursor: pointer; }
+        .img-preview { max-width: 70px; max-height: 70px; object-fit: cover; border-radius: 4px; display: block; margin: 5px auto; cursor: pointer; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
         .modal-content { max-width: 90%; max-height: 85%; border-radius: 8px; }
         .close-modal { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
+        
+        input[type="text"].table-input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
     </style>
 </head>
 <body>
@@ -109,11 +115,14 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 15%;">호수</th>
-                    <th style="width: 20%;">누수 상태</th>
-                    <th style="width: 20%;">실리콘 상태</th>
-                    <th style="width: 20%;">소음/진동</th>
-                    <th style="width: 25%;">현장 사진</th>
+                    <th style="width: 8%;">호수</th>
+                    <th style="width: 10%;">누수 상태</th>
+                    <th style="width: 10%;">실리콘 상태</th>
+                    <th style="width: 10%;">소음/진동</th>
+                    <th style="width: 15%;">현장 사진</th>
+                    <th style="width: 22%;">수리 내용</th>
+                    <th style="width: 15%;">수리 금액</th>
+                    <th style="width: 10%;">수리 여부</th>
                 </tr>
             </thead>
             <tbody id="boiler-table-body"></tbody>
@@ -148,14 +157,15 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 15%;">호수</th>
-                    <th style="width: 15%;">이상 발생 횟수</th>
-                    <th style="width: 20%;">최근 이상 발생일</th>
-                    <th style="width: 50%;">이상 발생 기록 (클릭 시 해당 점검표로 이동)</th>
+                    <th style="width: 10%;">호수</th>
+                    <th style="width: 15%;">최근 이상 발생일</th>
+                    <th style="width: 45%;">이상 발생 기록 (클릭 시 해당 점검표로 이동)</th>
+                    <th style="width: 15%;">총 이상 발생 횟수</th>
+                    <th style="width: 15%;">총 수리 금액</th>
                 </tr>
             </thead>
             <tbody id="history-table-body">
-                <tr><td colspan="4">데이터를 불러오는 중입니다...</td></tr>
+                <tr><td colspan="5">데이터를 불러오는 중입니다...</td></tr>
             </tbody>
         </table>
     </div>
@@ -217,12 +227,31 @@
                     <input type="file" accept="image/*" onchange="previewAndCompressImage(this, ${index})">
                     <img id="preview-${index}" class="img-preview hidden" onclick="openImageModal(this.src)" title="클릭하여 확대">
                 </td>
+                <td><input type="text" class="table-input repair-detail" placeholder="수리 내용 입력"></td>
+                <td><input type="text" class="table-input repair-cost" placeholder="0" oninput="formatCurrency(this)"></td>
+                <td>
+                    <select class="repair-status">
+                        <option>-</option>
+                        <option>O</option>
+                        <option>X</option>
+                    </select>
+                </td>
             `;
             tbody.appendChild(row);
         });
 
         document.getElementById('check-date').value = new Date().toISOString().substring(0, 10);
         updateHistoryOptions();
+    }
+
+    // 통화 자동 포맷팅 함수 (10000 -> 10,000원)
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) {
+            input.value = Number(value).toLocaleString('ko-KR') + '원';
+        } else {
+            input.value = '';
+        }
     }
 
     function previewAndCompressImage(input, index) {
@@ -307,8 +336,12 @@
             const noise = document.querySelectorAll('.status-noise')[index].value;
             const preview = document.getElementById(`preview-${index}`);
             const imgSrc = preview.classList.contains('hidden') ? '' : preview.src;
+            
+            const repairDetail = document.querySelectorAll('.repair-detail')[index].value;
+            const repairCost = document.querySelectorAll('.repair-cost')[index].value;
+            const repairStatus = document.querySelectorAll('.repair-status')[index].value;
 
-            roomData.push({ room, leak, silicon, noise, imgSrc });
+            roomData.push({ room, leak, silicon, noise, imgSrc, repairDetail, repairCost, repairStatus });
         });
 
         try {
@@ -371,9 +404,9 @@
                 document.getElementById('inspector-name').value = record.inspector || '';
 
                 record.roomData.forEach((data, index) => {
-                    document.querySelectorAll('.status-leak')[index].value = data.leak;
-                    document.querySelectorAll('.status-silicon')[index].value = data.silicon;
-                    document.querySelectorAll('.status-noise')[index].value = data.noise;
+                    document.querySelectorAll('.status-leak')[index].value = data.leak || '양호';
+                    document.querySelectorAll('.status-silicon')[index].value = data.silicon || '양호';
+                    document.querySelectorAll('.status-noise')[index].value = data.noise || '양호';
                     
                     const preview = document.getElementById(`preview-${index}`);
                     if (data.imgSrc) {
@@ -383,6 +416,10 @@
                         preview.src = '';
                         preview.classList.add('hidden');
                     }
+
+                    document.querySelectorAll('.repair-detail')[index].value = data.repairDetail || '';
+                    document.querySelectorAll('.repair-cost')[index].value = data.repairCost || '';
+                    document.querySelectorAll('.repair-status')[index].value = data.repairStatus || '-';
                 });
             }
         });
@@ -390,7 +427,7 @@
 
     function renderHistoryTable() {
         const tbody = document.getElementById('history-table-body');
-        tbody.innerHTML = '<tr><td colspan="4">데이터를 불러오는 중입니다...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5">데이터를 불러오는 중입니다...</td></tr>';
 
         db.collection("boiler_checks").get().then((querySnapshot) => {
             const allDocs = [];
@@ -404,7 +441,7 @@
             // 전월 및 당월 계산
             const now = new Date();
             const currYear = now.getFullYear();
-            const currMonth = now.getMonth() + 1; // 1-12
+            const currMonth = now.getMonth() + 1;
             
             const prevDateObj = new Date(currYear, now.getMonth() - 1, 1);
             const prevYear = prevDateObj.getFullYear();
@@ -417,7 +454,7 @@
             let currMonthIssues = 0;
 
             allDocs.forEach(doc => {
-                const docMonth = doc.date.substring(0, 7); // YYYY-MM
+                const docMonth = doc.date.substring(0, 7);
                 doc.roomData.forEach(r => {
                     if (r.leak === '점검필요' || r.silicon === '점검필요' || r.noise === '점검필요') {
                         if (docMonth === currMonthStr) currMonthIssues++;
@@ -431,26 +468,46 @@
 
             tbody.innerHTML = '';
             rooms.forEach(room => {
-                let issueDates = [];
+                let issueRecords = []; // { date: 'YYYY-MM-DD', status: 'O/X/-' }
+                let totalCost = 0;
 
                 allDocs.forEach(doc => {
                     const roomInfo = doc.roomData.find(r => r.room === room);
                     if (roomInfo) {
+                        // 점검필요 상태이거나 수리 금액이 존재하는 경우 기록에 추가
                         if (roomInfo.leak === '점검필요' || roomInfo.silicon === '점검필요' || roomInfo.noise === '점검필요') {
-                            issueDates.push(doc.date);
+                            issueRecords.push({
+                                date: doc.date,
+                                status: roomInfo.repairStatus || '-'
+                            });
+                        }
+
+                        // 누적 수리 금액 계산
+                        if (roomInfo.repairCost) {
+                            const costNum = parseInt(roomInfo.repairCost.replace(/[^0-9]/g, '')) || 0;
+                            totalCost += costNum;
                         }
                     }
                 });
 
-                const lastIssueDate = issueDates.length > 0 ? issueDates[issueDates.length - 1] : '-';
-                const dateTagsHtml = issueDates.map(d => `<span class="date-tag" onclick="goToDateForm('${d}')">${d}</span>`).join(' ');
+                const lastIssueDate = issueRecords.length > 0 ? issueRecords[issueRecords.length - 1].date : '-';
+                
+                // 날짜 태그 생성 (O면 초록색, 그 외 빨간색)
+                const dateTagsHtml = issueRecords.map(item => {
+                    const isCompleted = item.status === 'O';
+                    const cssClass = isCompleted ? 'date-tag repair-o' : 'date-tag repair-x';
+                    return `<span class="${cssClass}" onclick="goToDateForm('${item.date}')">${item.date}</span>`;
+                }).join(' ');
+
+                const formattedTotalCost = totalCost > 0 ? totalCost.toLocaleString('ko-KR') + '원' : '0원';
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${room}</strong></td>
-                    <td><span style="color: ${issueDates.length > 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">${issueDates.length}회</span></td>
                     <td>${lastIssueDate}</td>
                     <td>${dateTagsHtml || '<span style="color:#a0a0a0; font-size:13px;">이상 없음</span>'}</td>
+                    <td><span style="color: ${issueRecords.length > 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">${issueRecords.length}회</span></td>
+                    <td style="font-weight: bold; color: ${totalCost > 0 ? '#2b569a' : '#333'};">${formattedTotalCost}</td>
                 `;
                 tbody.appendChild(row);
             });
