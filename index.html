@@ -4,29 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>시설 점검 시스템</title>
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
         
-        /* 메인 메뉴 */
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
         .menu-btn { background: #2b569a; color: white; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .menu-btn:hover { background: #1d3c6e; }
         
-        /* 버튼 공통 */
         .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
         .save-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; }
         .save-btn:hover { background: #218838; }
         
-        /* 표 및 상자 */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #dee2e6; padding: 10px; text-align: center; vertical-align: middle; }
         th { background: #2b569a; color: white; }
         .info-box { background: #eef5ff; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         .history-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
         
-        /* 이미지 썸네일 & 모달 */
         .img-preview { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; display: block; margin: 5px auto; cursor: pointer; }
         .img-preview:hover { transform: scale(1.05); }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
@@ -39,7 +39,7 @@
 <div class="container">
     <!-- 메인 메뉴 -->
     <div id="main-menu">
-        <h2>📋 시설 점검표 목록</h2>
+        <h2>📋 시설 점검 시스템</h2>
         <p>조회 및 작성할 점검표를 선택하세요.</p>
         <div class="menu-grid">
             <div class="menu-btn" onclick="showPage('boiler')">🔥 보일러 주간 점검표</div>
@@ -88,7 +88,7 @@
             <tbody id="boiler-table-body"></tbody>
         </table>
 
-        <button class="save-btn" onclick="saveData()">💾 현재 날짜로 기록 저장하기</button>
+        <button class="save-btn" onclick="saveData()">☁️ 파이어베이스 서버에 저장하기</button>
     </div>
 
     <!-- 소화기 점검표 -->
@@ -113,6 +113,21 @@
 </div>
 
 <script>
+    // 입력받은 파이어베이스 설정을 적용했습니다.
+    const firebaseConfig = {
+        apiKey: "AIzaSyBnQfxr5Uzsk862IGBKs7KrvqF1__k3hqA",
+        authDomain: "facility-check-74a17.firebaseapp.com",
+        projectId: "facility-check-74a17",
+        storageBucket: "facility-check-74a17.firebasestorage.app",
+        messagingSenderId: "672284450568",
+        appId: "1:672284450568:web:5b6f809b4a032424b456bd",
+        measurementId: "G-KN5TSDQHMF"
+    };
+
+    // Firebase 및 Firestore 초기화
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const rooms = [
         '301호', '302호', '303호', '304호', '305호', '306호', '307호', '308호', '309호-1', '309호-2',
         '401호', '402호', '403호', '404호', '405호', '406호', '407호', '408호', '409호-1', '409호-2',
@@ -184,7 +199,7 @@
         document.getElementById('main-menu').classList.remove('hidden');
     }
 
-    function saveData() {
+    async function saveData() {
         const date = document.getElementById('check-date').value;
         const inspector = document.getElementById('inspector-name').value;
 
@@ -203,49 +218,58 @@
             roomData.push({ room, leak, silicon, noise, imgSrc });
         });
 
-        const record = { date, inspector, roomData };
-        localStorage.setItem('boiler_' + date, JSON.stringify(record));
-        alert(`${date} 점검 기록이 저장되었습니다!`);
-        updateHistoryOptions();
+        try {
+            await db.collection("boiler_checks").doc(date).set({
+                date: date,
+                inspector: inspector,
+                roomData: roomData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            alert(`${date} 점검 기록이 파이어베이스 서버에 저장되었습니다!\n이제 다른 PC에서도 동일하게 조회할 수 있습니다.`);
+            updateHistoryOptions();
+        } catch (error) {
+            console.error("저장 오류:", error);
+            alert("저장 실패: 파이어베이스 규칙 설정을 확인해 보세요.");
+        }
     }
 
     function updateHistoryOptions() {
         const select = document.getElementById('history-select');
         select.innerHTML = '<option value="">-- 날짜 선택 --</option>';
-        
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith('boiler_')) {
-                const dateVal = key.replace('boiler_', '');
+
+        db.collection("boiler_checks").get().then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
                 const option = document.createElement('option');
-                option.value = dateVal;
-                option.textContent = dateVal;
+                option.value = doc.id;
+                option.textContent = doc.id;
                 select.appendChild(option);
-            }
-        }
+            });
+        });
     }
 
     function loadHistory(date) {
         if (!date) return;
-        const dataStr = localStorage.getItem('boiler_' + date);
-        if (!dataStr) return;
 
-        const record = JSON.parse(dataStr);
-        document.getElementById('check-date').value = record.date;
-        document.getElementById('inspector-name').value = record.inspector;
+        db.collection("boiler_checks").doc(date).get().then((doc) => {
+            if (doc.exists) {
+                const record = doc.data();
+                document.getElementById('check-date').value = record.date;
+                document.getElementById('inspector-name').value = record.inspector || '';
 
-        record.roomData.forEach((data, index) => {
-            document.querySelectorAll('.status-leak')[index].value = data.leak;
-            document.querySelectorAll('.status-silicon')[index].value = data.silicon;
-            document.querySelectorAll('.status-noise')[index].value = data.noise;
-            
-            const preview = document.getElementById(`preview-${index}`);
-            if (data.imgSrc) {
-                preview.src = data.imgSrc;
-                preview.classList.remove('hidden');
-            } else {
-                preview.src = '';
-                preview.classList.add('hidden');
+                record.roomData.forEach((data, index) => {
+                    document.querySelectorAll('.status-leak')[index].value = data.leak;
+                    document.querySelectorAll('.status-silicon')[index].value = data.silicon;
+                    document.querySelectorAll('.status-noise')[index].value = data.noise;
+                    
+                    const preview = document.getElementById(`preview-${index}`);
+                    if (data.imgSrc) {
+                        preview.src = data.imgSrc;
+                        preview.classList.remove('hidden');
+                    } else {
+                        preview.src = '';
+                        preview.classList.add('hidden');
+                    }
+                });
             }
         });
     }
