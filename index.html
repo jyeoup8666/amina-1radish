@@ -23,6 +23,8 @@
         .nav-btn { background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
         .save-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; }
         .save-btn:hover { background: #218838; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .delete-btn:hover { background: #c82333; }
         .sync-btn { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -32,16 +34,14 @@
         .info-box { background: #eef5ff; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         .history-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
         
-        /* 통계 요약 카드 스타일 */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 5px solid #2b569a; padding: 15px; border-radius: 6px; }
         .stat-card.warning { border-left-color: #dc3545; background: #fff5f5; }
         .stat-title { font-size: 13px; color: #6c757d; font-weight: bold; margin-bottom: 5px; }
-        .stat-value { font-size: 20px; font-weight: bold; color: #333; }
+        .stat-value { font-size: 18px; font-weight: bold; color: #333; }
         
-        /* 날짜 태그 스타일 */
-        .date-tag { display: inline-block; background: #e9ecef; color: #2b569a; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; text-decoration: underline; }
-        .date-tag:hover { background: #2b569a; color: white; }
+        .date-tag { display: inline-block; background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
+        .date-tag:hover { background: #dc3545; color: white; }
         
         .img-preview { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; display: block; margin: 5px auto; cursor: pointer; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
@@ -87,6 +87,7 @@
             <select id="history-select" onchange="loadHistory(this.value)">
                 <option value="">-- 날짜 선택 --</option>
             </select>
+            <button class="delete-btn" onclick="deleteData()">🗑️ 삭제하기</button>
             <button onclick="resetForm()" style="margin-left: 10px;">새 작성하기</button>
             <button class="sync-btn" onclick="migrateLocalToFirebase()">기존PC 데이터 서버로 올리기</button>
         </div>
@@ -129,19 +130,14 @@
         </div>
         <h2>📊 보일러 점검 이력 관리</h2>
         
-        <!-- 통계 카운트 카드리스트 (센스 기능) -->
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-title">총 등록 점검 회차</div>
-                <div class="stat-value" id="stat-total-count">0회</div>
-            </div>
             <div class="stat-card">
                 <div class="stat-title">최근 점검 실시일</div>
                 <div class="stat-value" id="stat-last-date">-</div>
             </div>
             <div class="stat-card warning">
                 <div class="stat-title">최근 점검필요 호수</div>
-                <div class="stat-value" id="stat-issue-rooms" style="font-size: 15px; color: #dc3545;">없음</div>
+                <div class="stat-value" id="stat-issue-rooms" style="color: #dc3545;">없음 (전체 양호)</div>
             </div>
         </div>
 
@@ -149,9 +145,9 @@
             <thead>
                 <tr>
                     <th style="width: 15%;">호수</th>
-                    <th style="width: 15%;">총 점검 횟수</th>
-                    <th style="width: 20%;">최근 점검일</th>
-                    <th style="width: 50%;">점검 이력 날짜 (클릭 시 해당 점검표로 이동)</th>
+                    <th style="width: 15%;">이상 발생 횟수</th>
+                    <th style="width: 20%;">최근 이상 발생일</th>
+                    <th style="width: 50%;">이상 발생 기록 (클릭 시 해당 점검표로 이동)</th>
                 </tr>
             </thead>
             <tbody id="history-table-body">
@@ -326,6 +322,27 @@
         }
     }
 
+    async function deleteData() {
+        const selectedDate = document.getElementById('history-select').value || document.getElementById('check-date').value;
+
+        if (!selectedDate) {
+            alert('삭제할 점검 날짜를 선택해 주세요.');
+            return;
+        }
+
+        if (confirm(`정말로 ${selectedDate} 점검 기록을 서버에서 완전히 삭제하시겠습니까?`)) {
+            try {
+                await db.collection("boiler_checks").doc(selectedDate).delete();
+                alert(`${selectedDate} 점검 기록이 삭제되었습니다.`);
+                resetForm();
+                updateHistoryOptions();
+            } catch (error) {
+                console.error("삭제 오류:", error);
+                alert("삭제 처리 중 오류가 발생했습니다.");
+            }
+        }
+    }
+
     function updateHistoryOptions() {
         const select = document.getElementById('history-select');
         select.innerHTML = '<option value="">-- 날짜 선택 --</option>';
@@ -367,23 +384,19 @@
         });
     }
 
-    // 이력 관리 화면 데이터 불러오기 및 계산
     function renderHistoryTable() {
         const tbody = document.getElementById('history-table-body');
-        tbody.innerHTML = '<tr><td colspan="4">데이터를 동기화 중입니다...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4">데이터를 불러오는 중입니다...</td></tr>';
 
         db.collection("boiler_checks").get().then((querySnapshot) => {
             const allDocs = [];
             querySnapshot.forEach((doc) => allDocs.push(doc.data()));
 
-            // 날짜 오름차순 정렬
             allDocs.sort((a, b) => a.date.localeCompare(b.date));
 
-            // 통계 데이터 계산
-            document.getElementById('stat-total-count').textContent = `${allDocs.length}회`;
+            // 상단 카드 정보 갱신
             document.getElementById('stat-last-date').textContent = allDocs.length > 0 ? allDocs[allDocs.length - 1].date : '-';
 
-            // 최근 점검 기준 점검필요 호수 체크
             let issueRooms = [];
             if (allDocs.length > 0) {
                 const latestDoc = allDocs[allDocs.length - 1];
@@ -395,36 +408,35 @@
             }
             document.getElementById('stat-issue-rooms').textContent = issueRooms.length > 0 ? issueRooms.join(', ') : '없음 (전체 양호)';
 
-            // 호수별 점검 이력 집계
             tbody.innerHTML = '';
             rooms.forEach(room => {
-                let checkCount = 0;
-                let dates = [];
+                let issueDates = [];
 
                 allDocs.forEach(doc => {
                     const roomInfo = doc.roomData.find(r => r.room === room);
                     if (roomInfo) {
-                        checkCount++;
-                        dates.push(doc.date);
+                        // 해당 호수에 '점검필요' 항목이 하나라도 존재하는지 확인
+                        if (roomInfo.leak === '점검필요' || roomInfo.silicon === '점검필요' || roomInfo.noise === '점검필요') {
+                            issueDates.push(doc.date);
+                        }
                     }
                 });
 
-                const lastDate = dates.length > 0 ? dates[dates.length - 1] : '-';
-                const dateTagsHtml = dates.map(d => `<span class="date-tag" onclick="goToDateForm('${d}')">${d}</span>`).join(' ');
+                const lastIssueDate = issueDates.length > 0 ? issueDates[issueDates.length - 1] : '-';
+                const dateTagsHtml = issueDates.map(d => `<span class="date-tag" onclick="goToDateForm('${d}')">${d}</span>`).join(' ');
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><strong>${room}</strong></td>
-                    <td><span style="color: #2b569a; font-weight: bold;">${checkCount}회</span></td>
-                    <td>${lastDate}</td>
-                    <td>${dateTagsHtml || '-'}</td>
+                    <td><span style="color: ${issueDates.length > 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">${issueDates.length}회</span></td>
+                    <td>${lastIssueDate}</td>
+                    <td>${dateTagsHtml || '<span style="color:#a0a0a0; font-size:13px;">이상 없음</span>'}</td>
                 `;
                 tbody.appendChild(row);
             });
         });
     }
 
-    // 이력에서 특정 날짜 태그 클릭 시 주간점검표 페이지로 이동 후 데이터 불러오기
     function goToDateForm(date) {
         showPage('boiler-form');
         document.getElementById('history-select').value = date;
