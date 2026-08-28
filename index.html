@@ -6,29 +6,30 @@
     <title>시설 점검 시스템</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
         
-        /* 메인 메뉴 스타일 */
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-        .menu-btn { background: #2b569a; color: white; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
+        .menu-btn { background: #2b569a; color: white; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .menu-btn:hover { background: #1d3c6e; }
         
-        /* 공통 버튼 */
         .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
-        .back-btn:hover { background: #5a6268; }
+        .save-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; }
+        .save-btn:hover { background: #218838; }
         
-        /* 표 스타일 */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #dee2e6; padding: 10px; text-align: center; }
+        th, td { border: 1px solid #dee2e6; padding: 10px; text-align: center; vertical-align: middle; }
         th { background: #2b569a; color: white; }
         .info-box { background: #eef5ff; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+        
+        .img-preview { max-width: 80px; max-height: 80px; object-fit: cover; border-radius: 4px; display: block; margin: 5px auto; }
+        .history-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 1. 메인 메뉴 (초기 화면) -->
+    <!-- 메인 메뉴 -->
     <div id="main-menu">
         <h2>📋 시설 점검표 목록</h2>
         <p>조회 및 작성할 점검표를 선택하세요.</p>
@@ -39,67 +40,112 @@
         </div>
     </div>
 
-    <!-- 2. 보일러 주간 점검표 -->
+    <!-- 보일러 주간 점검표 -->
     <div id="page-boiler" class="hidden">
         <button class="back-btn" onclick="showMain()">← 목록으로 돌아가기</button>
         <h2>🔥 보일러 주간 점검표</h2>
+        
+        <!-- 저장 기록 조회 영역 -->
+        <div class="history-box">
+            <strong>📅 이전 점검 기록 조회: </strong>
+            <select id="history-select" onchange="loadHistory(this.value)">
+                <option value="">-- 날짜 선택 --</option>
+            </select>
+            <button onclick="resetForm()" style="margin-left: 10px;">새 작성하기</button>
+        </div>
+
         <div class="info-box">
             <strong>📋 주요 점검 기준</strong>
-            <ul>
-                <li><strong>누수:</strong> 본체 밑, 분배기 밸브, 배관 연결부 젖음</li>
-                <li><strong>실리콘:</strong> 접합부 실리콘 삭음 및 틈새 벌어짐</li>
-                <li><strong>소음/진동:</strong> 작동 중 이상 소음 및 이상 진동</li>
+            <ul style="margin: 5px 0 0 20px; padding: 0;">
+                <li>누수: 본체 밑, 분배기 밸브, 배관 연결부 젖음</li>
+                <li>실리콘: 접합부 실리콘 삭음 및 틈새 벌어짐</li>
+                <li>소음/진동: 작동 중 이상 소음 및 이상 진동</li>
             </ul>
         </div>
+
         <p>
-            점검일자: <input type="date"> 
-            점검자: <input type="text" placeholder="이름 입력">
+            점검일자: <input type="date" id="check-date"> 
+            점검자: <input type="text" id="inspector-name" placeholder="이름 입력">
         </p>
+
         <table>
             <thead>
                 <tr>
-                    <th>호수</th>
-                    <th>누수 상태</th>
-                    <th>실리콘 상태</th>
-                    <th>소음/진동</th>
-                    <th>현장 사진 업로드</th>
+                    <th style="width: 15%;">호수</th>
+                    <th style="width: 20%;">누수 상태</th>
+                    <th style="width: 20%;">실리콘 상태</th>
+                    <th style="width: 20%;">소음/진동</th>
+                    <th style="width: 25%;">현장 사진</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>301호</td>
-                    <td><select><option>양호</option><option>점검필요</option></select></td>
-                    <td><select><option>양호</option><option>점검필요</option></select></td>
-                    <td><select><option>양호</option><option>점검필요</option></select></td>
-                    <td><input type="file"></td>
-                </tr>
-                <tr>
-                    <td>302호</td>
-                    <td><select><option>양호</option><option>점검필요</option></select></td>
-                    <td><select><option>양호</option><option>점검필요</option></select></td>
-                    <td><select><option>양호</option><option>점검필요</option></select></td>
-                    <td><input type="file"></td>
-                </tr>
+            <tbody id="boiler-table-body">
+                <!-- 전체 호수 자동 생성 -->
             </tbody>
         </table>
+
+        <button class="save-btn" onclick="saveData()">💾 현재 날짜로 기록 저장하기</button>
     </div>
 
-    <!-- 3. 소화기 점검표 (추가 메뉴 예시) -->
+    <!-- 소화기 점검표 -->
     <div id="page-fire" class="hidden">
         <button class="back-btn" onclick="showMain()">← 목록으로 돌아가기</button>
         <h2>🧯 소화기 점검표</h2>
-        <p>소화기 점검 항목 화면입니다.</p>
+        <p>준비 중입니다.</p>
     </div>
 
-    <!-- 4. 정수기 점검표 (추가 메뉴 예시) -->
+    <!-- 정수기 점검표 -->
     <div id="page-water" class="hidden">
         <button class="back-btn" onclick="showMain()">← 목록으로 돌아가기</button>
         <h2>💧 정수기 점검표</h2>
-        <p>정수기 필터 및 위생 점검 화면입니다.</p>
+        <p>준비 중입니다.</p>
     </div>
 </div>
 
 <script>
+    // 전체 호수 목록 지정 (309, 409, 509, 608호는 1, 2로 구분)
+    const rooms = [
+        '301호', '302호', '303호', '304호', '305호', '306호', '307호', '308호', '309호-1', '309호-2',
+        '401호', '402호', '403호', '404호', '405호', '406호', '407호', '408호', '409호-1', '409호-2',
+        '501호', '502호', '503호', '504호', '505호', '506호', '507호', '508호', '509호-1', '509호-2',
+        '601호', '602호', '603호', '604호', '605호', '606호', '607호', '608호-1', '608호-2'
+    ];
+
+    function initBoilerTable() {
+        const tbody = document.getElementById('boiler-table-body');
+        tbody.innerHTML = '';
+        
+        rooms.forEach((room, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${room}</strong></td>
+                <td><select class="status-leak"><option>양호</option><option>점검필요</option></select></td>
+                <td><select class="status-silicon"><option>양호</option><option>점검필요</option></select></td>
+                <td><select class="status-noise"><option>양호</option><option>점검필요</option></select></td>
+                <td>
+                    <input type="file" accept="image/*" onchange="previewImage(this, ${index})">
+                    <img id="preview-${index}" class="img-preview hidden">
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        document.getElementById('check-date').value = new Date().toISOString().substring(0, 10);
+        updateHistoryOptions();
+    }
+
+    function previewImage(input, index) {
+        const file = input.files[0];
+        const preview = document.getElementById(`preview-${index}`);
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
     function showPage(pageId) {
         document.getElementById('main-menu').classList.add('hidden');
         document.getElementById('page-boiler').classList.add('hidden');
@@ -107,14 +153,85 @@
         document.getElementById('page-water').classList.add('hidden');
         
         document.getElementById('page-' + pageId).classList.remove('hidden');
+        if(pageId === 'boiler') initBoilerTable();
     }
 
     function showMain() {
         document.getElementById('page-boiler').classList.add('hidden');
         document.getElementById('page-fire').classList.add('hidden');
         document.getElementById('page-water').classList.add('hidden');
-        
         document.getElementById('main-menu').classList.remove('hidden');
+    }
+
+    function saveData() {
+        const date = document.getElementById('check-date').value;
+        const inspector = document.getElementById('inspector-name').value;
+
+        if (!date) {
+            alert('점검일자를 선택해 주세요.');
+            return;
+        }
+
+        const roomData = [];
+        rooms.forEach((room, index) => {
+            const leak = document.querySelectorAll('.status-leak')[index].value;
+            const silicon = document.querySelectorAll('.status-silicon')[index].value;
+            const noise = document.querySelectorAll('.status-noise')[index].value;
+            const imgSrc = document.getElementById(`preview-${index}`).src || '';
+
+            roomData.push({ room, leak, silicon, noise, imgSrc });
+        });
+
+        const record = { date, inspector, roomData };
+        localStorage.setItem('boiler_' + date, JSON.stringify(record));
+        alert(`${date} 점검 기록이 저장되었습니다!`);
+        updateHistoryOptions();
+    }
+
+    function updateHistoryOptions() {
+        const select = document.getElementById('history-select');
+        select.innerHTML = '<option value="">-- 날짜 선택 --</option>';
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('boiler_')) {
+                const dateVal = key.replace('boiler_', '');
+                const option = document.createElement('option');
+                option.value = dateVal;
+                option.textContent = dateVal;
+                select.appendChild(option);
+            }
+        }
+    }
+
+    function loadHistory(date) {
+        if (!date) return;
+        const dataStr = localStorage.getItem('boiler_' + date);
+        if (!dataStr) return;
+
+        const record = JSON.parse(dataStr);
+        document.getElementById('check-date').value = record.date;
+        document.getElementById('inspector-name').value = record.inspector;
+
+        record.roomData.forEach((data, index) => {
+            document.querySelectorAll('.status-leak')[index].value = data.leak;
+            document.querySelectorAll('.status-silicon')[index].value = data.silicon;
+            document.querySelectorAll('.status-noise')[index].value = data.noise;
+            
+            const preview = document.getElementById(`preview-${index}`);
+            if (data.imgSrc) {
+                preview.src = data.imgSrc;
+                preview.classList.remove('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+            }
+        });
+    }
+
+    function resetForm() {
+        initBoilerTable();
+        document.getElementById('inspector-name').value = '';
     }
 </script>
 
