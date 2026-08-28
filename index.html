@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아미나 병원 행정 & 시설 관리 포털</title>
+    <title>아미나 병원 시설/행정 관리 포털</title>
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; padding: 20px; line-height: 1.6; background-color: #f4f6f9; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 { color: #1e3a8a; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
+        .container { max-width: 1000px; margin: 0 auto; display: none; } /* 인증 전까지 숨김 */
         .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1 { color: #1e3a8a; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
         h2 { color: #2563eb; margin-top: 0; font-size: 1.3rem; }
         .btn { display: inline-block; padding: 10px 18px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px; border: none; cursor: pointer; }
         .btn:hover { background: #1d4ed8; }
         
+        /* 암호 입력 모달 스타일 */
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e293b; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .auth-box { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 90%; max-width: 350px; }
+        .auth-box input { width: 80%; padding: 10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; text-align: center; }
+
         /* 보일러 점검표 스타일 */
         .notice-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px; margin-bottom: 15px; border-radius: 4px; }
         .notice-box ul { margin: 5px 0 0 20px; padding: 0; }
@@ -26,132 +31,156 @@
 </head>
 <body>
 
-<div class="container">
-    <h1>🏥 아미나 병원 시설/행정 관리 포털</h1>
-    <p>원내 시설 점검 및 행정 대장을 온라인으로 통합 관리합니다.</p>
-
-    <!-- 1. 소화기 점검표 -->
-    <div class="card">
-        <h2>🧯 소화기 점검표</h2>
-        <p>각 층 및 구역별 소화기 설치 상태, 압력계, 외관을 점검합니다.</p>
-        <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">소화기 점검하기</button>
+    <!-- 🔒 비밀번호 인증 창 -->
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <h2>🏥 아미나 병원 포털</h2>
+            <p>직원 전용 페이지입니다.<br>비밀번호를 입력하세요.</p>
+            <input type="password" id="pass-input" placeholder="비밀번호 입력">
+            <br>
+            <button class="btn" onclick="checkPassword()">접속하기</button>
+        </div>
     </div>
 
-    <!-- 2. 정수기 관리대장 -->
-    <div class="card">
-        <h2>💧 정수기 관리대장</h2>
-        <p>원내 정수기 필터 교체 주기, 위생 살균, 수질 점검 이력을 관리합니다.</p>
-        <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">정수기 대장 작성</button>
-    </div>
+    <!-- 🏥 실제 콘텐츠 (인증 성공 시 표시) -->
+    <div class="container" id="main-content">
+        <h1>🏥 아미나 병원 시설/행정 관리 포털</h1>
+        <p>원내 시설 점검 및 행정 대장을 온라인으로 통합 관리합니다.</p>
 
-    <!-- 3. 정화조 관리대장 -->
-    <div class="card">
-        <h2>🚽 정화조 관리대장</h2>
-        <p>정화조 내부 청소, 약품 투여, 폭기조 상태 및 정기 점검을 기록합니다.</p>
-        <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">정화조 대장 작성</button>
-    </div>
-
-    <!-- 4. 세탁기 관리표 -->
-    <div class="card">
-        <h2>🧺 세탁기 관리표</h2>
-        <p>세탁기/건조기 필터 청소, 세제 공급선, 동작 상태를 점검합니다.</p>
-        <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">세탁기 점검하기</button>
-    </div>
-
-    <!-- 5. 기타 기기 관리 -->
-    <div class="card">
-        <h2>⚙️ 기타 기기 관리</h2>
-        <p>원내 기타 시설물 및 온열치료기 등 보조 기기 점검 이력을 기록합니다.</p>
-        <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">기타 기기 대장 작성</button>
-    </div>
-
-    <!-- 6. 보일러 주간 점검표 -->
-    <div class="card">
-        <h2>🔥 보일러 주간 점검표</h2>
-        
-        <div class="notice-box">
-            <strong>📋 주요 점검 기준</strong>
-            <ul>
-                <li><strong>누수:</strong> 본체 밑, 분배기 밸브, 배관 연결부 젖음</li>
-                <li><strong>실리콘:</strong> 접합부 실리콘 삭음 및 틈새 벌어짐</li>
-                <li><strong>소음/진동:</strong> 작동 중 이상 소음 및 이상 진동</li>
-            </ul>
+        <!-- 1. 소화기 점검표 -->
+        <div class="card">
+            <h2>🧯 소화기 점검표</h2>
+            <p>각 층 및 구역별 소화기 설치 상태, 압력계, 외관을 점검합니다.</p>
+            <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">소화기 점검하기</button>
         </div>
 
-        <form onsubmit="event.preventDefault(); alert('점검 내용이 제출되었습니다. (구글 시트 연동 준비중)');">
-            <div style="margin-bottom: 10px;">
-                <label><strong>점검일자:</strong> </label>
-                <input type="date" required>
-                <label style="margin-left: 15px;"><strong>점검자:</strong> </label>
-                <input type="text" placeholder="이름 입력" required style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+        <!-- 2. 정수기 관리대장 -->
+        <div class="card">
+            <h2>💧 정수기 관리대장</h2>
+            <p>원내 정수기 필터 교체 주기, 위생 살균, 수질 점검 이력을 관리합니다.</p>
+            <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">정수기 대장 작성</button>
+        </div>
+
+        <!-- 3. 정화조 관리대장 -->
+        <div class="card">
+            <h2>🚽 정화조 관리대장</h2>
+            <p>정화조 내부 청소, 약품 투여, 폭기조 상태 및 정기 점검을 기록합니다.</p>
+            <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">정화조 대장 작성</button>
+        </div>
+
+        <!-- 4. 세탁기 관리표 -->
+        <div class="card">
+            <h2>🧺 세탁기 관리표</h2>
+            <p>세탁기/건조기 필터 청소, 세제 공급선, 동작 상태를 점검합니다.</p>
+            <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">세탁기 점검하기</button>
+        </div>
+
+        <!-- 5. 기타 기기 관리 -->
+        <div class="card">
+            <h2>⚙️ 기타 기기 관리</h2>
+            <p>원내 기타 시설물 및 온열치료기 등 보조 기기 점검 이력을 기록합니다.</p>
+            <button class="btn" onclick="alert('Google Form/시트 연동 예정입니다.')">기타 기기 대장 작성</button>
+        </div>
+
+        <!-- 6. 보일러 주간 점검표 -->
+        <div class="card">
+            <h2>🔥 보일러 주간 점검표</h2>
+            
+            <div class="notice-box">
+                <strong>📋 주요 점검 기준</strong>
+                <ul>
+                    <li><strong>누수:</strong> 본체 밑, 분배기 밸브, 배관 연결부 젖음</li>
+                    <li><strong>실리콘:</strong> 접합부 실리콘 삭음 및 틈새 벌어짐</li>
+                    <li><strong>소음/진동:</strong> 작동 중 이상 소음 및 이상 진동</li>
+                </ul>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>호수</th>
-                        <th>누수 상태</th>
-                        <th>실리콘 상태</th>
-                        <th>소음/진동</th>
-                        <th>현장 사진 업로드</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- 3층 -->
-                    <tr><td>301호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>302호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>303호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>304호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>305호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>306호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>307호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>308호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>309호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>309호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+            <form onsubmit="event.preventDefault(); alert('점검 내용이 제출되었습니다. (구글 시트 연동 준비중)');">
+                <div style="margin-bottom: 10px;">
+                    <label><strong>점검일자:</strong> </label>
+                    <input type="date" required>
+                    <label style="margin-left: 15px;"><strong>점검자:</strong> </label>
+                    <input type="text" placeholder="이름 입력" required style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+                </div>
 
-                    <!-- 4층 -->
-                    <tr><td>401호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>402호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>403호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>404호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>405호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>406호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>407호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>408호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>409호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>409호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>호수</th>
+                            <th>누수 상태</th>
+                            <th>실리콘 상태</th>
+                            <th>소음/진동</th>
+                            <th>현장 사진 업로드</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 3층 -->
+                        <tr><td>301호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>302호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>303호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>304호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>305호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>306호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>307호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>308호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>309호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>309호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
 
-                    <!-- 5층 -->
-                    <tr><td>501호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>502호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>503호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>504호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>505호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>506호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>507호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>508호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>509호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>509호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <!-- 4층 -->
+                        <tr><td>401호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>402호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>403호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>404호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>405호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>406호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>407호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>408호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>409호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>409호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
 
-                    <!-- 6층 -->
-                    <tr><td>601호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>602호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>603호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>604호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>605호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>606호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr><td>607호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>608호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                    <tr style="background-color: #fef3c7;"><td><strong>608호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
-                </tbody>
-            </table>
+                        <!-- 5층 -->
+                        <tr><td>501호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>502호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>503호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>504호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>505호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>506호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>507호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>508호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>509호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>509호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
 
-            <div style="text-align: center; margin-top: 15px;">
-                <button type="submit" class="btn" style="padding: 12px 30px; font-size: 1.05rem;">보일러 점검표 제출하기</button>
-            </div>
-        </form>
+                        <!-- 6층 -->
+                        <tr><td>601호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>602호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>603호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>604호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>605호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>606호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr><td>607호</td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>608호 (#1)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                        <tr style="background-color: #fef3c7;"><td><strong>608호 (#2)</strong></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><select><option>양호</option><option>점검필요</option></select></td><td><input type="file" accept="image/*" class="file-input"></td></tr>
+                    </tbody>
+                </table>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <button type="submit" class="btn" style="padding: 12px 30px; font-size: 1.05rem;">보일러 점검표 제출하기</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
+    <script>
+        function checkPassword() {
+            const password = document.getElementById('pass-input').value;
+            // 💡 초기 비밀번호는 1234 입니다. (필요 시 수정 가능)
+            if (password === "1234") {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                alert('비밀번호가 올바르지 않습니다.');
+            }
+        }
+    </script>
 </body>
 </html>
