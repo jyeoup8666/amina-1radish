@@ -34,11 +34,11 @@
         .info-box { background: #eef5ff; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         .history-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 5px solid #2b569a; padding: 15px; border-radius: 6px; }
         .stat-card.warning { border-left-color: #dc3545; background: #fff5f5; }
         .stat-title { font-size: 13px; color: #6c757d; font-weight: bold; margin-bottom: 5px; }
-        .stat-value { font-size: 18px; font-weight: bold; color: #333; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #333; }
         
         .date-tag { display: inline-block; background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .date-tag:hover { background: #dc3545; color: white; }
@@ -136,8 +136,12 @@
                 <div class="stat-value" id="stat-last-date">-</div>
             </div>
             <div class="stat-card warning">
-                <div class="stat-title">최근 점검필요 호수</div>
-                <div class="stat-value" id="stat-issue-rooms" style="color: #dc3545;">없음 (전체 양호)</div>
+                <div class="stat-title">전월 이상 발생 횟수</div>
+                <div class="stat-value" id="stat-prev-month-issues" style="color: #dc3545;">0회</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-title">당월 이상 발생 횟수</div>
+                <div class="stat-value" id="stat-curr-month-issues" style="color: #dc3545;">0회</div>
             </div>
         </div>
 
@@ -394,19 +398,36 @@
 
             allDocs.sort((a, b) => a.date.localeCompare(b.date));
 
-            // 상단 카드 정보 갱신
+            // 최근 점검 실시일
             document.getElementById('stat-last-date').textContent = allDocs.length > 0 ? allDocs[allDocs.length - 1].date : '-';
 
-            let issueRooms = [];
-            if (allDocs.length > 0) {
-                const latestDoc = allDocs[allDocs.length - 1];
-                latestDoc.roomData.forEach(r => {
+            // 전월 및 당월 계산
+            const now = new Date();
+            const currYear = now.getFullYear();
+            const currMonth = now.getMonth() + 1; // 1-12
+            
+            const prevDateObj = new Date(currYear, now.getMonth() - 1, 1);
+            const prevYear = prevDateObj.getFullYear();
+            const prevMonth = prevDateObj.getMonth() + 1;
+
+            const currMonthStr = `${currYear}-${String(currMonth).padStart(2, '0')}`;
+            const prevMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
+
+            let prevMonthIssues = 0;
+            let currMonthIssues = 0;
+
+            allDocs.forEach(doc => {
+                const docMonth = doc.date.substring(0, 7); // YYYY-MM
+                doc.roomData.forEach(r => {
                     if (r.leak === '점검필요' || r.silicon === '점검필요' || r.noise === '점검필요') {
-                        issueRooms.push(r.room);
+                        if (docMonth === currMonthStr) currMonthIssues++;
+                        if (docMonth === prevMonthStr) prevMonthIssues++;
                     }
                 });
-            }
-            document.getElementById('stat-issue-rooms').textContent = issueRooms.length > 0 ? issueRooms.join(', ') : '없음 (전체 양호)';
+            });
+
+            document.getElementById('stat-prev-month-issues').textContent = `${prevMonthIssues}회`;
+            document.getElementById('stat-curr-month-issues').textContent = `${currMonthIssues}회`;
 
             tbody.innerHTML = '';
             rooms.forEach(room => {
@@ -415,7 +436,6 @@
                 allDocs.forEach(doc => {
                     const roomInfo = doc.roomData.find(r => r.room === room);
                     if (roomInfo) {
-                        // 해당 호수에 '점검필요' 항목이 하나라도 존재하는지 확인
                         if (roomInfo.leak === '점검필요' || roomInfo.silicon === '점검필요' || roomInfo.noise === '점검필요') {
                             issueDates.push(doc.date);
                         }
