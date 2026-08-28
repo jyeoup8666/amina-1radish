@@ -20,6 +20,7 @@
         .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
         .save-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; }
         .save-btn:hover { background: #218838; }
+        .sync-btn { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #dee2e6; padding: 10px; text-align: center; vertical-align: middle; }
@@ -54,11 +55,12 @@
         <h2>🔥 보일러 주간 점검표</h2>
         
         <div class="history-box">
-            <strong>📅 이전 점검 기록 조회: </strong>
+            <strong>📅 Server 저장 기록 조회: </strong>
             <select id="history-select" onchange="loadHistory(this.value)">
                 <option value="">-- 날짜 선택 --</option>
             </select>
             <button onclick="resetForm()" style="margin-left: 10px;">새 작성하기</button>
+            <button class="sync-btn" onclick="migrateLocalToFirebase()"> 기존PC 데이터 서버로 올리기</button>
         </div>
 
         <div class="info-box">
@@ -113,7 +115,6 @@
 </div>
 
 <script>
-    // 입력받은 파이어베이스 설정을 적용했습니다.
     const firebaseConfig = {
         apiKey: "AIzaSyBnQfxr5Uzsk862IGBKs7KrvqF1__k3hqA",
         authDomain: "facility-check-74a17.firebaseapp.com",
@@ -124,7 +125,6 @@
         measurementId: "G-KN5TSDQHMF"
     };
 
-    // Firebase 및 Firestore 초기화
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -225,14 +225,15 @@
                 roomData: roomData,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            alert(`${date} 점검 기록이 파이어베이스 서버에 저장되었습니다!\n이제 다른 PC에서도 동일하게 조회할 수 있습니다.`);
+            alert(`${date} 점검 기록이 서버에 저장되었습니다!\n모든 PC에서 조회 가능합니다.`);
             updateHistoryOptions();
         } catch (error) {
             console.error("저장 오류:", error);
-            alert("저장 실패: 파이어베이스 규칙 설정을 확인해 보세요.");
+            alert("저장 실패: 파이어베이스 규칙(1단계)을 100% 변경했는지 확인해 주세요.");
         }
     }
 
+    // 서버의 날짜 목록 불러오기
     function updateHistoryOptions() {
         const select = document.getElementById('history-select');
         select.innerHTML = '<option value="">-- 날짜 선택 --</option>';
@@ -244,6 +245,8 @@
                 option.textContent = doc.id;
                 select.appendChild(option);
             });
+        }).catch(err => {
+            console.error("불러오기 에러:", err);
         });
     }
 
@@ -272,6 +275,29 @@
                 });
             }
         });
+    }
+
+    // 기존 PC의 내장 로컬 데이터를 파이어베이스로 한 번에 동기화
+    async function migrateLocalToFirebase() {
+        const localData = JSON.parse(localStorage.getItem('boiler_history') || '{}');
+        const dates = Object.keys(localData);
+
+        if (dates.length === 0) {
+            alert('이 PC 브라우저에 저장되어 있는 이전 local 데이터가 없습니다.');
+            return;
+        }
+
+        for (let date of dates) {
+            const record = localData[date];
+            await db.collection("boiler_checks").doc(date).set({
+                date: record.date,
+                inspector: record.inspector || '',
+                roomData: record.roomData,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        alert(`기존 PC에 있던 ${dates.length}개의 점검 기록을 파이어베이스 서버로 올렸습니다!`);
+        updateHistoryOptions();
     }
 
     function resetForm() {
