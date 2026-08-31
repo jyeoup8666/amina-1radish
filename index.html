@@ -1126,7 +1126,6 @@
 
     function resetFireForm() {
         initFireTable();
-        renderHydrantTable();
         document.getElementById('fire-inspector-name').value = '';
     }
 
@@ -1264,20 +1263,17 @@ const makeSelect = (name) => `
     </select>
 `;
 
-// 소화기 테이블 동적 생성 (층별 필터 적용)
-function renderExtinguisherTable(targetFloor = 'ALL') {
-    currentFloorFilter = targetFloor;
+// 소화기 테이블 생성 - 항상 전체 항목을 렌더링하고, 층 필터는 행을 숨기고 보이는 것만으로 처리합니다.
+// (예전에는 층을 선택할 때마다 그 층 항목만 다시 그렸는데, 그러면 각 항목의 번호(idx)가 층마다 달라져서
+//  저장/불러오기가 엉뚱한 칸을 가리키게 되고, 층을 바꾸면 입력했던 내용도 사라지는 문제가 있었습니다.)
+function renderExtinguisherTable() {
     const tbody = document.getElementById('fire-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // 층 필터링
-    const targetList = targetFloor === 'ALL' 
-        ? fireLocations 
-        : fireLocations.filter(item => item.floor === targetFloor);
-
-    targetList.forEach((item, idx) => {
+    fireLocations.forEach((item, idx) => {
         const tr = document.createElement('tr');
+        tr.dataset.floor = item.floor;
         tr.innerHTML = `
             <td style="font-weight: bold; text-align: left;">
                 [${item.floor}] ${item.location}<br>
@@ -1310,31 +1306,35 @@ function renderExtinguisherTable(targetFloor = 'ALL') {
     });
 }
 
-// 층 선택 버튼 클릭 시: 소화기 표와 소화전 표를 같은 층 기준으로 함께 필터링
+// 층 선택 버튼 클릭 시: 표는 다시 그리지 않고, 해당 층 행만 보이도록 전환 (입력해둔 값은 그대로 유지됨)
 function filterFireTablesByFloor(targetFloor) {
-    renderExtinguisherTable(targetFloor);
-    renderHydrantTable(targetFloor);
+    currentFloorFilter = targetFloor;
+    document.querySelectorAll('#fire-table-body > tr').forEach(tr => {
+        tr.style.display = (targetFloor === 'ALL' || tr.dataset.floor === targetFloor) ? '' : 'none';
+    });
+    document.querySelectorAll('#hydrant-table-body > tr').forEach(tr => {
+        tr.style.display = (targetFloor === 'ALL' || tr.dataset.floor === targetFloor) ? '' : 'none';
+    });
 }
 
 // 기존 initFireTable을 대체하여 소화기 점검 페이지가 열릴 때 덮어쓰지 못하도록 함
 function initFireTable() {
+    renderExtinguisherTable();
+    renderHydrantTable();
     filterFireTablesByFloor('ALL');
     document.getElementById('fire-check-date').value = new Date().toISOString().substring(0, 10);
     updateFireHistoryOptions();
 }
 
-// 4. 소화전 테이블 동적 생성 (층별 필터 적용)
-function renderHydrantTable(targetFloor = 'ALL') {
+// 4. 소화전 테이블 생성 - 항상 전체 항목을 렌더링 (층 필터는 filterFireTablesByFloor에서 처리)
+function renderHydrantTable() {
     const tbody = document.getElementById('hydrant-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    const targetList = targetFloor === 'ALL'
-        ? hydrantLocations
-        : hydrantLocations.filter(item => item.floor === targetFloor);
-
-    targetList.forEach((item, idx) => {
+    hydrantLocations.forEach((item, idx) => {
         const tr = document.createElement('tr');
+        tr.dataset.floor = item.floor;
         tr.innerHTML = `
             <td style="font-weight: bold; text-align: left;">
                 [${item.floor}] ${item.location}
