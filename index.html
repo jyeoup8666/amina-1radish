@@ -271,12 +271,27 @@
     </div>
 
     <div class="info-box">
+        
         <strong id="fire-info-title">📋 소화기 주요 점검 기준</strong>
         <ul id="fire-info-list" style="margin: 5px 0 0 20px; padding: 0; font-size: 13px; line-height: 1.5;">
             <li><b>외관/보관:</b> 지정장소 설치, 보관거리, 적응성, 위치표지, 본체/레버 부식 및 손상 상태</li>
             <li><b>부품/압력:</b> 지시압력계(녹색 범위), 안전핀 고정, 호스/노즐 균열 및 소화약제 상태</li>
         </ul>
     </div>
+    <!-- 층 선택 버튼 영역 -->
+<div style="margin-bottom: 15px; display: flex; gap: 5px; flex-wrap: wrap;">
+    <button type="button" class="btn" onclick="renderExtinguisherTable('ALL')">전체</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('B4')">B4</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('B3')">B3</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('B2')">B2</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('B1')">B1</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('2F')">2F</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('3F')">3F</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('4F')">4F</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('5F')">5F</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('6F')">6F</button>
+    <button type="button" class="btn" onclick="renderExtinguisherTable('7F')">7F</button>
+</div>
 
     <p>
         점검일자: <input type="date" id="fire-check-date"> 
@@ -1056,6 +1071,7 @@
 </script>
     <script>
     // 1. 소화기 및 소화전 데이터셋
+// 1. 소화기 및 소화전 데이터셋
 const fireLocations = [
     { floor: "B4", location: "주차장(E/V 앞)", type: "ABC 3.3kg" },
     { floor: "B4", location: "주차장(부계단)", type: "ABC 3.3kg" },
@@ -1116,30 +1132,8 @@ const fireLocations = [
     { floor: "7F", location: "식당", type: "ABC 3.3kg" }
 ];
 
-const hydrantLocations = [
-    { floor: "B4", location: "왼쪽 비상계단 출입문 옆" },
-    { floor: "B4", location: "오른쪽 비상계단 출입문 옆" },
-    { floor: "B3", location: "왼쪽 비상계단 출입문 옆" },
-    { floor: "B3", location: "오른쪽 비상계단 출입문 옆" },
-    { floor: "B2", location: "왼쪽 비상계단 출입문 옆" },
-    { floor: "B2", location: "오른쪽 비상계단 출입문 옆" },
-    { floor: "B1", location: "식당 입구" },
-    { floor: "B1", location: "오른쪽 비상계단 출입문 옆" },
-    { floor: "2F", location: "비상계단 출입문 옆" },
-    { floor: "2F", location: "화장실 사이" },
-    { floor: "3F", location: "비상계단 출입문 옆" },
-    { floor: "3F", location: "여자화장실 옆" },
-    { floor: "4F", location: "비상계단 출입문 옆" },
-    { floor: "4F", location: "여자화장실 옆" },
-    { floor: "5F", location: "비상계단 출입문 옆" },
-    { floor: "5F", location: "여자화장실 옆" },
-    { floor: "6F", location: "비상계단 출입문 옆" },
-    { floor: "6F", location: "여자화장실 옆" },
-    { floor: "7F", location: "비상계단 출입문 옆" },
-    { floor: "7F", location: "여자화장실 옆" }
-];
+let currentFloorFilter = 'ALL'; // 현재 선택된 층 저장 변수
 
-// 2. Select 옵션 태그 도우미
 const makeSelect = (name) => `
     <select name="${name}" style="width:100%; padding: 4px; border-radius: 4px; border: 1px solid #ccc;">
         <option value="양호">양호</option>
@@ -1147,13 +1141,19 @@ const makeSelect = (name) => `
     </select>
 `;
 
-// 3. 소화기 테이블 동적 생성
-function renderExtinguisherTable() {
+// 소화기 테이블 동적 생성 (층별 필터 적용)
+function renderExtinguisherTable(targetFloor = 'ALL') {
+    currentFloorFilter = targetFloor;
     const tbody = document.getElementById('fire-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    fireLocations.forEach((item, idx) => {
+    // 층 필터링
+    const targetList = targetFloor === 'ALL' 
+        ? fireLocations 
+        : fireLocations.filter(item => item.floor === targetFloor);
+
+    targetList.forEach((item, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td style="font-weight: bold; text-align: left;">
@@ -1171,7 +1171,7 @@ function renderExtinguisherTable() {
             <td>${makeSelect(`ext_gauge_${idx}`)}</td>
             <td>${makeSelect(`ext_pin_${idx}`)}</td>
             <td>
-                <input type="file" id="ext_img_${idx}" accept="image/*" style="display:none;">
+                <input type="file" id="ext_img_${idx}" accept="image/*" style="display:none;" onchange="previewAndCompressImage(this, 'fire', ${idx})">
                 <button type="button" style="font-size:11px; padding:3px 6px;" onclick="document.getElementById('ext_img_${idx}').click()">사진</button>
             </td>
             <td><input type="text" class="table-input" id="ext_action_${idx}" placeholder="조치사항"></td>
@@ -1186,6 +1186,10 @@ function renderExtinguisherTable() {
     });
 }
 
+// 기존 initFireTable을 대체하여 소화기 점검 페이지가 열릴 때 덮어쓰지 못하도록 함
+function initFireTable() {
+    renderExtinguisherTable('ALL');
+}
 // 4. 소화전 테이블 동적 생성
 function renderHydrantTable() {
     const tbody = document.getElementById('hydrant-table-body');
