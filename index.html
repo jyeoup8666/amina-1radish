@@ -202,6 +202,7 @@
             <button class="delete-btn" onclick="deleteData()">🗑️ 삭제하기</button>
             <button onclick="resetForm()" style="margin-left: 10px;">새 작성하기</button>
             <button class="sync-btn" onclick="migrateLocalToFirebase()">기존PC 데이터 서버로 올리기</button>
+            <button class="sync-btn" onclick="migrateOldBoilerChecksToRoomChecks()">이전 서버 기록 이전하기</button>
         </div>
 
         <div class="info-box">
@@ -951,6 +952,60 @@
         }
         alert(`기존 PC에 있던 ${dates.length}개의 점검 기록을 파이어베이스 서버로 올렸습니다!`);
         updateHistoryOptions();
+    }
+
+    // 예전 방식(boiler_checks: 날짜 하나당 문서 하나, roomData 배열)으로 저장된 서버 데이터를
+    // 새 방식(boiler_room_checks: 호실 하나당 문서 하나)으로 옮겨줌 - 1회성 이전 작업
+    async function migrateOldBoilerChecksToRoomChecks() {
+        if (!confirm('이전 방식으로 서버에 저장된 보일러 점검 기록을 새 구조로 이전합니다. 계속할까요?')) return;
+
+        try {
+            const snapshot = await db.collection('boiler_checks').get();
+            if (snapshot.empty) {
+                alert('이전 방식으로 저장된 예전 서버 데이터가 없습니다.');
+                return;
+            }
+
+            let dateCount = 0;
+            let roomCount = 0;
+
+            for (const doc of snapshot.docs) {
+                const record = doc.data();
+                const date = record.date || doc.id;
+                const roomData = record.roomData || [];
+                if (roomData.length === 0) continue;
+
+                const batch = db.batch();
+                roomData.forEach(r => {
+                    if (!r.room) return;
+                    const docId = `${toDocIdSafe(r.room)}__${date}`;
+                    const ref = db.collection('boiler_room_checks').doc(docId);
+                    batch.set(ref, {
+                        room: r.room,
+                        date: date,
+                        inspector: record.inspector || '',
+                        leak: r.leak || '양호',
+                        silicon: r.silicon || '양호',
+                        noise: r.noise || '양호',
+                        imgSrc: r.imgSrc || '',
+                        repairDetail: r.repairDetail || '',
+                        repairCost: r.repairCost || '',
+                        repairStatus: r.repairStatus || '-',
+                        savedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    roomCount++;
+                });
+                await batch.commit();
+                dateCount++;
+            }
+
+            alert(`이전 완료! 날짜 ${dateCount}개, 호실 기록 ${roomCount}건을 새 구조로 옮겼습니다.`);
+            updateHistoryOptions();
+            renderHistoryTable();
+        } catch (err) {
+            console.error('이전 오류:', err);
+            alert('이전 중 오류가 발생했습니다: ' + err.message);
+        }
     }
 
     function resetForm() {
