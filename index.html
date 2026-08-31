@@ -3,49 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시설 점검 시스템</title>
-    <!-- Firebase SDK (CDN) -->
+    <title>시설 점검 및 수리 요청 통합 시스템</title>
+    <!-- Firebase SDK (Compat CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        * { box-sizing: border-box; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; }
+        body { background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .hidden { display: none !important; }
         
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-        .menu-btn { background: #2b569a; color: white; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        /* 메인 메뉴 그리드 */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
+        .menu-btn { background: #2b569a; color: white; padding: 25px 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: background 0.2s; }
         .menu-btn:hover { background: #1d3c6e; }
+        .menu-btn.highlight { background: #2b6cb0; border: 2px solid #1a4971; }
         .menu-btn-sub { background: #4a72b8; color: white; padding: 25px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; }
         .menu-btn-sub:hover { background: #2b569a; }
         
-        .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
+        /* 공통 버튼 */
+        .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
+        .back-btn:hover { background: #5a6268; }
         .nav-btn { background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
         .save-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; }
         .save-btn:hover { background: #218838; }
         .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
-        .delete-btn:hover { background: #c82333; }
         .sync-btn { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
         
+        /* 테이블 스타일 */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { border: 1px solid #dee2e6; padding: 8px; text-align: center; vertical-align: middle; }
+        th, td { border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; vertical-align: middle; word-break: break-all; }
         th { background: #2b569a; color: white; }
         
+        /* 기타 UI 요소 */
         .info-box { background: #eef5ff; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         .history-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 5px solid #2b569a; padding: 15px; border-radius: 6px; }
         .stat-card.warning { border-left-color: #dc3545; background: #fff5f5; }
+        .stat-card.completed { border-left-color: #28a745; background: #f0fff4; }
         .stat-title { font-size: 13px; color: #6c757d; font-weight: bold; margin-bottom: 5px; }
-        .stat-value { font-size: 20px; font-weight: bold; color: #333; }
+        .stat-value { font-size: 22px; font-weight: bold; color: #333; }
         
-        /* 날짜 태그 스타일 (X/기본: 빨강, O: 초록) */
         .date-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .date-tag.repair-x { background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; }
-        .date-tag.repair-x:hover { background: #dc3545; color: white; }
         .date-tag.repair-o { background: #e6f4ea; color: #137333; border: 1px solid #ceedd6; }
-        .date-tag.repair-o:hover { background: #137333; color: white; }
         
         .img-preview { max-width: 70px; max-height: 70px; object-fit: cover; border-radius: 4px; display: block; margin: 5px auto; cursor: pointer; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
@@ -53,23 +58,72 @@
         .close-modal { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
         
         input[type="text"].table-input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+
+        /* 라인 수리 요청용 스타일 */
+        .tab-container { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab-btn { padding: 8px 16px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; cursor: pointer; font-weight: bold; color: #64748b; }
+        .tab-btn.active { background: #2b6cb0; color: white; border-color: #2b6cb0; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; }
+        .status-badge.pending { background-color: #dc3545; }
+        .status-badge.completed { background-color: #28a745; }
+        .btn-complete { background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-complete:hover { background-color: #218838; }
+        .empty-msg { padding: 40px; text-align: center; color: #a0aec0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- 메인 메뉴 -->
+    <!-- 통합 메인 메뉴 -->
     <div id="main-menu">
-        <h2>📋 시설 점검 시스템</h2>
-        <p>조회 및 작성할 점검표를 선택하세요.</p>
+        <h2>📋 시설 점검 및 수리 관리 시스템</h2>
+        <p>조회 및 작업할 메뉴를 선택하세요.</p>
         <div class="menu-grid">
+            <div class="menu-btn highlight" onclick="showPage('line-requests')">💬 라인 수리/점검 요청 목록</div>
             <div class="menu-btn" onclick="showPage('boiler-menu')">🔥 보일러 점검</div>
             <div class="menu-btn" onclick="showPage('fire')">🧯 소화기 점검표</div>
             <div class="menu-btn" onclick="showPage('water')">💧 정수기 점검표</div>
         </div>
     </div>
 
-    <!-- 보일러 메뉴 선택 화면 -->
+    <!-- 1. 라인 수리/점검 요청 목록 화면 -->
+    <div id="page-line-requests" class="hidden">
+        <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        <h2>💬 라인 단톡방 수리/점검 요청 목록</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <div class="stat-title">처리 대기 중인 요청</div>
+                <div class="stat-value" id="count-pending" style="color: #dc3545;">0건</div>
+            </div>
+            <div class="stat-card completed">
+                <div class="stat-title">수리 완료된 요청</div>
+                <div class="stat-value" id="count-completed" style="color: #28a745;">0건</div>
+            </div>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-btn active" id="tab-pending-btn" onclick="switchLineTab('pending')">🚨 처리 대기 목록</button>
+            <button class="tab-btn" id="tab-completed-btn" onclick="switchLineTab('completed')">✅ 처리 완료 내역</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">요청 시간</th>
+                    <th style="width: 12%;">요청자</th>
+                    <th style="width: 45%;">요청 내용</th>
+                    <th style="width: 10%;">상태</th>
+                    <th style="width: 18%;">완료 처리 / 답변 내용</th>
+                </tr>
+            </thead>
+            <tbody id="request-list">
+                <tr><td colspan="5" class="empty-msg">데이터를 실시간으로 불러오는 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. 보일러 메뉴 선택 화면 -->
     <div id="page-boiler-menu" class="hidden">
         <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
         <h2>🔥 보일러 점검</h2>
@@ -80,7 +134,7 @@
         </div>
     </div>
 
-    <!-- 보일러 주간 점검표 작성 화면 -->
+    <!-- 3. 보일러 주간 점검표 작성 화면 -->
     <div id="page-boiler-form" class="hidden">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <button class="back-btn" onclick="showPage('boiler-menu')">← 이전 메뉴로</button>
@@ -131,7 +185,7 @@
         <button class="save-btn" onclick="saveData()">☁️ 파이어베이스 서버에 저장하기</button>
     </div>
 
-    <!-- 보일러 점검 이력 화면 -->
+    <!-- 4. 보일러 점검 이력 화면 -->
     <div id="page-boiler-history" class="hidden">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <button class="back-btn" onclick="showPage('boiler-menu')">← 이전 메뉴로</button>
@@ -170,14 +224,14 @@
         </table>
     </div>
 
-    <!-- 소화기 점검표 -->
+    <!-- 5. 소화기 점검표 -->
     <div id="page-fire" class="hidden">
         <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
         <h2>🧯 소화기 점검표</h2>
         <p>준비 중입니다.</p>
     </div>
 
-    <!-- 정수기 점검표 -->
+    <!-- 6. 정수기 점검표 -->
     <div id="page-water" class="hidden">
         <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
         <h2>💧 정수기 점검표</h2>
@@ -192,6 +246,7 @@
 </div>
 
 <script>
+    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyBnQfxr5Uzsk862IGBKs7KrvqF1__k3hqA",
         authDomain: "facility-check-74a17.firebaseapp.com",
@@ -199,12 +254,133 @@
         storageBucket: "facility-check-74a17.firebasestorage.app",
         messagingSenderId: "672284450568",
         appId: "1:672284450568:web:5b6f809b4a032424b456bd",
-        measurementId: "G-KN5TSDQHMF"
+        databaseURL: "https://facility-check-74a17-default-rtdb.firebaseio.com"
     };
 
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const db = firebase.firestore();            // Firestore (보일러 점검 데이터)
+    const rtdb = firebase.database();           // Realtime Database (라인 요청 데이터)
 
+    // 페이지 전환 공통
+    function showPage(pageId) {
+        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById('page-' + pageId).classList.remove('hidden');
+        
+        if (pageId === 'boiler-form') initBoilerTable();
+        if (pageId === 'boiler-history') renderHistoryTable();
+        if (pageId === 'line-requests') initLineRequests();
+    }
+
+    function showMain() {
+        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById('main-menu').classList.remove('hidden');
+    }
+
+    /* ==========================================
+       1. 라인 수리/점검 요청 모듈 (RTDB)
+    ========================================== */
+    let currentLineTab = 'pending';
+    let allRequests = {};
+    let isRtdbListening = false;
+
+    function initLineRequests() {
+        if (isRtdbListening) return;
+        
+        const requestsRef = rtdb.ref('facility_requests');
+        requestsRef.on('value', (snapshot) => {
+            allRequests = snapshot.val() || {};
+            renderLineTable();
+        });
+        isRtdbListening = true;
+    }
+
+    function switchLineTab(tab) {
+        currentLineTab = tab;
+        document.getElementById('tab-pending-btn').classList.toggle('active', tab === 'pending');
+        document.getElementById('tab-completed-btn').classList.toggle('active', tab === 'completed');
+        renderLineTable();
+    }
+
+    function renderLineTable() {
+        const tbody = document.getElementById('request-list');
+        tbody.innerHTML = '';
+
+        let pendingCount = 0;
+        let completedCount = 0;
+
+        const entries = Object.entries(allRequests).sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
+        let currentTabEntries = [];
+
+        entries.forEach(([key, item]) => {
+            const isCompleted = item.status === 'completed';
+            if (isCompleted) completedCount++;
+            else pendingCount++;
+
+            if ((currentLineTab === 'pending' && !isCompleted) || (currentLineTab === 'completed' && isCompleted)) {
+                currentTabEntries.push({ key, ...item });
+            }
+        });
+
+        document.getElementById('count-pending').innerText = `${pendingCount}건`;
+        document.getElementById('count-completed').innerText = `${completedCount}건`;
+
+        if (currentTabEntries.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">${currentLineTab === 'pending' ? '대기 중인 수리 요청이 없습니다.' : '완료된 요청 내역이 없습니다.'}</td></tr>`;
+            return;
+        }
+
+        currentTabEntries.forEach(item => {
+            const tr = document.createElement('tr');
+            const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR') : '-';
+            const userName = item.userName || '알 수 없음';
+            const text = item.text || '';
+            const isCompleted = item.status === 'completed';
+
+            tr.innerHTML = `
+                <td>${dateStr}</td>
+                <td><strong>${escapeHtml(userName)}</strong></td>
+                <td style="text-align: left;">${escapeHtml(text)}</td>
+                <td>
+                    <span class="status-badge ${isCompleted ? 'completed' : 'pending'}">
+                        ${isCompleted ? '완료' : '대기중'}
+                    </span>
+                </td>
+                <td>
+                    ${!isCompleted ? 
+                        `<button class="btn-complete" onclick="markAsComplete('${item.key}')">✓ 수리 완료 처리</button>` : 
+                        `<span style="color: #4a5568; font-size: 13px;">${escapeHtml(item.replyText || '처리 완료')}</span>`
+                    }
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function markAsComplete(key) {
+        if (!confirm('해당 항목을 수리 완료 처리하시겠습니까?')) return;
+        
+        try {
+            await rtdb.ref(`facility_requests/${key}`).update({
+                status: 'completed',
+                completedAt: Date.now()
+            });
+        } catch (err) {
+            alert('완료 처리 중 오류가 발생했습니다: ' + err.message);
+        }
+    }
+
+    function escapeHtml(text) {
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    /* ==========================================
+       2. 보일러 점검표 모듈 (Firestore)
+    ========================================== */
     const rooms = [
         '301호', '302호', '303호', '304호', '305호', '306호', '307호', '308호', '309호-1', '309호-2',
         '401호', '402호', '403호', '404호', '405호', '406호', '407호', '408호', '409호-1', '409호-2',
@@ -244,14 +420,9 @@
         updateHistoryOptions();
     }
 
-    // 통화 자동 포맷팅 함수 (10000 -> 10,000원)
     function formatCurrency(input) {
         let value = input.value.replace(/[^0-9]/g, '');
-        if (value) {
-            input.value = Number(value).toLocaleString('ko-KR') + '원';
-        } else {
-            input.value = '';
-        }
+        input.value = value ? Number(value).toLocaleString('ko-KR') + '원' : '';
     }
 
     function previewAndCompressImage(input, index) {
@@ -264,20 +435,13 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
+                    let width = img.width, height = img.height;
                     const max_size = 800;
 
                     if (width > height) {
-                        if (width > max_size) {
-                            height *= max_size / width;
-                            width = max_size;
-                        }
+                        if (width > max_size) { height *= max_size / width; width = max_size; }
                     } else {
-                        if (height > max_size) {
-                            width *= max_size / height;
-                            height = max_size;
-                        }
+                        if (height > max_size) { width *= max_size / height; height = max_size; }
                     }
 
                     canvas.width = width;
@@ -285,9 +449,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    
-                    preview.src = compressedDataUrl;
+                    preview.src = canvas.toDataURL('image/jpeg', 0.7);
                     preview.classList.remove('hidden');
                 };
                 img.src = e.target.result;
@@ -297,27 +459,12 @@
     }
 
     function openImageModal(src) {
-        const modal = document.getElementById('image-modal');
-        const modalImg = document.getElementById('modal-img');
-        modal.style.display = 'flex';
-        modalImg.src = src;
+        document.getElementById('image-modal').style.display = 'flex';
+        document.getElementById('modal-img').src = src;
     }
 
     function closeImageModal() {
         document.getElementById('image-modal').style.display = 'none';
-    }
-
-    function showPage(pageId) {
-        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
-        document.getElementById('page-' + pageId).classList.remove('hidden');
-        
-        if(pageId === 'boiler-form') initBoilerTable();
-        if(pageId === 'boiler-history') renderHistoryTable();
-    }
-
-    function showMain() {
-        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
-        document.getElementById('main-menu').classList.remove('hidden');
     }
 
     async function saveData() {
@@ -355,7 +502,7 @@
             updateHistoryOptions();
         } catch (error) {
             console.error("저장 오류:", error);
-            alert("저장 실패: 파이어베이스 연결 및 설정을 확인해 주세요.");
+            alert("저장 실패: 파이어베이스 설정을 확인해 주세요.");
         }
     }
 
@@ -367,7 +514,7 @@
             return;
         }
 
-        if (confirm(`정말로 ${selectedDate} 점검 기록을 서버에서 완전히 삭제하시겠습니까?`)) {
+        if (confirm(`정말로 ${selectedDate} 점검 기록을 완전 삭제하시겠습니까?`)) {
             try {
                 await db.collection("boiler_checks").doc(selectedDate).delete();
                 alert(`${selectedDate} 점검 기록이 삭제되었습니다.`);
@@ -435,23 +582,17 @@
 
             allDocs.sort((a, b) => a.date.localeCompare(b.date));
 
-            // 최근 점검 실시일
             document.getElementById('stat-last-date').textContent = allDocs.length > 0 ? allDocs[allDocs.length - 1].date : '-';
 
-            // 전월 및 당월 계산
             const now = new Date();
-            const currYear = now.getFullYear();
-            const currMonth = now.getMonth() + 1;
-            
+            const currYear = now.getFullYear(), currMonth = now.getMonth() + 1;
             const prevDateObj = new Date(currYear, now.getMonth() - 1, 1);
-            const prevYear = prevDateObj.getFullYear();
-            const prevMonth = prevDateObj.getMonth() + 1;
+            const prevYear = prevDateObj.getFullYear(), prevMonth = prevDateObj.getMonth() + 1;
 
             const currMonthStr = `${currYear}-${String(currMonth).padStart(2, '0')}`;
             const prevMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
 
-            let prevMonthIssues = 0;
-            let currMonthIssues = 0;
+            let prevMonthIssues = 0, currMonthIssues = 0;
 
             allDocs.forEach(doc => {
                 const docMonth = doc.date.substring(0, 7);
@@ -468,34 +609,25 @@
 
             tbody.innerHTML = '';
             rooms.forEach(room => {
-                let issueRecords = []; // { date: 'YYYY-MM-DD', status: 'O/X/-' }
+                let issueRecords = [];
                 let totalCost = 0;
 
                 allDocs.forEach(doc => {
                     const roomInfo = doc.roomData.find(r => r.room === room);
                     if (roomInfo) {
-                        // 점검필요 상태이거나 수리 금액이 존재하는 경우 기록에 추가
                         if (roomInfo.leak === '점검필요' || roomInfo.silicon === '점검필요' || roomInfo.noise === '점검필요') {
-                            issueRecords.push({
-                                date: doc.date,
-                                status: roomInfo.repairStatus || '-'
-                            });
+                            issueRecords.push({ date: doc.date, status: roomInfo.repairStatus || '-' });
                         }
-
-                        // 누적 수리 금액 계산
                         if (roomInfo.repairCost) {
-                            const costNum = parseInt(roomInfo.repairCost.replace(/[^0-9]/g, '')) || 0;
-                            totalCost += costNum;
+                            totalCost += parseInt(roomInfo.repairCost.replace(/[^0-9]/g, '')) || 0;
                         }
                     }
                 });
 
                 const lastIssueDate = issueRecords.length > 0 ? issueRecords[issueRecords.length - 1].date : '-';
                 
-                // 날짜 태그 생성 (O면 초록색, 그 외 빨간색)
                 const dateTagsHtml = issueRecords.map(item => {
-                    const isCompleted = item.status === 'O';
-                    const cssClass = isCompleted ? 'date-tag repair-o' : 'date-tag repair-x';
+                    const cssClass = item.status === 'O' ? 'date-tag repair-o' : 'date-tag repair-x';
                     return `<span class="${cssClass}" onclick="goToDateForm('${item.date}')">${item.date}</span>`;
                 }).join(' ');
 
@@ -538,7 +670,7 @@
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         }
-        alert(`기존 PC에 있던 ${dates.length}개의 점검 기록을 파이어베이스 서버로 올렸습니다!`);
+        alert(`기존 PC에 있던 ${dates.length}개의 점검 기록을 서버로 올렸습니다!`);
         updateHistoryOptions();
     }
 
