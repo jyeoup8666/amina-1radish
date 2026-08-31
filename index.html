@@ -8,6 +8,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- QR 코드 생성 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
@@ -19,6 +21,10 @@
         .menu-btn:hover { background: #1d3c6e; }
         .menu-btn-sub { background: #4a72b8; color: white; padding: 25px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; }
         .menu-btn-sub:hover { background: #2b569a; }
+
+        .floor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-top: 15px; }
+        .floor-btn { background: #4a72b8; color: white; padding: 18px 10px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 17px; }
+        .floor-btn:hover { background: #2b569a; }
         
         .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
         .nav-btn { background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
@@ -62,6 +68,39 @@
         .realtime-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #e9ecef; }
         .badge-live { background-color: #e6f4ea; color: #137333; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
         .pulse-dot { width: 8px; height: 8px; background-color: #28a745; border-radius: 50%; display: inline-block; }
+
+        /* --- 층별 소방시설 이력(관리대장) 스타일 --- */
+        .floor-year-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .year-select { padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; }
+        .ledger-table th, .ledger-table td { font-size: 12px; padding: 5px; }
+        .ledger-table td.ledger-o { color: #137333; font-weight: bold; }
+        .ledger-table td.ledger-x { color: #dc3545; font-weight: bold; background: #fff5f5; }
+        .section-title { margin: 25px 0 5px 0; color: #2b569a; }
+        .hydrant-sheet { margin-bottom: 25px; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; background: #fafbfc; }
+        .hydrant-sheet h5 { margin: 0 0 8px 0; color: #17a2b8; }
+        .empty-note { color: #6c757d; padding: 10px 0; }
+
+        /* --- QR 현장 점검(스캔용) 스타일 --- */
+        .qr-check-card { max-width: 480px; margin: 0 auto; }
+        .qr-check-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .qr-check-label { flex: 1; font-size: 14px; padding-right: 10px; }
+        .toggle-pair { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #ccc; flex-shrink: 0; }
+        .toggle-btn { border: none; padding: 9px 16px; font-weight: bold; cursor: pointer; background: #f1f1f1; color: #555; font-size: 13px; }
+        .toggle-btn.good.active { background: #28a745; color: white; }
+        .toggle-btn.bad.active { background: #dc3545; color: white; }
+
+        /* --- QR 라벨 인쇄 스타일 --- */
+        .qr-print-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 15px; }
+        .qr-print-card { border: 1px dashed #999; border-radius: 6px; padding: 10px; text-align: center; }
+        .qr-print-card .qr-box { display: flex; justify-content: center; margin-bottom: 6px; }
+        .qr-print-card .qr-label { font-size: 12px; font-weight: bold; line-height: 1.3; }
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; background: white; }
+            .container { box-shadow: none; max-width: 100%; padding: 0; }
+            .qr-print-grid { grid-template-columns: repeat(4, 1fr); }
+            .qr-print-card { border: 1px dashed #999; break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
@@ -244,6 +283,7 @@
     <div class="menu-grid">
         <div class="menu-btn-sub" onclick="showPage('fire-form')">📝 소방시설 점검표 작성/조회</div>
         <div class="menu-btn-sub" onclick="showPage('fire-history')">📊 소방시설 점검 이력 확인</div>
+        <div class="menu-btn-sub" onclick="showPage('fire-qr')">🏷️ QR코드 라벨 생성/인쇄</div>
     </div>
 </div>
 
@@ -280,17 +320,17 @@
     </div>
     <!-- 층 선택 버튼 영역 -->
 <div style="margin-bottom: 15px; display: flex; gap: 5px; flex-wrap: wrap;">
-    <button type="button" class="btn" onclick="renderExtinguisherTable('ALL')">전체</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('B4')">B4</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('B3')">B3</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('B2')">B2</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('B1')">B1</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('2F')">2F</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('3F')">3F</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('4F')">4F</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('5F')">5F</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('6F')">6F</button>
-    <button type="button" class="btn" onclick="renderExtinguisherTable('7F')">7F</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('ALL')">전체</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('B4')">B4</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('B3')">B3</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('B2')">B2</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('B1')">B1</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('2F')">2F</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('3F')">3F</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('4F')">4F</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('5F')">5F</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('6F')">6F</button>
+    <button type="button" class="btn" onclick="filterFireTablesByFloor('7F')">7F</button>
 </div>
 
     <p>
@@ -347,42 +387,57 @@
 
     <button class="save-btn" onclick="saveFireData()">☁️ 소방시설 점검 결과 서버에 저장하기</button>
 </div>
-    <!-- 소화기 점검 이력 화면 -->
+
+    <!-- 소방시설 점검 이력 화면 (층별) -->
     <div id="page-fire-history" class="hidden">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <button class="back-btn" onclick="showPage('fire-menu')">← 이전 메뉴로</button>
-            <button class="nav-btn" onclick="showPage('fire-form')">📝 소화기 점검표 작성하러 가기</button>
+            <button class="nav-btn" onclick="showPage('fire-form')">📝 소방시설 점검표 작성하러 가기</button>
         </div>
-        <h2>📊 소화기 점검 이력 관리</h2>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-title">최근 점검 실시일</div>
-                <div class="stat-value" id="fire-stat-last-date">-</div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-title">전월 점검필요 건수</div>
-                <div class="stat-value" id="fire-stat-prev-month-issues" style="color: #dc3545;">0건</div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-title">당월 점검필요 건수</div>
-                <div class="stat-value" id="fire-stat-curr-month-issues" style="color: #dc3545;">0건</div>
-            </div>
+        <h2>📊 소방시설 점검 이력 관리</h2>
+
+        <!-- 1단계: 층 선택 -->
+        <div id="fire-history-floor-select">
+            <p>확인하실 층을 선택하세요.</p>
+            <div class="floor-grid" id="fire-history-floor-grid"></div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 12%;">위치/호수</th>
-                    <th style="width: 18%;">최근 이상 발생일</th>
-                    <th style="width: 50%;">이상 발생 기록 (클릭 시 해당 점검표로 이동)</th>
-                    <th style="width: 20%;">총 이상 발생 횟수</th>
-                </tr>
-            </thead>
-            <tbody id="fire-history-table-body">
-                <tr><td colspan="4">데이터를 불러오는 중입니다...</td></tr>
-            </tbody>
-        </table>
+        <!-- 2단계: 선택한 층의 소화기/소화전 관리대장 -->
+        <div id="fire-history-floor-detail" class="hidden">
+            <div class="floor-year-bar">
+                <button class="back-btn" style="margin-bottom:0;" onclick="showFireHistoryFloorList()">← 층 선택으로</button>
+                <h3 id="fire-history-floor-title" style="margin:0; flex:1;"></h3>
+                <div>
+                    점검년도:
+                    <select id="fire-history-year-select" class="year-select" onchange="onFireHistoryYearChange()"></select>
+                </div>
+            </div>
+
+            <h4 class="section-title">🧯 소화기 관리대장</h4>
+            <div style="overflow-x: auto;">
+                <table class="ledger-table" id="fire-history-ext-table"></table>
+            </div>
+
+            <h4 class="section-title">🚒 소화전 관리대장</h4>
+            <div id="fire-history-hyd-sheets"></div>
+        </div>
+    </div>
+
+    <!-- QR코드 라벨 생성/인쇄 화면 -->
+    <div id="page-fire-qr" class="hidden">
+        <button class="back-btn no-print" onclick="showPage('fire-menu')">← 이전 메뉴로</button>
+        <h2 class="no-print">🏷️ QR코드 라벨 생성 / 인쇄</h2>
+        <p class="no-print">각 소화기·소화전 옆에 붙일 QR 라벨입니다. 라벨을 스캔하면 해당 위치의 점검표만 바로 열립니다. 층을 선택한 뒤 인쇄 버튼을 눌러주세요.</p>
+        <div class="floor-grid no-print" id="qr-print-floor-grid" style="margin-bottom: 15px;"></div>
+        <div class="no-print" style="margin-bottom: 15px;">
+            <button class="save-btn" style="width: auto; display: inline-block; padding: 10px 22px;" onclick="window.print()">🖨️ 인쇄하기</button>
+        </div>
+        <div id="qr-print-grid" class="qr-print-grid"></div>
+    </div>
+
+    <!-- QR 스캔 시 진입하는 단일 항목 현장 점검 화면 -->
+    <div id="page-qr-check" class="hidden">
+        <div id="qr-check-content"></div>
     </div>
 
     <!-- 정수기 점검표 -->
@@ -618,7 +673,8 @@
         if(pageId === 'boiler-form') initBoilerTable();
         if(pageId === 'boiler-history') renderHistoryTable();
         if(pageId === 'fire-form') initFireTable();
-        if(pageId === 'fire-history') renderFireHistoryTable();
+        if(pageId === 'fire-history') initFireHistoryFloorView();
+        if(pageId === 'fire-qr') { renderQrPrintFloorButtons(); renderQrPrintGrid('ALL'); }
     }
 
     function showMain() {
@@ -848,75 +904,8 @@
         document.getElementById('inspector-name').value = '';
     }
 
-    // 5. 소화기 점검 로직
-    function initFireTable() {
-        const tbody = document.getElementById('fire-table-body');
-        tbody.innerHTML = '';
-        
-        rooms.forEach((room, index) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><strong>${room}</strong></td>
-                <td><select class="status-pressure"><option>양호</option><option>점검필요</option></select></td>
-                <td><select class="status-appearance"><option>양호</option><option>점검필요</option></select></td>
-                <td><select class="status-pin"><option>양호</option><option>점검필요</option></select></td>
-                <td>
-                    <input type="file" accept="image/*" onchange="previewAndCompressImage(this, 'fire', ${index})">
-                    <img id="fire-preview-${index}" class="img-preview hidden" onclick="openImageModal(this.src)" title="클릭하여 확대">
-                </td>
-                <td><input type="text" class="table-input fire-action-detail" placeholder="조치 내용 입력"></td>
-                <td>
-                    <select class="fire-action-status">
-                        <option>-</option>
-                        <option>O</option>
-                        <option>X</option>
-                    </select>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-
-        document.getElementById('fire-check-date').value = new Date().toISOString().substring(0, 10);
-        updateFireHistoryOptions();
-    }
-
-    async function saveFireData() {
-        const date = document.getElementById('fire-check-date').value;
-        const inspector = document.getElementById('fire-inspector-name').value;
-
-        if (!date) {
-            alert('점검일자를 선택해 주세요.');
-            return;
-        }
-
-        const roomData = [];
-        rooms.forEach((room, index) => {
-            const pressure = document.querySelectorAll('#page-fire-form .status-pressure')[index].value;
-            const appearance = document.querySelectorAll('#page-fire-form .status-appearance')[index].value;
-            const pin = document.querySelectorAll('#page-fire-form .status-pin')[index].value;
-            const preview = document.getElementById(`fire-preview-${index}`);
-            const imgSrc = preview.classList.contains('hidden') ? '' : preview.src;
-            
-            const actionDetail = document.querySelectorAll('#page-fire-form .fire-action-detail')[index].value;
-            const actionStatus = document.querySelectorAll('#page-fire-form .fire-action-status')[index].value;
-
-            roomData.push({ room, pressure, appearance, pin, imgSrc, actionDetail, actionStatus });
-        });
-
-        try {
-            await db.collection("fire_extinguisher_checks").doc(date).set({
-                date: date,
-                inspector: inspector,
-                roomData: roomData,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            alert(`${date} 소화기 점검 기록이 서버에 저장되었습니다!`);
-            updateFireHistoryOptions();
-        } catch (error) {
-            console.error("저장 오류:", error);
-            alert("저장 실패: 파이어베이스 연결 및 설정을 확인해 주세요.");
-        }
-    }
+    // 5. 소화기/소화전 점검 데이터는 "fire_checks" 컬렉션에 위치 하나당 문서 하나로 저장됩니다.
+    //    (일괄 작성표 저장과 QR 스캔 개별 저장이 같은 컬렉션을 공유합니다)
 
     async function deleteFireData() {
         const selectedDate = document.getElementById('fire-history-select').value || document.getElementById('fire-check-date').value;
@@ -926,12 +915,20 @@
             return;
         }
 
-        if (confirm(`정말로 ${selectedDate} 소화기 점검 기록을 서버에서 완전히 삭제하시겠습니까?`)) {
+        if (confirm(`정말로 ${selectedDate} 소방시설 점검 기록을 서버에서 완전히 삭제하시겠습니까?`)) {
             try {
-                await db.collection("fire_extinguisher_checks").doc(selectedDate).delete();
-                alert(`${selectedDate} 소화기 점검 기록이 삭제되었습니다.`);
+                const snapshot = await db.collection('fire_checks').where('date', '==', selectedDate).get();
+                if (snapshot.empty) {
+                    alert('해당 날짜의 저장된 기록이 없습니다.');
+                    return;
+                }
+                const batch = db.batch();
+                snapshot.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                alert(`${selectedDate} 소방시설 점검 기록이 삭제되었습니다.`);
                 resetFireForm();
                 updateFireHistoryOptions();
+                fireChecksCacheByYear = {};
             } catch (error) {
                 console.error("삭제 오류:", error);
                 alert("삭제 처리 중 오류가 발생했습니다.");
@@ -941,13 +938,20 @@
 
     function updateFireHistoryOptions() {
         const select = document.getElementById('fire-history-select');
+        if (!select) return;
         select.innerHTML = '<option value="">-- 날짜 선택 --</option>';
 
-        db.collection("fire_extinguisher_checks").get().then((querySnapshot) => {
+        db.collection("fire_checks").get().then((querySnapshot) => {
+            const datesSet = new Set();
             querySnapshot.forEach((doc) => {
+                const d = doc.data();
+                if (d.date) datesSet.add(d.date);
+            });
+            const dates = Array.from(datesSet).sort().reverse();
+            dates.forEach((dateStr) => {
                 const option = document.createElement('option');
-                option.value = doc.id;
-                option.textContent = doc.id;
+                option.value = dateStr;
+                option.textContent = dateStr;
                 select.appendChild(option);
             });
         });
@@ -956,122 +960,62 @@
     function loadFireHistory(date) {
         if (!date) return;
 
-        db.collection("fire_extinguisher_checks").doc(date).get().then((doc) => {
-            if (doc.exists) {
-                const record = doc.data();
-                document.getElementById('fire-check-date').value = record.date;
-                document.getElementById('fire-inspector-name').value = record.inspector || '';
-
-                record.roomData.forEach((data, index) => {
-                    document.querySelectorAll('#page-fire-form .status-pressure')[index].value = data.pressure || '양호';
-                    document.querySelectorAll('#page-fire-form .status-appearance')[index].value = data.appearance || '양호';
-                    document.querySelectorAll('#page-fire-form .status-pin')[index].value = data.pin || '양호';
-                    
-                    const preview = document.getElementById(`fire-preview-${index}`);
-                    if (data.imgSrc) {
-                        preview.src = data.imgSrc;
-                        preview.classList.remove('hidden');
-                    } else {
-                        preview.src = '';
-                        preview.classList.add('hidden');
-                    }
-
-                    document.querySelectorAll('#page-fire-form .fire-action-detail')[index].value = data.actionDetail || '';
-                    document.querySelectorAll('#page-fire-form .fire-action-status')[index].value = data.actionStatus || '-';
-                });
+        db.collection('fire_checks').where('date', '==', date).get().then((snapshot) => {
+            if (snapshot.empty) {
+                alert('해당 날짜의 저장된 기록이 없습니다.');
+                return;
             }
-        });
-    }
 
-    function renderFireHistoryTable() {
-        const tbody = document.getElementById('fire-history-table-body');
-        tbody.innerHTML = '<tr><td colspan="4">데이터를 불러오는 중입니다...</td></tr>';
+            document.getElementById('fire-check-date').value = date;
+            let inspectorName = '';
 
-        db.collection("fire_extinguisher_checks").get().then((querySnapshot) => {
-            const allDocs = [];
-            querySnapshot.forEach((doc) => allDocs.push(doc.data()));
+            snapshot.forEach((doc) => {
+                const d = doc.data();
+                if (d.inspector) inspectorName = d.inspector;
+                const c = d.checks || {};
 
-            allDocs.sort((a, b) => a.date.localeCompare(b.date));
-
-            document.getElementById('fire-stat-last-date').textContent = allDocs.length > 0 ? allDocs[allDocs.length - 1].date : '-';
-
-            const now = new Date();
-            const currYear = now.getFullYear();
-            const currMonth = now.getMonth() + 1;
-            
-            const prevDateObj = new Date(currYear, now.getMonth() - 1, 1);
-            const prevYear = prevDateObj.getFullYear();
-            const prevMonth = prevDateObj.getMonth() + 1;
-
-            const currMonthStr = `${currYear}-${String(currMonth).padStart(2, '0')}`;
-            const prevMonthStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}`;
-
-            let prevMonthIssues = 0;
-            let currMonthIssues = 0;
-
-            allDocs.forEach(doc => {
-                const docMonth = doc.date.substring(0, 7);
-                doc.roomData.forEach(r => {
-                    if (r.pressure === '점검필요' || r.appearance === '점검필요' || r.pin === '점검필요') {
-                        if (docMonth === currMonthStr) currMonthIssues++;
-                        if (docMonth === prevMonthStr) prevMonthIssues++;
-                    }
-                });
+                if (d.type === 'ext') {
+                    const idx = fireLocations.findIndex(i => i.floor === d.floor && i.location === d.location);
+                    if (idx === -1) return;
+                    Object.keys(c).forEach(key => {
+                        const el = document.querySelector(`select[name="ext_${key}_${idx}"]`);
+                        if (el) el.value = c[key];
+                    });
+                    const actionEl = document.getElementById(`ext_action_${idx}`);
+                    if (actionEl) actionEl.value = d.action || '';
+                    const statusEl = document.getElementById(`ext_status_${idx}`);
+                    if (statusEl) statusEl.value = d.isCompleted ? '완료' : '미조치';
+                } else if (d.type === 'hyd') {
+                    const idx = hydrantLocations.findIndex(i => i.floor === d.floor && i.location === d.location);
+                    if (idx === -1) return;
+                    Object.keys(c).forEach(key => {
+                        const el = document.querySelector(`select[name="hyd_${key}_${idx}"]`);
+                        if (el) el.value = c[key];
+                    });
+                    const actionEl = document.getElementById(`hyd_action_${idx}`);
+                    if (actionEl) actionEl.value = d.action || '';
+                    const statusEl = document.getElementById(`hyd_status_${idx}`);
+                    if (statusEl) statusEl.value = d.isCompleted ? '완료' : '미조치';
+                }
             });
 
-            document.getElementById('fire-stat-prev-month-issues').textContent = `${prevMonthIssues}건`;
-            document.getElementById('fire-stat-curr-month-issues').textContent = `${currMonthIssues}건`;
-
-            tbody.innerHTML = '';
-            rooms.forEach(room => {
-                let issueRecords = [];
-
-                allDocs.forEach(doc => {
-                    const roomInfo = doc.roomData.find(r => r.room === room);
-                    if (roomInfo) {
-                        if (roomInfo.pressure === '점검필요' || roomInfo.appearance === '점검필요' || roomInfo.pin === '점검필요') {
-                            issueRecords.push({
-                                date: doc.date,
-                                status: roomInfo.actionStatus || '-'
-                            });
-                        }
-                    }
-                });
-
-                const lastIssueDate = issueRecords.length > 0 ? issueRecords[issueRecords.length - 1].date : '-';
-                
-                const dateTagsHtml = issueRecords.map(item => {
-                    const isCompleted = item.status === 'O';
-                    const cssClass = isCompleted ? 'date-tag repair-o' : 'date-tag repair-x';
-                    return `<span class="${cssClass}" onclick="goToFireDateForm('${item.date}')">${item.date}</span>`;
-                }).join(' ');
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${room}</strong></td>
-                    <td>${lastIssueDate}</td>
-                    <td>${dateTagsHtml || '<span style="color:#a0a0a0; font-size:13px;">이상 없음</span>'}</td>
-                    <td><span style="color: ${issueRecords.length > 0 ? '#dc3545' : '#28a745'}; font-weight: bold;">${issueRecords.length}회</span></td>
-                `;
-                tbody.appendChild(row);
-            });
+            document.getElementById('fire-inspector-name').value = inspectorName;
         });
-    }
-
-    function goToFireDateForm(date) {
-        showPage('fire-form');
-        document.getElementById('fire-history-select').value = date;
-        loadFireHistory(date);
     }
 
     function resetFireForm() {
         initFireTable();
+        renderHydrantTable();
         document.getElementById('fire-inspector-name').value = '';
+    }
+
+    // Firestore 문서 ID에 쓸 수 없는 문자(/  등)를 안전하게 치환
+    function toDocIdSafe(str) {
+        return (str || '').replace(/[\/\.#\$\[\]]/g, '-').replace(/\s+/g, '_');
     }
 </script>
     <script>
     // 1. 소화기 및 소화전 데이터셋
-// 1. 소화기 및 소화전 데이터셋
 const fireLocations = [
     { floor: "B4", location: "주차장(E/V 앞)", type: "ABC 3.3kg" },
     { floor: "B4", location: "주차장(부계단)", type: "ABC 3.3kg" },
@@ -1106,31 +1050,89 @@ const fireLocations = [
     { floor: "3F", location: "복도(307호 앞)", type: "ABC 3.3kg" },
     { floor: "3F", location: "탕비실", type: "ABC 3.3kg" },
     { floor: "3F", location: "직원휴게실(미화)", type: "ABC 3.3kg" },
-    { floor: "3F", location: "301호~309호 병실", type: "ABC 3.3kg" },
+    { floor: "3F", location: "301호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "302호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "303호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "304호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "305호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "306호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "307호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "308호", type: "ABC 3.3kg" },
+    { floor: "3F", location: "309호", type: "ABC 3.3kg" },
     { floor: "3F", location: "산소보관실", type: "ABC 3.3kg" },
     { floor: "4F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
     { floor: "4F", location: "복도(대피공간 앞)", type: "ABC 3.3kg" },
     { floor: "4F", location: "복도(407호 앞)", type: "ABC 3.3kg" },
     { floor: "4F", location: "탕비실", type: "ABC 3.3kg" },
     { floor: "4F", location: "비품창고", type: "ABC 3.3kg" },
-    { floor: "4F", location: "401호~409호 병실", type: "ABC 3.3kg" },
+    { floor: "4F", location: "401호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "402호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "403호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "404호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "405호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "406호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "407호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "408호", type: "ABC 3.3kg" },
+    { floor: "4F", location: "409호", type: "ABC 3.3kg" },
     { floor: "5F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
     { floor: "5F", location: "복도(대피공간 앞)", type: "ABC 3.3kg" },
     { floor: "5F", location: "복도(508호 앞)", type: "ABC 3.3kg" },
     { floor: "5F", location: "탕비실", type: "ABC 3.3kg" },
     { floor: "5F", location: "약국", type: "ABC 3.3kg" },
     { floor: "5F", location: "의당당직실", type: "ABC 3.3kg" },
-    { floor: "5F", location: "501호~509호 병실", type: "ABC 3.3kg" },
-    { floor: "6F", location: "601호~608호 병실", type: "ABC 3.3kg" },
+    { floor: "5F", location: "501호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "502호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "503호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "504호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "505호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "506호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "507호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "508호", type: "ABC 3.3kg" },
+    { floor: "5F", location: "509호", type: "ABC 3.3kg" },
     { floor: "6F", location: "승강기 옆", type: "ABC 3.3kg" },
     { floor: "6F", location: "탕비실", type: "ABC 3.3kg" },
     { floor: "6F", location: "보일러실", type: "ABC 3.3kg" },
-    { floor: "6F", location: "대피소 앞", type: "ABC 3.3kg" },
+    { floor: "6F", location: "대피공간 앞", type: "ABC 3.3kg" },
     { floor: "6F", location: "복도 안쪽 끝", type: "ABC 3.3kg" },
+    { floor: "6F", location: "601호", type: "ABC 3.3kg" },
+    { floor: "6F", location: "602호", type: "ABC 3.3kg" },
+    { floor: "6F", location: "603호", type: "ABC 3.3kg" },
+    { floor: "6F", location: "604호", type: "ABC 3.3kg" },
+    { floor: "6F", location: "605호", type: "ABC 3.3kg" },
+    { floor: "6F", location: "606호", type: "ABC 3.3kg" },
+    { floor: "6F", location: "607호", type: "ABC 3.3kg" },
+    { floor: "6F", location: "608호", type: "ABC 3.3kg" },
     { floor: "7F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
     { floor: "7F", location: "옥상 출입구", type: "ABC 3.3kg" },
     { floor: "7F", location: "식당", type: "ABC 3.3kg" }
 ];
+
+// 소화전(옥내소화전) 위치 목록
+const hydrantLocations = [
+    { floor: "7F", location: "여자화장실 옆" },
+    { floor: "7F", location: "비상계단 출입문 옆" },
+    { floor: "6F", location: "여자화장실 옆" },
+    { floor: "6F", location: "비상계단 출입문 옆" },
+    { floor: "5F", location: "여자화장실 옆" },
+    { floor: "5F", location: "비상계단 출입문 옆" },
+    { floor: "4F", location: "비상계단 출입문 옆" },
+    { floor: "4F", location: "여자화장실 옆" },
+    { floor: "3F", location: "여자화장실 옆" },
+    { floor: "3F", location: "비상계단 출입문 옆" },
+    { floor: "2F", location: "화장실 사이" },
+    { floor: "2F", location: "비상계단 출입문 옆" },
+    { floor: "B1", location: "식당 입구" },
+    { floor: "B1", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "B2", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "B2", location: "왼쪽 비상계단 출입문 옆" },
+    { floor: "B3", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "B3", location: "왼쪽 비상계단 출입문 옆" },
+    { floor: "B4", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "B4", location: "왼쪽 비상계단 출입문 옆" }
+];
+
+// 층 표시 순서 (7층 -> B4층)
+const FLOOR_ORDER = ['7F', '6F', '5F', '4F', '3F', '2F', 'B1', 'B2', 'B3', 'B4'];
 
 let currentFloorFilter = 'ALL'; // 현재 선택된 층 저장 변수
 
@@ -1186,22 +1188,34 @@ function renderExtinguisherTable(targetFloor = 'ALL') {
     });
 }
 
+// 층 선택 버튼 클릭 시: 소화기 표와 소화전 표를 같은 층 기준으로 함께 필터링
+function filterFireTablesByFloor(targetFloor) {
+    renderExtinguisherTable(targetFloor);
+    renderHydrantTable(targetFloor);
+}
+
 // 기존 initFireTable을 대체하여 소화기 점검 페이지가 열릴 때 덮어쓰지 못하도록 함
 function initFireTable() {
-    renderExtinguisherTable('ALL');
+    filterFireTablesByFloor('ALL');
+    document.getElementById('fire-check-date').value = new Date().toISOString().substring(0, 10);
+    updateFireHistoryOptions();
 }
-// 4. 소화전 테이블 동적 생성
-function renderHydrantTable() {
+
+// 4. 소화전 테이블 동적 생성 (층별 필터 적용)
+function renderHydrantTable(targetFloor = 'ALL') {
     const tbody = document.getElementById('hydrant-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    hydrantLocations.forEach((item, idx) => {
+    const targetList = targetFloor === 'ALL'
+        ? hydrantLocations
+        : hydrantLocations.filter(item => item.floor === targetFloor);
+
+    targetList.forEach((item, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td style="font-weight: bold; text-align: left;">
-                [${item.floor}] ${item.location}<br>
-                <span style="font-size: 11px; color: #17a2b8; font-weight: normal;">(옥내소화전)</span>
+                [${item.floor}] ${item.location}
             </td>
             <td>${makeSelect(`hyd_lamp_${idx}`)}</td>
             <td>${makeSelect(`hyd_pump_${idx}`)}</td>
@@ -1211,7 +1225,7 @@ function renderHydrantTable() {
             <td>${makeSelect(`hyd_hose_${idx}`)}</td>
             <td>${makeSelect(`hyd_freeze_${idx}`)}</td>
             <td>
-                <input type="file" id="hyd_img_${idx}" accept="image/*" style="display:none;">
+                <input type="file" id="hyd_img_${idx}" accept="image/*" style="display:none;" onchange="previewAndCompressImage(this, 'fire', 'hyd_${idx}')">
                 <button type="button" style="font-size:11px; padding:3px 6px;" onclick="document.getElementById('hyd_img_${idx}').click()">사진</button>
             </td>
             <td><input type="text" class="table-input" id="hyd_action_${idx}" placeholder="조치사항"></td>
@@ -1258,7 +1272,7 @@ function switchFireTab(tabType) {
     }
 }
 
-// 6. 파이어베이스 저장 연동
+// 6. 파이어베이스 저장 연동 (위치 하나당 문서 하나 - fire_checks 컬렉션)
 function saveFireData() {
     const checkDate = document.getElementById('fire-check-date').value;
     const inspector = document.getElementById('fire-inspector-name').value;
@@ -1268,11 +1282,10 @@ function saveFireData() {
         return;
     }
 
-    const extinguisherData = fireLocations.map((item, idx) => ({
-        floor: item.floor,
-        location: item.location,
-        type: item.type,
-        checks: {
+    const batch = db.batch();
+
+    fireLocations.forEach((item, idx) => {
+        const checks = {
             place: document.querySelector(`select[name="ext_place_${idx}"]`).value,
             dist: document.querySelector(`select[name="ext_dist_${idx}"]`).value,
             suit: document.querySelector(`select[name="ext_suit_${idx}"]`).value,
@@ -1283,15 +1296,27 @@ function saveFireData() {
             hose: document.querySelector(`select[name="ext_hose_${idx}"]`).value,
             gauge: document.querySelector(`select[name="ext_gauge_${idx}"]`).value,
             pin: document.querySelector(`select[name="ext_pin_${idx}"]`).value
-        },
-        action: document.getElementById(`ext_action_${idx}`).value,
-        isCompleted: document.getElementById(`ext_status_${idx}`).value === '완료'
-    }));
+        };
+        const action = document.getElementById(`ext_action_${idx}`).value;
+        const isCompleted = document.getElementById(`ext_status_${idx}`).value === '완료';
+        const docId = `ext__${toDocIdSafe(item.floor)}__${toDocIdSafe(item.location)}__${checkDate}`;
+        const ref = db.collection('fire_checks').doc(docId);
+        batch.set(ref, {
+            type: 'ext',
+            floor: item.floor,
+            location: item.location,
+            itemType: item.type,
+            date: checkDate,
+            inspector: inspector,
+            checks: checks,
+            action: action,
+            isCompleted: isCompleted,
+            savedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    });
 
-    const hydrantData = hydrantLocations.map((item, idx) => ({
-        floor: item.floor,
-        location: item.location,
-        checks: {
+    hydrantLocations.forEach((item, idx) => {
+        const checks = {
             lamp: document.querySelector(`select[name="hyd_lamp_${idx}"]`).value,
             pump: document.querySelector(`select[name="hyd_pump_${idx}"]`).value,
             block: document.querySelector(`select[name="hyd_block_${idx}"]`).value,
@@ -1299,22 +1324,29 @@ function saveFireData() {
             pipe: document.querySelector(`select[name="hyd_pipe_${idx}"]`).value,
             hose: document.querySelector(`select[name="hyd_hose_${idx}"]`).value,
             freeze: document.querySelector(`select[name="hyd_freeze_${idx}"]`).value
-        },
-        action: document.getElementById(`hyd_action_${idx}`).value,
-        isCompleted: document.getElementById(`hyd_status_${idx}`).value === '완료'
-    }));
+        };
+        const action = document.getElementById(`hyd_action_${idx}`).value;
+        const isCompleted = document.getElementById(`hyd_status_${idx}`).value === '완료';
+        const docId = `hyd__${toDocIdSafe(item.floor)}__${toDocIdSafe(item.location)}__${checkDate}`;
+        const ref = db.collection('fire_checks').doc(docId);
+        batch.set(ref, {
+            type: 'hyd',
+            floor: item.floor,
+            location: item.location,
+            date: checkDate,
+            inspector: inspector,
+            checks: checks,
+            action: action,
+            isCompleted: isCompleted,
+            savedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    });
 
-    const fireReportPayload = {
-        date: checkDate,
-        inspector: inspector,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        extinguishers: extinguisherData,
-        hydrants: hydrantData
-    };
-
-    db.collection('fire_inspections').doc(checkDate).set(fireReportPayload)
+    batch.commit()
         .then(() => {
             alert('소화기 및 소화전 점검표가 성공적으로 저장되었습니다!');
+            updateFireHistoryOptions();
+            fireChecksCacheByYear = {};
         })
         .catch((error) => {
             console.error('저장 실패:', error);
@@ -1322,10 +1354,419 @@ function saveFireData() {
         });
 }
 
-// 7. 페이지 초기화
+// =========================================================
+// 7. 소방시설 점검 이력 - 층별 관리대장 화면
+// =========================================================
+
+// 점검 항목의 한글 라벨 (소화기: 한 항목이라도 '불량'이면 그 달은 X)
+const EXT_CHECK_LABELS = {
+    place: '설치장소', dist: '설치거리', suit: '적응성', sign: '위치표지',
+    agent: '소화약제', lever: '레버상태', body: '본체상태', hose: '호스/노즐',
+    gauge: '지시압력계', pin: '안전핀'
+};
+
+// 소화전 점검 항목 (관리대장 행 순서 그대로)
+const HYD_CHECK_ITEMS = [
+    { key: 'lamp', label: '1. 위치표시등의 정상적인 점등 여부' },
+    { key: 'pump', label: '2. 가압송수장치가 자동 및 수동으로 작동하는지 여부' },
+    { key: 'block', label: '3. 소화전 주위의 장애물 등은 제거되어 있는가' },
+    { key: 'valve', label: '4. 수원의 정량 확보 및 개폐밸브의 개방 여부' },
+    { key: 'pipe', label: '5. 배관 및 밸브류 등은 부식 및 누수가 없는가' },
+    { key: 'hose', label: '6. 소화전내 호스 및 관창의 비치 유무' },
+    { key: 'freeze', label: '7. 수원 및 배관주위의 동파 위험 여부는 없는가' }
+];
+
+let fireChecksCacheByYear = {}; // 연도별 fire_checks 캐시 { year: [문서, ...] }
+
+// 특정 연도의 fire_checks 문서를 모두 가져옴 (date 범위 쿼리, 연도별 캐시)
+async function getFireChecksForYear(year) {
+    if (fireChecksCacheByYear[year]) return fireChecksCacheByYear[year];
+    const start = `${year}-01-01`;
+    const end = `${year}-12-31`;
+    const snapshot = await db.collection('fire_checks')
+        .where('date', '>=', start)
+        .where('date', '<=', end)
+        .get();
+    const docs = [];
+    snapshot.forEach(doc => docs.push(doc.data()));
+    fireChecksCacheByYear[year] = docs;
+    return docs;
+}
+
+// 페이지 진입 시: 층 선택 화면부터 표시
+function initFireHistoryFloorView() {
+    fireChecksCacheByYear = {}; // 최신 데이터로 다시 불러오도록 캐시 초기화
+    renderFireHistoryFloorButtons();
+    showFireHistoryFloorList();
+}
+
+function renderFireHistoryFloorButtons() {
+    const grid = document.getElementById('fire-history-floor-grid');
+    grid.innerHTML = '';
+    FLOOR_ORDER.forEach(floor => {
+        const btn = document.createElement('div');
+        btn.className = 'floor-btn';
+        btn.textContent = floor;
+        btn.onclick = () => showFireHistoryFloorDetail(floor);
+        grid.appendChild(btn);
+    });
+}
+
+function showFireHistoryFloorList() {
+    document.getElementById('fire-history-floor-select').classList.remove('hidden');
+    document.getElementById('fire-history-floor-detail').classList.add('hidden');
+}
+
+function populateFireHistoryYearSelect() {
+    const select = document.getElementById('fire-history-year-select');
+    const currentYear = new Date().getFullYear();
+    select.innerHTML = '';
+    for (let y = currentYear; y >= currentYear - 3; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = `${y}년`;
+        select.appendChild(opt);
+    }
+    select.value = currentYear;
+}
+
+async function showFireHistoryFloorDetail(floor) {
+    document.getElementById('fire-history-floor-select').classList.add('hidden');
+    document.getElementById('fire-history-floor-detail').classList.remove('hidden');
+    document.getElementById('fire-history-floor-detail').dataset.floor = floor;
+    document.getElementById('fire-history-floor-title').textContent = `${floor} 소방시설 점검 이력`;
+
+    populateFireHistoryYearSelect();
+
+    const extTable = document.getElementById('fire-history-ext-table');
+    const hydContainer = document.getElementById('fire-history-hyd-sheets');
+    extTable.innerHTML = '<tr><td style="padding:15px;">데이터를 불러오는 중입니다...</td></tr>';
+    hydContainer.innerHTML = '';
+
+    const year = parseInt(document.getElementById('fire-history-year-select').value, 10);
+    const yearDocs = await getFireChecksForYear(year);
+    renderExtinguisherLedger(floor, yearDocs);
+    renderHydrantLedgerSheets(floor, yearDocs);
+}
+
+async function onFireHistoryYearChange() {
+    const floor = document.getElementById('fire-history-floor-detail').dataset.floor;
+    if (!floor) return;
+    const year = parseInt(document.getElementById('fire-history-year-select').value, 10);
+    const yearDocs = await getFireChecksForYear(year);
+    renderExtinguisherLedger(floor, yearDocs);
+    renderHydrantLedgerSheets(floor, yearDocs);
+}
+
+// ---- 소화기 관리대장 (위치별 1행, 월별 종합 O/X) ----
+function renderExtinguisherLedger(floor, yearDocs) {
+    const table = document.getElementById('fire-history-ext-table');
+    const floorItems = fireLocations.filter(item => item.floor === floor);
+
+    if (floorItems.length === 0) {
+        table.innerHTML = `<tr><td class="empty-note">${floor}에 등록된 소화기가 없습니다.</td></tr>`;
+        return;
+    }
+
+    let monthHeaders = '';
+    for (let m = 1; m <= 12; m++) monthHeaders += `<th>${m}월</th>`;
+
+    let rows = '';
+    floorItems.forEach(item => {
+        let cells = '';
+        for (let m = 1; m <= 12; m++) {
+            const status = getMonthlyExtStatus(yearDocs, floor, item.location, m);
+            const cls = status === 'X' ? 'ledger-x' : (status === 'O' ? 'ledger-o' : '');
+            cells += `<td class="${cls}">${status}</td>`;
+        }
+        rows += `
+            <tr>
+                <td style="text-align:left; font-weight:bold;">${item.location}</td>
+                <td>${item.type}</td>
+                ${cells}
+            </tr>
+        `;
+    });
+
+    table.innerHTML = `
+        <thead>
+            <tr><th style="min-width:140px;">위치</th><th style="min-width:90px;">종류</th>${monthHeaders}</tr>
+        </thead>
+        <tbody>${rows}</tbody>
+    `;
+}
+
+// 해당 층/위치/월에 저장된 점검기록(fire_checks)에서 종합 O/X 산출
+// - 그 달에 저장된 점검이 없으면 '-'
+// - 점검 항목 중 하나라도 '불량'이면 X, 전부 '양호'면 O
+function getMonthlyExtStatus(yearDocs, floor, location, month) {
+    const mm = String(month).padStart(2, '0');
+    let found = false;
+    let bad = false;
+
+    yearDocs.forEach(doc => {
+        if (doc.type !== 'ext' || doc.floor !== floor || doc.location !== location) return;
+        if (!doc.date || doc.date.substring(5, 7) !== mm) return;
+        found = true;
+        const values = Object.values(doc.checks || {});
+        if (values.some(v => v === '불량')) bad = true;
+    });
+
+    if (!found) return '-';
+    return bad ? 'X' : 'O';
+}
+
+// ---- 소화전 관리대장 (위치별 개별 시트, 점검항목별 행) ----
+function renderHydrantLedgerSheets(floor, yearDocs) {
+    const container = document.getElementById('fire-history-hyd-sheets');
+    container.innerHTML = '';
+
+    const items = hydrantLocations.filter(item => item.floor === floor);
+
+    if (items.length === 0) {
+        container.innerHTML = `<p class="empty-note">${floor}에 등록된 소화전 위치가 없습니다.</p>`;
+        return;
+    }
+
+    let monthHeaders = '';
+    for (let m = 1; m <= 12; m++) monthHeaders += `<th>${m}월</th>`;
+
+    items.forEach(item => {
+        let rows = '';
+        HYD_CHECK_ITEMS.forEach(ci => {
+            let cells = '';
+            for (let m = 1; m <= 12; m++) {
+                const status = getMonthlyHydStatus(yearDocs, item.floor, item.location, ci.key, m);
+                const cls = status === 'X' ? 'ledger-x' : (status === 'O' ? 'ledger-o' : '');
+                cells += `<td class="${cls}">${status}</td>`;
+            }
+            rows += `<tr><td style="text-align:left;">${ci.label}</td>${cells}</tr>`;
+        });
+
+        const sheet = document.createElement('div');
+        sheet.className = 'hydrant-sheet';
+        sheet.innerHTML = `
+            <h5>📍 ${item.floor} ${item.location}</h5>
+            <table class="ledger-table">
+                <thead><tr><th style="min-width:230px;">점검사항</th>${monthHeaders}</tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
+        container.appendChild(sheet);
+    });
+}
+
+// 해당 층/위치/항목/월의 O/X 산출 (항목별로 개별 판정)
+function getMonthlyHydStatus(yearDocs, floor, location, key, month) {
+    const mm = String(month).padStart(2, '0');
+    let status = null;
+
+    yearDocs.forEach(doc => {
+        if (doc.type !== 'hyd' || doc.floor !== floor || doc.location !== location) return;
+        if (!doc.date || doc.date.substring(5, 7) !== mm) return;
+        if (doc.checks && doc.checks[key]) status = doc.checks[key];
+    });
+
+    if (status === null) return '-';
+    return status === '불량' ? 'X' : 'O';
+}
+
+// =========================================================
+// 8. QR코드 라벨 인쇄
+// =========================================================
+
+function renderQrPrintFloorButtons() {
+    const grid = document.getElementById('qr-print-floor-grid');
+    grid.innerHTML = '';
+
+    const allBtn = document.createElement('div');
+    allBtn.className = 'floor-btn';
+    allBtn.textContent = '전체';
+    allBtn.onclick = () => renderQrPrintGrid('ALL');
+    grid.appendChild(allBtn);
+
+    FLOOR_ORDER.forEach(floor => {
+        const btn = document.createElement('div');
+        btn.className = 'floor-btn';
+        btn.textContent = floor;
+        btn.onclick = () => renderQrPrintGrid(floor);
+        grid.appendChild(btn);
+    });
+}
+
+function renderQrPrintGrid(targetFloor) {
+    const container = document.getElementById('qr-print-grid');
+    container.innerHTML = '';
+    const base = window.location.origin + window.location.pathname;
+
+    const extItems = fireLocations
+        .filter(i => targetFloor === 'ALL' || i.floor === targetFloor)
+        .map(i => ({ type: 'ext', floor: i.floor, location: i.location, sub: `소화기 · ${i.type}` }));
+    const hydItems = hydrantLocations
+        .filter(i => targetFloor === 'ALL' || i.floor === targetFloor)
+        .map(i => ({ type: 'hyd', floor: i.floor, location: i.location, sub: '옥내소화전' }));
+
+    const allItems = extItems.concat(hydItems);
+
+    allItems.forEach(item => {
+        const url = `${base}?t=${item.type}&floor=${encodeURIComponent(item.floor)}&loc=${encodeURIComponent(item.location)}`;
+
+        const card = document.createElement('div');
+        card.className = 'qr-print-card';
+        const qrBoxId = 'qrbox_' + Math.random().toString(36).slice(2, 10);
+        card.innerHTML = `
+            <div class="qr-box" id="${qrBoxId}"></div>
+            <div class="qr-label">[${item.floor}] ${item.location}<br><span style="font-weight:normal; color:#6c757d;">${item.sub}</span></div>
+        `;
+        container.appendChild(card);
+
+        const qrBox = document.getElementById(qrBoxId);
+        new QRCode(qrBox, { text: url, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M });
+    });
+}
+
+// =========================================================
+// 9. QR 스캔 시 진입하는 단일 항목 현장 점검 화면
+// =========================================================
+
+let qrCheckState = {};
+
+function initQrCheckFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get('t');
+    if (type !== 'ext' && type !== 'hyd') return; // QR 링크로 들어온 경우가 아니면 평소처럼 메인 메뉴 표시
+    const floor = params.get('floor');
+    const loc = params.get('loc');
+    enterQrCheckMode(type, floor, loc);
+}
+
+function enterQrCheckMode(type, floor, loc) {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-qr-check').classList.remove('hidden');
+
+    const list = type === 'ext' ? fireLocations : hydrantLocations;
+    const item = list.find(i => i.floor === floor && i.location === loc);
+    const content = document.getElementById('qr-check-content');
+
+    if (!item) {
+        content.innerHTML = `
+            <div class="info-box" style="background:#fff5f5;">
+                ❌ 해당 위치 정보를 찾을 수 없습니다. QR 라벨을 다시 확인해 주세요.
+            </div>
+            <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        `;
+        return;
+    }
+
+    const checkItems = type === 'ext'
+        ? Object.entries(EXT_CHECK_LABELS)
+        : HYD_CHECK_ITEMS.map(ci => [ci.key, ci.label]);
+
+    const cachedName = localStorage.getItem('inspector_name_cache') || '';
+    const todayStr = new Date().toISOString().substring(0, 10);
+    const typeLabel = type === 'ext' ? '🧯 소화기' : '🚒 소화전';
+    const subLabel = type === 'ext' ? `(${item.type})` : '(옥내소화전)';
+
+    qrCheckState = {};
+    let toggleRows = '';
+    checkItems.forEach(([key, label]) => {
+        qrCheckState[key] = '양호';
+        toggleRows += `
+            <div class="qr-check-row">
+                <div class="qr-check-label">${label}</div>
+                <div class="toggle-pair" data-key="${key}">
+                    <button type="button" class="toggle-btn good active" onclick="setQrCheckValue('${key}','양호',this)">양호</button>
+                    <button type="button" class="toggle-btn bad" onclick="setQrCheckValue('${key}','불량',this)">불량</button>
+                </div>
+            </div>
+        `;
+    });
+
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0;">${typeLabel} 현장 점검</h2>
+            <div class="info-box" style="margin-bottom:15px;">
+                <strong>[${item.floor}] ${item.location}</strong> ${subLabel}
+            </div>
+            <p>
+                점검일자: <input type="date" id="qr-check-date" value="${todayStr}"><br><br>
+                점검자: <input type="text" id="qr-check-inspector" placeholder="이름 입력" value="${cachedName}">
+            </p>
+            ${toggleRows}
+            <p style="margin-top:15px;">
+                조치/교체 내용 (이상 있을 때만 입력):<br>
+                <input type="text" id="qr-check-action" class="table-input" style="width:100%; margin-top:5px;" placeholder="예: 지시압력계 교체 필요">
+            </p>
+            <button class="save-btn" onclick="saveQrCheck('${type}')">☁️ 저장하기</button>
+            <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+            <p style="text-align:center; margin-top:20px;">
+                <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
+            </p>
+        </div>
+    `;
+
+    // 저장 대상 위치 정보를 폼에 보관 (특수문자가 섞인 위치명도 안전하게 저장하기 위함)
+    content.dataset.floor = item.floor;
+    content.dataset.location = item.location;
+}
+
+function setQrCheckValue(key, value, btnEl) {
+    qrCheckState[key] = value;
+    const pair = btnEl.closest('.toggle-pair');
+    pair.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+}
+
+async function saveQrCheck(type) {
+    const content = document.getElementById('qr-check-content');
+    const floor = content.dataset.floor;
+    const loc = content.dataset.location;
+
+    const date = document.getElementById('qr-check-date').value;
+    const inspector = document.getElementById('qr-check-inspector').value.trim();
+    const action = document.getElementById('qr-check-action').value;
+    const resultEl = document.getElementById('qr-check-result');
+
+    if (!date) { alert('점검일자를 확인해 주세요.'); return; }
+    if (!inspector) { alert('점검자 이름을 입력해 주세요.'); return; }
+
+    localStorage.setItem('inspector_name_cache', inspector);
+
+    const docId = `${type}__${toDocIdSafe(floor)}__${toDocIdSafe(loc)}__${date}`;
+    const payload = {
+        type: type,
+        floor: floor,
+        location: loc,
+        date: date,
+        inspector: inspector,
+        checks: qrCheckState,
+        action: action,
+        isCompleted: !Object.values(qrCheckState).some(v => v === '불량'),
+        savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (type === 'ext') {
+        const item = fireLocations.find(i => i.floor === floor && i.location === loc);
+        if (item) payload.itemType = item.type;
+    }
+
+    try {
+        await db.collection('fire_checks').doc(docId).set(payload);
+        fireChecksCacheByYear = {};
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다! 다음 위치로 이동해 다시 스캔해 주세요.';
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+// 10. 페이지 초기화
 document.addEventListener('DOMContentLoaded', () => {
-    renderExtinguisherTable();
-    renderHydrantTable();
+    // fire-table-body / hydrant-table-body 는 '소방시설 점검표 작성' 화면 진입 시(initFireTable)에 그려집니다.
+    // QR코드로 접속한 경우(?t=ext... 또는 ?t=hyd...) 바로 단일 항목 점검 화면으로 진입시킵니다.
+    initQrCheckFromUrl();
 });
     </script>
 
