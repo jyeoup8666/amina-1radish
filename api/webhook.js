@@ -1,11 +1,11 @@
 const line = require('@line/bot-sdk');
 const admin = require('firebase-admin');
 
-// Firebase Admin 초기화
+// Firebase Admin 초기화 (projectId 하드코딩 추가)
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
+            projectId: process.env.FIREBASE_PROJECT_ID || "facility-check-74a17", // ★ 프로젝트 ID 직접 지정
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
             privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
         }),
