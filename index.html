@@ -240,39 +240,69 @@
     const db = firebase.firestore();
     const rtdb = firebase.database();
 
-    // 2. 실시간 시설요청 현황 (Realtime Database)
+    // 2. 메인 화면 수리요청 데이터 수신 및 처리
     const requestRef = rtdb.ref('facility_requests');
     requestRef.on('value', (snapshot) => {
-        const tbody = document.getElementById('requestTableBody');
+        const tbody = document.getElementById('requestTableBody'); // 진행 중인 요청 표
+        const historyTbody = document.getElementById('completedRequestTableBody'); // 완료된 요청 표
         const data = snapshot.val();
 
         if (!data) {
             tbody.innerHTML = '<tr><td colspan="3" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
+            if (historyTbody) {
+                historyTbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
+            }
             return;
         }
 
-        let html = '';
-        let index = 1;
-        const items = Object.values(data).reverse();
+        let activeHtml = '';
+        let completedHtml = '';
+        let activeIndex = 1;
+        let completedIndex = 1;
 
-        items.forEach((item) => {
+        const items = Object.entries(data).reverse();
+
+        items.forEach(([key, item]) => {
             const dateStr = item.timestamp 
                 ? new Date(item.timestamp).toLocaleString('ko-KR') 
                 : '-';
 
-            html += `
-                <tr>
-                    <td>${index++}</td>
-                    <td>${dateStr}</td>
-                    <td style="text-align: left; font-weight: bold; padding-left: 15px;">${item.text || ''}</td>
-                </tr>
-            `;
+            // 답장으로 완료 처리된 항목
+            if (item.status === 'completed') {
+                const completedDateStr = item.completedAt 
+                    ? new Date(item.completedAt).toLocaleString('ko-KR') 
+                    : '-';
+                const replyNote = item.replyMessage ? `<br><small style="color:#28a745;">ㄴ 답장: ${item.replyMessage}</small>` : '';
+
+                completedHtml += `
+                    <tr style="background-color: #f8f9fa; color: #6c757d;">
+                        <td>${completedIndex++}</td>
+                        <td>${dateStr}</td>
+                        <td style="text-align: left; padding-left: 15px;">
+                            <span style="text-decoration: line-through;">${item.text || ''}</span>
+                            ${replyNote}
+                        </td>
+                        <td><span style="color: #28a745; font-weight: bold;">완료 (${completedDateStr})</span></td>
+                    </tr>
+                `;
+            } 
+            // 진행 중인 요청
+            else {
+              activeHtml += `
+                  <tr>
+                      <td>${activeIndex++}</td>
+                      <td>${dateStr}</td>
+                      <td style="text-align: left; font-weight: bold; padding-left: 15px;">${item.text || ''}</td>
+                  </tr>
+              `;
+            }
         });
 
-        tbody.innerHTML = html;
-    }, (error) => {
-        console.error("실시간 데이터 수신 에러:", error);
-        document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="3" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+        tbody.innerHTML = activeHtml || '<tr><td colspan="3" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
+
+        if (historyTbody) {
+            historyTbody.innerHTML = completedHtml || '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
+        }
     });
 
     // 3. 보일러 점검 로직
