@@ -110,15 +110,14 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 15%;">요청 시간</th>
-                    <th style="width: 12%;">요청자</th>
-                    <th style="width: 45%;">요청 내용</th>
-                    <th style="width: 10%;">상태</th>
-                    <th style="width: 18%;">완료 처리 / 답변 내용</th>
+                    <th style="width: 18%;">요청 시간</th>
+                    <th style="width: 50%;">요청 내용</th>
+                    <th style="width: 12%;">상태</th>
+                    <th style="width: 20%;">완료 처리 / 답변 내용</th>
                 </tr>
             </thead>
             <tbody id="request-list">
-                <tr><td colspan="5" class="empty-msg">데이터를 실시간으로 불러오는 중...</td></tr>
+                <tr><td colspan="4" class="empty-msg">데이터를 실시간으로 불러오는 중...</td></tr>
             </tbody>
         </table>
     </div>
@@ -325,32 +324,37 @@
         document.getElementById('count-completed').innerText = `${completedCount}건`;
 
         if (currentTabEntries.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">${currentLineTab === 'pending' ? '대기 중인 수리 요청이 없습니다.' : '완료된 요청 내역이 없습니다.'}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="empty-msg">${currentLineTab === 'pending' ? '대기 중인 수리 요청이 없습니다.' : '완료된 요청 내역이 없습니다.'}</td></tr>`;
             return;
         }
 
         currentTabEntries.forEach(item => {
             const tr = document.createElement('tr');
             const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR') : '-';
-            const userName = item.userName || '알 수 없음';
             const text = item.text || '';
             const isCompleted = item.status === 'completed';
 
+            let completedInfo = '';
+            if (isCompleted) {
+                const completedDateStr = item.completedAt ? new Date(item.completedAt).toLocaleString('ko-KR') : '';
+                const replyText = item.replyText ? escapeHtml(item.replyText) : '처리 완료';
+                completedInfo = `
+                    <div style="font-weight: bold; color: #28a745; font-size: 13px;">${replyText}</div>
+                    <div style="font-size: 11px; color: #888; margin-top: 2px;">${completedDateStr}</div>
+                `;
+            } else {
+                completedInfo = `<button class="btn-complete" onclick="markAsComplete('${item.key}')">✓ 수리 완료 처리</button>`;
+            }
+
             tr.innerHTML = `
                 <td>${dateStr}</td>
-                <td><strong>${escapeHtml(userName)}</strong></td>
                 <td style="text-align: left;">${escapeHtml(text)}</td>
                 <td>
                     <span class="status-badge ${isCompleted ? 'completed' : 'pending'}">
                         ${isCompleted ? '완료' : '대기중'}
                     </span>
                 </td>
-                <td>
-                    ${!isCompleted ? 
-                        `<button class="btn-complete" onclick="markAsComplete('${item.key}')">✓ 수리 완료 처리</button>` : 
-                        `<span style="color: #4a5568; font-size: 13px;">${escapeHtml(item.replyText || '처리 완료')}</span>`
-                    }
-                </td>
+                <td>${completedInfo}</td>
             `;
             tbody.appendChild(tr);
         });
@@ -362,7 +366,8 @@
         try {
             await rtdb.ref(`facility_requests/${key}`).update({
                 status: 'completed',
-                completedAt: Date.now()
+                completedAt: Date.now(),
+                replyText: '웹에서 수동 완료 처리'
             });
         } catch (err) {
             alert('완료 처리 중 오류가 발생했습니다: ' + err.message);
