@@ -28,6 +28,11 @@
         .delete-btn:hover { background: #c82333; }
         .sync-btn { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
         
+        .btn-small-danger { background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-small-danger:hover { background: #bd2130; }
+        .toggle-history-btn { background: #6c757d; color: white; border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .toggle-history-btn:hover { background: #5a6268; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
         th, td { border: 1px solid #dee2e6; padding: 8px; text-align: center; vertical-align: middle; }
         th { background: #2b569a; color: white; }
@@ -41,7 +46,6 @@
         .stat-title { font-size: 13px; color: #6c757d; font-weight: bold; margin-bottom: 5px; }
         .stat-value { font-size: 20px; font-weight: bold; color: #333; }
         
-        /* 날짜 태그 스타일 (X/기본: 빨강, O: 초록) */
         .date-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .date-tag.repair-x { background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; }
         .date-tag.repair-x:hover { background: #dc3545; color: white; }
@@ -55,7 +59,6 @@
         
         input[type="text"].table-input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
 
-        /* 실시간 요청 현황 스타일 */
         .realtime-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #e9ecef; }
         .badge-live { background-color: #e6f4ea; color: #137333; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
         .pulse-dot { width: 8px; height: 8px; background-color: #28a745; border-radius: 50%; display: inline-block; }
@@ -81,21 +84,45 @@
                     <h3 style="margin: 0; color: #333;">🔔 실시간 시설요청 현황</h3>
                     <p style="margin: 5px 0 0 0; font-size: 13px; color: #6c757d;">라인 봇을 통해 접수된 실시간 수리 요청 목록입니다.</p>
                 </div>
-                <span class="badge-live"><span class="pulse-dot"></span> 실시간 연동 중</span>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="toggle-history-btn" onclick="toggleCompletedRequests()">📜 완료된 수리 요청 보기</button>
+                    <span class="badge-live"><span class="pulse-dot"></span> 실시간 연동 중</span>
+                </div>
             </div>
 
+            <!-- 1) 진행 중인 수리 요청 표 -->
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 10%;">번호</th>
-                        <th style="width: 25%;">접수 시간</th>
-                        <th style="width: 65%;">요청 내용</th>
+                        <th style="width: 8%;">번호</th>
+                        <th style="width: 22%;">접수 시간</th>
+                        <th style="width: 60%;">요청 내용</th>
+                        <th style="width: 10%;">관리</th>
                     </tr>
                 </thead>
                 <tbody id="requestTableBody">
-                    <tr><td colspan="3" style="color: #6c757d; padding: 20px;">수리 요청 내역을 불러오는 중입니다...</td></tr>
+                    <tr><td colspan="4" style="color: #6c757d; padding: 20px;">수리 요청 내역을 불러오는 중입니다...</td></tr>
                 </tbody>
             </table>
+
+            <!-- 2) 완료된 수리 요청 표 (버튼 클릭 시 토글) -->
+            <div id="completedRequestSection" class="hidden" style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc;">
+                <h4 style="margin: 0 0 10px 0; color: #28a745;">✅ 완료된 수리 요청 내역</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">번호</th>
+                            <th style="width: 20%;">접수 시간</th>
+                            <th style="width: 47%;">요청 및 답장 내용</th>
+                            <th style="width: 15%;">처리 완료 시각</th>
+                            <th style="width: 10%;">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completedRequestTableBody">
+                        <tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -240,17 +267,17 @@
     const db = firebase.firestore();
     const rtdb = firebase.database();
 
-    // 2. 메인 화면 수리요청 데이터 수신 및 처리
+    // 2. 실시간 시설요청 현황 (Realtime Database)
     const requestRef = rtdb.ref('facility_requests');
     requestRef.on('value', (snapshot) => {
-        const tbody = document.getElementById('requestTableBody'); // 진행 중인 요청 표
-        const historyTbody = document.getElementById('completedRequestTableBody'); // 완료된 요청 표
+        const tbody = document.getElementById('requestTableBody');
+        const historyTbody = document.getElementById('completedRequestTableBody');
         const data = snapshot.val();
 
         if (!data) {
-            tbody.innerHTML = '<tr><td colspan="3" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
             if (historyTbody) {
-                historyTbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
+                historyTbody.innerHTML = '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
             }
             return;
         }
@@ -272,7 +299,7 @@
                 const completedDateStr = item.completedAt 
                     ? new Date(item.completedAt).toLocaleString('ko-KR') 
                     : '-';
-                const replyNote = item.replyMessage ? `<br><small style="color:#28a745;">ㄴ 답장: ${item.replyMessage}</small>` : '';
+                const replyNote = item.replyMessage ? `<br><small style="color:#28a745; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>` : '';
 
                 completedHtml += `
                     <tr style="background-color: #f8f9fa; color: #6c757d;">
@@ -283,6 +310,7 @@
                             ${replyNote}
                         </td>
                         <td><span style="color: #28a745; font-weight: bold;">완료 (${completedDateStr})</span></td>
+                        <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
                     </tr>
                 `;
             } 
@@ -293,17 +321,46 @@
                       <td>${activeIndex++}</td>
                       <td>${dateStr}</td>
                       <td style="text-align: left; font-weight: bold; padding-left: 15px;">${item.text || ''}</td>
+                      <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
                   </tr>
               `;
             }
         });
 
-        tbody.innerHTML = activeHtml || '<tr><td colspan="3" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
+        tbody.innerHTML = activeHtml || '<tr><td colspan="4" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
 
         if (historyTbody) {
-            historyTbody.innerHTML = completedHtml || '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
+            historyTbody.innerHTML = completedHtml || '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
         }
+    }, (error) => {
+        console.error("실시간 데이터 수신 에러:", error);
+        document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="4" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
     });
+
+    // 개별 수리 요청 삭제 기능
+    function deleteRequest(key) {
+        if (confirm("해당 수리 요청 항목을 삭제하시겠습니까?")) {
+            rtdb.ref(`facility_requests/${key}`).remove()
+                .then(() => alert("성공적으로 삭제되었습니다."))
+                .catch((err) => alert("삭제 실패: " + err.message));
+        }
+    }
+
+    // 완료된 수리 요청 영역 보기/숨기기 토글
+    function toggleCompletedRequests() {
+        const section = document.getElementById('completedRequestSection');
+        const btn = document.querySelector('.toggle-history-btn');
+        
+        if (section.classList.contains('hidden')) {
+            section.classList.remove('hidden');
+            btn.textContent = '🙈 완료된 수리 요청 숨기기';
+            btn.style.backgroundColor = '#495057';
+        } else {
+            section.classList.add('hidden');
+            btn.textContent = '📜 완료된 수리 요청 보기';
+            btn.style.backgroundColor = '#6c757d';
+        }
+    }
 
     // 3. 보일러 점검 로직
     const rooms = [
