@@ -1,28 +1,28 @@
 const line = require('@line/bot-sdk');
 const admin = require('firebase-admin');
 
-// Firebase Admin 안전한 초기화
+// Firebase Admin 초기화 (private_key 복잡한 조건 제거하고 안전하게 초기화)
 if (!admin.apps.length) {
-    const serviceAccount = {
-        projectId: process.env.FIREBASE_PROJECT_ID || "facility-check-74a17",
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY 
-            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
-            : undefined,
-    };
-
-    // 서비스 계정 인증 정보가 충분치 않을 경우를 대비한 세이프티 로직
-    if (serviceAccount.clientEmail && serviceAccount.privateKey) {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-            databaseURL: process.env.FIREBASE_DATABASE_URL || "https://facility-check-74a17-default-rtdb.firebaseio.com"
-        });
-    } else {
-        // 환경 변수가 없을 때 기본 앱 인증 구조 사용
-        admin.initializeApp({
-            projectId: "facility-check-74a17",
-            databaseURL: process.env.FIREBASE_DATABASE_URL || "https://facility-check-74a17-default-rtdb.firebaseio.com"
-        });
+    try {
+        // 1순위: 환경변수가 전부 있을 경우 cert 방식 사용
+        if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId: process.env.FIREBASE_PROJECT_ID || "facility-check-74a17",
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+                }),
+                databaseURL: process.env.FIREBASE_DATABASE_URL || "https://facility-check-74a17-default-rtdb.firebaseio.com"
+            });
+        } else {
+            // 2순위: privateKey 환경변수가 유효하지 않을 때 fallback (프로젝트 ID 및 DB URL 직접 지정)
+            admin.initializeApp({
+                projectId: process.env.FIREBASE_PROJECT_ID || "facility-check-74a17",
+                databaseURL: process.env.FIREBASE_DATABASE_URL || "https://facility-check-74a17-default-rtdb.firebaseio.com"
+            });
+        }
+    } catch (e) {
+        console.error("Firebase 초기화 에러:", e);
     }
 }
 
