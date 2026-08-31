@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시설 점검 시스템</title>
-    <!-- Firebase SDK (v8 호환 모드) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
+    <title>시설 관리 및 점검 시스템</title>
+    <!-- Firebase SDK (Compat v10.8.0) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
-        
+
+        /* 메뉴 버튼 스타일 */
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
         .menu-btn { background: #2b569a; color: white; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .menu-btn:hover { background: #1d3c6e; }
+        .menu-btn-highlight { background: #00c73c; color: white; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .menu-btn-highlight:hover { background: #009b2f; }
         .menu-btn-sub { background: #4a72b8; color: white; padding: 25px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 18px; }
         .menu-btn-sub:hover { background: #2b569a; }
-        
+
+        /* 공통 버튼 */
         .back-btn { background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
         .nav-btn { background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
         .save-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; }
@@ -27,38 +31,44 @@
         .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
         .delete-btn:hover { background: #c82333; }
         .sync-btn { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
-        
+        .action-btn { background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .action-btn:hover { background: #218838; }
+
+        /* 테이블 및 정보 박스 */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { border: 1px solid #dee2e6; padding: 8px; text-align: center; vertical-align: middle; }
+        th, td { border: 1px solid #dee2e6; padding: 10px 8px; text-align: center; vertical-align: middle; }
         th { background: #2b569a; color: white; }
         
         .info-box { background: #eef5ff; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
         .history-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
-        
+
+        /* 통계 카운터 카드 */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: #f8f9fa; border: 1px solid #e9ecef; border-left: 5px solid #2b569a; padding: 15px; border-radius: 6px; }
         .stat-card.warning { border-left-color: #dc3545; background: #fff5f5; }
+        .stat-card.success { border-left-color: #28a745; background: #f4faf6; }
         .stat-title { font-size: 13px; color: #6c757d; font-weight: bold; margin-bottom: 5px; }
         .stat-value { font-size: 20px; font-weight: bold; color: #333; }
-        
-        /* 날짜 태그 스타일 (X/기본: 빨강, O: 초록) */
+
+        /* 태그 및 이미지 미리보기 */
         .date-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .date-tag.repair-x { background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; }
         .date-tag.repair-x:hover { background: #dc3545; color: white; }
         .date-tag.repair-o { background: #e6f4ea; color: #137333; border: 1px solid #ceedd6; }
         .date-tag.repair-o:hover { background: #137333; color: white; }
-        
+
+        .badge-pending { background-color: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .badge-completed { background-color: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+
         .img-preview { max-width: 70px; max-height: 70px; object-fit: cover; border-radius: 4px; display: block; margin: 5px auto; cursor: pointer; }
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
         .modal-content { max-width: 90%; max-height: 85%; border-radius: 8px; }
         .close-modal { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
-        
-        input[type="text"].table-input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
 
-        /* 실시간 요청 현황 스타일 */
-        .realtime-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #e9ecef; }
-        .badge-live { background-color: #e6f4ea; color: #137333; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
-        .pulse-dot { width: 8px; height: 8px; background-color: #28a745; border-radius: 50%; display: inline-block; }
+        input[type="text"].table-input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #2b569a; padding-bottom: 10px; }
+        .tab-btn { padding: 8px 16px; border: none; background: #e9ecef; cursor: pointer; font-weight: bold; border-radius: 5px; }
+        .tab-btn.active { background: #2b569a; color: white; }
     </style>
 </head>
 <body>
@@ -66,38 +76,51 @@
 <div class="container">
     <!-- 메인 메뉴 -->
     <div id="main-menu">
-        <h2>📋 시설 점검 시스템</h2>
-        <p>조회 및 작성할 점검표를 선택하세요.</p>
+        <h2>📋 시설 점검 및 요청 관리 시스템</h2>
+        <p>조회 및 작성할 점검표 또는 메신저 수리 요청을 선택하세요.</p>
         <div class="menu-grid">
+            <div class="menu-btn-highlight" onclick="showPage('line-requests')">💬 라인 단톡방 수리 요청 모니터링</div>
             <div class="menu-btn" onclick="showPage('boiler-menu')">🔥 보일러 점검</div>
             <div class="menu-btn" onclick="showPage('fire')">🧯 소화기 점검표</div>
             <div class="menu-btn" onclick="showPage('water')">💧 정수기 점검표</div>
         </div>
+    </div>
 
-        <!-- 메인 화면 하단: 실시간 수리 요청 현황 표 -->
-        <div class="realtime-section">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h3 style="margin: 0; color: #333;">🔔 실시간 시설요청 현황</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #6c757d;">라인 봇을 통해 접수된 실시간 수리 요청 목록입니다.</p>
-                </div>
-                <span class="badge-live"><span class="pulse-dot"></span> 실시간 연동 중</span>
+    <!-- 💬 라인 수리 요청 모니터링 화면 -->
+    <div id="page-line-requests" class="hidden">
+        <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        <h2>💬 라인 단톡방 수리/점검 요청 목록</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <div class="stat-title">처리 대기 중인 요청</div>
+                <div class="stat-value" id="stat-line-pending" style="color: #dc3545;">0건</div>
             </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;">번호</th>
-                        <th style="width: 22%;">접수 시간</th>
-                        <th style="width: 20%;">요청자</th>
-                        <th style="width: 50%;">요청 내용</th>
-                    </tr>
-                </thead>
-                <tbody id="requestTableBody">
-                    <tr><td colspan="4" style="color: #6c757d; padding: 20px;">수리 요청 내역을 불러오는 중입니다...</td></tr>
-                </tbody>
-            </table>
+            <div class="stat-card success">
+                <div class="stat-title">수리 완료된 요청</div>
+                <div class="stat-value" id="stat-line-completed" style="color: #28a745;">0건</div>
+            </div>
         </div>
+
+        <div class="tab-menu">
+            <button class="tab-btn active" id="tab-btn-pending" onclick="filterLineRequests('pending')">🚨 처리 대기 목록</button>
+            <button class="tab-btn" id="tab-btn-completed" onclick="filterLineRequests('completed')">✅ 처리 완료 내역</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">요청 시간</th>
+                    <th style="width: 12%;">요청자</th>
+                    <th style="width: 35%;">요청 내용</th>
+                    <th style="width: 10%;">상태</th>
+                    <th style="width: 28%;" id="th-line-action">완료 처리 / 답변 내용</th>
+                </tr>
+            </thead>
+            <tbody id="line-requests-table-body">
+                <tr><td colspan="5">실시간 요청 데이터를 불러오는 중입니다...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- 보일러 메뉴 선택 화면 -->
@@ -223,65 +246,22 @@
 </div>
 
 <script>
-    // 1. Firebase 설정 (Firestore 및 Realtime Database 공통 적용)
+    // 1. Firebase 설정 (Firestore & Realtime Database 공용)
     const firebaseConfig = {
         apiKey: "AIzaSyBnQfxr5Uzsk862IGBKs7KrvqF1__k3hqA",
         authDomain: "facility-check-74a17.firebaseapp.com",
+        databaseURL: "https://facility-check-74a17-default-rtdb.firebaseio.com",
         projectId: "facility-check-74a17",
         storageBucket: "facility-check-74a17.firebasestorage.app",
         messagingSenderId: "672284450568",
         appId: "1:672284450568:web:5b6f809b4a032424b456bd",
-        measurementId: "G-KN5TSDQHMF",
-        databaseURL: "https://facility-check-74a17-default-rtdb.firebaseio.com"
+        measurementId: "G-KN5TSDQHMF"
     };
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.firestore();
-    const rtdb = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();            // 점검표용
+    const rtdb = firebase.database();           // 라인 실시간 수리요청용
 
-    // 2. 실시간 시설요청 현황 (Realtime Database)
-    const requestRef = rtdb.ref('facility_requests');
-    requestRef.on('value', (snapshot) => {
-        const tbody = document.getElementById('requestTableBody');
-        const data = snapshot.val();
-
-        if (!data) {
-            tbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
-            return;
-        }
-
-        let html = '';
-        let index = 1;
-        const items = Object.values(data).reverse();
-
-        items.forEach((item) => {
-            const dateStr = item.timestamp 
-                ? new Date(item.timestamp).toLocaleString('ko-KR') 
-                : '-';
-            
-            const userIdShort = item.userId 
-                ? item.userId.substring(0, 8) + '...' 
-                : '익명';
-
-            html += `
-                <tr>
-                    <td>${index++}</td>
-                    <td>${dateStr}</td>
-                    <td>${userIdShort}</td>
-                    <td style="text-align: left; font-weight: bold; padding-left: 15px;">${item.text || ''}</td>
-                </tr>
-            `;
-        });
-
-        tbody.innerHTML = html;
-    }, (error) => {
-        console.error("실시간 데이터 수신 에러:", error);
-        document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="4" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
-    });
-
-    // 3. 보일러 점검 로직
     const rooms = [
         '301호', '302호', '303호', '304호', '305호', '306호', '307호', '308호', '309호-1', '309호-2',
         '401호', '402호', '403호', '404호', '405호', '406호', '407호', '408호', '409호-1', '409호-2',
@@ -289,6 +269,106 @@
         '601호', '602호', '603호', '604호', '605호', '606호', '607호', '608호-1', '608호-2'
     ];
 
+    let allLineRequests = {};
+    let currentLineTab = 'pending';
+
+    // ----------------------------------------------------------------
+    // 💬 라인 수리/점검 실시간 모니터링 로직
+    // ----------------------------------------------------------------
+    function initLineRealtimeListener() {
+        rtdb.ref('facility_requests').on('value', (snapshot) => {
+            allLineRequests = snapshot.val() || {};
+            renderLineRequests();
+        });
+    }
+
+    function filterLineRequests(tabStatus) {
+        currentLineTab = tabStatus;
+        document.getElementById('tab-btn-pending').classList.toggle('active', tabStatus === 'pending');
+        document.getElementById('tab-btn-completed').classList.toggle('active', tabStatus === 'completed');
+        
+        const thAction = document.getElementById('th-line-action');
+        thAction.textContent = tabStatus === 'pending' ? '완료 처리' : '답변자 / 완료 내용';
+        
+        renderLineRequests();
+    }
+
+    function renderLineRequests() {
+        const tbody = document.getElementById('line-requests-table-body');
+        tbody.innerHTML = '';
+
+        const keys = Object.keys(allLineRequests);
+        let pendingCount = 0;
+        let completedCount = 0;
+
+        const filteredList = [];
+
+        keys.forEach(key => {
+            const item = allLineRequests[key];
+            item.id = key;
+
+            if (item.status === 'completed') completedCount++;
+            else pendingCount++;
+
+            if ((currentLineTab === 'pending' && item.status !== 'completed') ||
+                (currentLineTab === 'completed' && item.status === 'completed')) {
+                filteredList.push(item);
+            }
+        });
+
+        document.getElementById('stat-line-pending').textContent = `${pendingCount}건`;
+        document.getElementById('stat-line-completed').textContent = `${completedCount}건`;
+
+        // 최근 요청순 정렬
+        filteredList.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+        if (filteredList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="padding: 20px; color: #888;">${currentLineTab === 'pending' ? '대기 중인 수리 요청이 없습니다 🎉' : '완료된 요청 기록이 없습니다.'}</td></tr>`;
+            return;
+        }
+
+        filteredList.forEach(item => {
+            const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR') : '-';
+            const row = document.createElement('tr');
+
+            let actionCellHtml = '';
+            if (currentLineTab === 'pending') {
+                actionCellHtml = `<button class="action-btn" onclick="markAsCompleted('${item.id}')">✅ 수리 완료 처리</button>`;
+            } else {
+                const replyTime = item.replyTimestamp ? new Date(item.replyTimestamp).toLocaleString('ko-KR') : '';
+                actionCellHtml = `<strong>${item.replyUser || '관리자'}</strong><br><span style="color: #555;">${item.replyText || '수리 완료 처리됨'}</span><br><small style="color: #888;">(${replyTime})</small>`;
+            }
+
+            row.innerHTML = `
+                <td>${dateStr}</td>
+                <td><strong>${item.userName || '알 수 없음'}</strong></td>
+                <td style="text-align: left; padding-left: 15px;">${item.text || ''}</td>
+                <td><span class="${item.status === 'completed' ? 'badge-completed' : 'badge-pending'}">${item.status === 'completed' ? '완료' : '대기중'}</span></td>
+                <td>${actionCellHtml}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function markAsCompleted(id) {
+        if (confirm('이 요청건을 완료 상태로 전환하시겠습니까?')) {
+            try {
+                await rtdb.ref(`facility_requests/${id}`).update({
+                    status: 'completed',
+                    replyUser: '웹 관리자',
+                    replyText: '웹 페이지에서 조치 완료 처리됨',
+                    replyTimestamp: Date.now()
+                });
+            } catch (err) {
+                alert('완료 처리 중 오류가 발생했습니다.');
+                console.error(err);
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------
+    // 🔥 보일러 주간 점검표 로직
+    // ----------------------------------------------------------------
     function initBoilerTable() {
         const tbody = document.getElementById('boiler-table-body');
         tbody.innerHTML = '';
@@ -389,6 +469,7 @@
         
         if(pageId === 'boiler-form') initBoilerTable();
         if(pageId === 'boiler-history') renderHistoryTable();
+        if(pageId === 'line-requests') renderLineRequests();
     }
 
     function showMain() {
@@ -617,6 +698,11 @@
         initBoilerTable();
         document.getElementById('inspector-name').value = '';
     }
+
+    // 페이지 로드 시 라인 실시간 수리 요청 수신기 동작 시작
+    window.onload = function() {
+        initLineRealtimeListener();
+    };
 </script>
 
 </body>
