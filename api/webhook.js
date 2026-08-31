@@ -1,34 +1,54 @@
+const line = require('@line/bot-sdk');
+const admin = require('firebase-admin');
+
+// LINE SDK 클라이언트 설정
+const lineClient = new line.Client({
+    channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+    channelSecret: process.env.LINE_CHANNEL_SECRET
+});
+
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const events = req.body.events || [];
+    if (req.method !== 'POST') return res.status(200).send('OK');
+
+    const events = req.body.events;
 
     for (let event of events) {
-      if (event.type === 'message' && event.message.type === 'text') {
-        const userMessage = event.message.text;
-        const userId = event.source.userId;
+        if (event.type === 'message' && event.message.type === 'text') {
+            const userId = event.source.userId;
+            const groupId = event.source.groupId;
+            const text = event.message.text;
+            const timestamp = event.timestamp;
+            
+            // 1. 답장(Quote Reply) 인지 확인
+            const replyToId = event.message.quotedMessageId || null;
+            const status = replyToId ? 'completed' : 'pending';
 
-        console.log(`수신 메시지: ${userMessage} (보낸 사람: ${userId})`);
+            // 2. LINE 사용자 프로필(이름) 가져오기
+            let userName = '알 수 없음';
+            try {
+                if (groupId) {
+                    const profile = await lineClient.getGroupMemberProfile(groupId, userId);
+                    userName = profile.displayName; // 예: "최민원 (시설팀장)"
+                } else {
+                    const profile = await lineClient.getProfile(userId);
+                    userName = profile.displayName;
+                }
+            } catch (err) {
+                console.error("라인 프로필 조회 실패:", err);
+            }
 
-        // Firebase Realtime Database 저장 로직 추가
-        const firebaseUrl = 'https://facility-check-74a17-default-rtdb.firebaseio.com/facility_requests.json';
-        
-        try {
-          await fetch(firebaseUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              text: userMessage,
-              userId: userId,
-              timestamp: Date.now()
-            })
-          });
-        } catch (error) {
-          console.error('Firebase 저장 실패:', error);
+            // 3. Firebase Realtime Database에 저장
+            const db = admin.database();
+            await db.ref(`facility_requests/${event.message.id}`).set({
+                userId: userId,
+                userName: userName, // 사용자 실제 이름 저장
+                text: text,
+                timestamp: timestamp,
+                status: status,     // 'pending' 또는 'completed'
+                replyTo: replytoId
+            });
         }
-      }
     }
-    return res.status(200).json({ message: 'OK' });
-  }
 
-  res.status(200).send('LINE Webhook Server is Running!');
+    return res.status(200).json({ status: 'success' });
 }
