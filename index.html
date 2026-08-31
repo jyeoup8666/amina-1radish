@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>시설점검 및 수리요청 접수 현황</title>
+  <title>시설 점검 및 수리요청 시스템</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -13,59 +13,80 @@
   </style>
 </head>
 <body class="p-4 md:p-8">
-  <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-md p-6">
-    <!-- 상단 헤더 -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-gray-200">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">📋 시설점검 및 수리요청 접수 현황</h1>
-        <p class="text-sm text-gray-500 mt-1">라인 Official Account를 통해 실시간으로 접수된 내역입니다.</p>
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- 1. 기존 시설 점검표 선택 영역 (원상복구) -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">📋 시설 점검 시스템</h1>
+        <p class="text-sm text-gray-500 mt-1">조회 및 작성할 점검표를 선택하세요.</p>
       </div>
-      <div class="mt-4 md:mt-0 flex items-center gap-3">
-        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          <span class="w-2 h-2 mr-1.5 bg-green-500 rounded-full animate-pulse"></span> 실시간 연동 중
-        </span>
-        <!-- 이전 관리 내역 버튼 -->
-        <button onclick="openHistoryModal()" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium px-3.5 py-2 rounded-lg transition flex items-center gap-1 shadow-sm">
-          📁 이전 관리 내역
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <button onclick="alert('보일러 점검표로 이동합니다.')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+          🔥 보일러 점검
+        </button>
+        <button onclick="alert('소화기 점검표로 이동합니다.')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+          🧯 소화기 점검표
+        </button>
+        <button onclick="alert('정수기 점검표로 이동합니다.')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+          💧 정수기 점검표
         </button>
       </div>
     </div>
 
-    <!-- 진행 중인 접수 목록 테이블 -->
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gray-100 text-gray-700 text-sm font-semibold border-b">
-            <th class="p-3 w-16 text-center">번호</th>
-            <th class="p-3 w-36">접수 시간</th>
-            <th class="p-3 w-28">요청자</th>
-            <th class="p-3">요청 내용</th>
-            <th class="p-3 w-24 text-center">상태</th>
-          </tr>
-        </thead>
-        <tbody id="request-list" class="divide-y divide-gray-200 text-sm">
-          <tr>
-            <td colspan="5" class="text-center py-8 text-gray-400">접수된 요청 항목을 불러오는 중입니다...</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- 2. 라인 실시간 수리요청 접수 현황 영역 -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-4 border-b border-gray-200">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">🔔 라인 실시간 수리요청 현황</h2>
+          <p class="text-xs text-gray-500 mt-0.5">라인 봇을 통해 실시간으로 접수된 수리 요청 목록입니다.</p>
+        </div>
+        <div class="mt-3 md:mt-0 flex items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <span class="w-2 h-2 mr-1.5 bg-green-500 rounded-full animate-pulse"></span> 실시간 연동 중
+          </span>
+          <button onclick="openHistoryModal()" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition">
+            📁 이전 관리 내역
+          </button>
+        </div>
+      </div>
+
+      <!-- 접수 테이블 -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-100 text-gray-700 text-xs font-semibold border-b">
+              <th class="p-2.5 w-14 text-center">번호</th>
+              <th class="p-2.5 w-32">접수 시간</th>
+              <th class="p-2.5 w-24">요청자</th>
+              <th class="p-2.5">요청 내용</th>
+              <th class="p-2.5 w-20 text-center">상태</th>
+            </tr>
+          </thead>
+          <tbody id="request-list" class="divide-y divide-gray-200 text-xs">
+            <tr>
+              <td colspan="5" class="text-center py-6 text-gray-400">접수된 요청 항목을 불러오는 중입니다...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+
   </div>
 
-  <!-- 이전 관리 내역 (완료 모달 창) -->
+  <!-- 3. 이전 관리 내역 (완료 내역 모달) -->
   <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col overflow-hidden">
-      <!-- 모달 헤더 -->
-      <div class="p-5 bg-gray-50 border-b flex justify-between items-center">
+      <div class="p-4 bg-gray-50 border-b flex justify-between items-center">
         <div>
-          <h2 class="text-lg font-bold text-gray-800">📁 완료된 이전 관리 내역</h2>
-          <p class="text-xs text-gray-500 mt-0.5">처리 완료된 시설 점검 및 수리 요청 목록입니다.</p>
+          <h3 class="text-base font-bold text-gray-800">📁 완료된 이전 관리 내역</h3>
+          <p class="text-xs text-gray-500">처리 완료된 수리 및 점검 요청 목록입니다.</p>
         </div>
         <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl px-2">&times;</button>
       </div>
       
-      <!-- 모달 본문 (테이블) -->
-      <div class="p-5 overflow-y-auto flex-1">
+      <div class="p-4 overflow-y-auto flex-1">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-100 text-gray-700 text-xs font-semibold border-b">
@@ -78,15 +99,14 @@
           </thead>
           <tbody id="history-list" class="divide-y divide-gray-200 text-xs">
             <tr>
-              <td colspan="5" class="text-center py-8 text-gray-400">완료 내역을 불러오는 중입니다...</td>
+              <td colspan="5" class="text-center py-6 text-gray-400">완료 내역을 불러오는 중입니다...</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- 모달 푸터 -->
-      <div class="p-4 border-t bg-gray-50 text-right">
-        <button onclick="closeHistoryModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-medium px-4 py-2 rounded-lg transition">
+      <div class="p-3 border-t bg-gray-50 text-right">
+        <button onclick="closeHistoryModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-medium px-4 py-1.5 rounded-lg transition">
           닫기
         </button>
       </div>
@@ -105,7 +125,7 @@
     const database = firebase.database();
     const requestListRef = database.ref('facility_requests');
 
-    // 실시간 데이터 수신 및 분류 Render
+    // 실시간 데이터 수신 및 분리
     requestListRef.on('value', (snapshot) => {
       const tbody = document.getElementById('request-list');
       const historyTbody = document.getElementById('history-list');
@@ -115,8 +135,8 @@
 
       const data = snapshot.val();
       if (!data) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">현재 접수된 시설 수리요청이 없습니다.</td></tr>`;
-        historyTbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">완료된 관리 내역이 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400">현재 접수된 수리 요청이 없습니다.</td></tr>`;
+        historyTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400">완료된 관리 내역이 없습니다.</td></tr>`;
         return;
       }
 
@@ -130,7 +150,6 @@
         tr.className = "hover:bg-gray-50 transition";
 
         if (item.status === '완료') {
-          // 완료된 내역 ➔ 모달 목록에 추가
           historyIndex++;
           tr.innerHTML = `
             <td class="p-2.5 text-center text-gray-500 font-mono">${historyIndex}</td>
@@ -141,28 +160,26 @@
           `;
           historyTbody.appendChild(tr);
         } else {
-          // 접수된 내역 ➔ 메인 목록에 추가
           activeIndex++;
           tr.innerHTML = `
-            <td class="p-3 text-center text-gray-500 font-mono">${activeIndex}</td>
-            <td class="p-3 text-gray-600 text-xs">${timeStr}</td>
-            <td class="p-3 font-medium text-gray-800">${item.userName || '직원'}</td>
-            <td class="p-3 text-gray-700 font-medium">${item.message || ''}</td>
-            <td class="p-3 text-center"><span class="bg-yellow-100 text-yellow-800 text-xs px-2.5 py-1 rounded-full font-medium">접수</span></td>
+            <td class="p-2.5 text-center text-gray-500 font-mono">${activeIndex}</td>
+            <td class="p-2.5 text-gray-600">${timeStr}</td>
+            <td class="p-2.5 font-medium text-gray-800">${item.userName || '직원'}</td>
+            <td class="p-2.5 text-gray-700 font-medium">${item.message || ''}</td>
+            <td class="p-2.5 text-center"><span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5 rounded-full font-medium">접수</span></td>
           `;
           tbody.appendChild(tr);
         }
       });
 
       if (activeIndex === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">현재 대기 중인 수리 요청이 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400">현재 대기 중인 수리 요청이 없습니다.</td></tr>`;
       }
       if (historyIndex === 0) {
-        historyTbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-gray-400">완료된 관리 내역이 없습니다.</td></tr>`;
+        historyTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400">완료된 관리 내역이 없습니다.</td></tr>`;
       }
     });
 
-    // 모달 열기/닫기 제어
     function openHistoryModal() {
       document.getElementById('history-modal').classList.remove('hidden');
     }
