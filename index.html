@@ -236,66 +236,102 @@
         </table>
     </div>
 
-    <!-- 소화기 점검 메뉴 선택 화면 -->
-    <div id="page-fire-menu" class="hidden">
-        <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
-        <h2>🧯 소화기 점검</h2>
-        <p>원하시는 작업을 선택하세요.</p>
-        <div class="menu-grid">
-            <div class="menu-btn-sub" onclick="showPage('fire-form')">📝 소화기 점검표 작성/조회</div>
-            <div class="menu-btn-sub" onclick="showPage('fire-history')">📊 소화기 점검 이력 확인</div>
-        </div>
+    <!-- 소방시설 점검 메뉴 선택 화면 -->
+<div id="page-fire-menu" class="hidden">
+    <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+    <h2>🧯 소방시설 점검 (소화기 / 옥내소화전)</h2>
+    <p>원하시는 작업을 선택하세요.</p>
+    <div class="menu-grid">
+        <div class="menu-btn-sub" onclick="showPage('fire-form')">📝 소방시설 점검표 작성/조회</div>
+        <div class="menu-btn-sub" onclick="showPage('fire-history')">📊 소방시설 점검 이력 확인</div>
+    </div>
+</div>
+
+<!-- 소방시설(소화기/소화전) 점검표 작성 화면 -->
+<div id="page-fire-form" class="hidden">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="back-btn" onclick="showPage('fire-menu')">← 이전 메뉴로</button>
+        <button class="nav-btn" onclick="showPage('fire-history')">📜 소방점검 이력 보기</button>
+    </div>
+    <h2>🧯 소방시설 점검표 (소화기 / 옥내소화전)</h2>
+    
+    <div class="history-box">
+        <strong>📅 Server 저장 기록 조회: </strong>
+        <select id="fire-history-select" onchange="loadFireHistory(this.value)">
+            <option value="">-- 날짜 선택 --</option>
+        </select>
+        <button class="delete-btn" onclick="deleteFireData()">🗑️ 삭제하기</button>
+        <button onclick="resetFireForm()" style="margin-left: 10px;">새 작성하기</button>
     </div>
 
-    <!-- 소화기 점검표 작성 화면 -->
-    <div id="page-fire-form" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <button class="back-btn" onclick="showPage('fire-menu')">← 이전 메뉴로</button>
-            <button class="nav-btn" onclick="showPage('fire-history')">📜 소화기 점검 이력 보기</button>
-        </div>
-        <h2>🧯 소화기 점검표</h2>
-        
-        <div class="history-box">
-            <strong>📅 Server 저장 기록 조회: </strong>
-            <select id="fire-history-select" onchange="loadFireHistory(this.value)">
-                <option value="">-- 날짜 선택 --</option>
-            </select>
-            <button class="delete-btn" onclick="deleteFireData()">🗑️ 삭제하기</button>
-            <button onclick="resetFireForm()" style="margin-left: 10px;">새 작성하기</button>
-        </div>
+    <!-- 탭 전환 버튼 -->
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <button id="tab-btn-ext" class="nav-btn" style="background: #2b569a; flex: 1; padding: 12px; margin: 0;" onclick="switchFireTab('extinguisher')">🧯 소화기 점검표 (층별/위치별)</button>
+        <button id="tab-btn-hyd" class="nav-btn" style="background: #6c757d; flex: 1; padding: 12px; margin: 0;" onclick="switchFireTab('hydrant')">🚒 옥내소화전 점검표 (층별/위치별)</button>
+    </div>
 
-        <div class="info-box">
-            <strong>📋 소화기 점검 기준</strong>
-            <ul style="margin: 5px 0 0 20px; padding: 0;">
-                <li>압력계: 지침이 녹색 범위(적정 압력) 내에 위치하는지 점검</li>
-                <li>외관/보관: 용기 부식, 변형 및 장애물 적치 여부 확인</li>
-                <li>안전핀/호스: 안전핀 탈락 여부 및 호스 균열/파손 여부 확인</li>
-            </ul>
-        </div>
+    <div class="info-box">
+        <strong id="fire-info-title">📋 소화기 주요 점검 기준</strong>
+        <ul id="fire-info-list" style="margin: 5px 0 0 20px; padding: 0; font-size: 13px; line-height: 1.5;">
+            <li><b>외관/보관:</b> 지정장소 설치, 보관거리, 적응성, 위치표지, 본체/레버 부식 및 손상 상태</li>
+            <li><b>부품/압력:</b> 지시압력계(녹색 범위), 안전핀 고정, 호스/노즐 균열 및 소화약제 상태</li>
+        </ul>
+    </div>
 
-        <p>
-            점검일자: <input type="date" id="fire-check-date"> 
-            점검자: <input type="text" id="fire-inspector-name" placeholder="이름 입력">
-        </p>
+    <p>
+        점검일자: <input type="date" id="fire-check-date"> 
+        점검자: <input type="text" id="fire-inspector-name" placeholder="이름 입력">
+    </p>
 
+    <!-- 소화기 점검 테이블 -->
+    <div id="extinguisher-section" style="overflow-x: auto;">
         <table>
             <thead>
                 <tr>
-                    <th style="width: 10%;">위치/호수</th>
-                    <th style="width: 12%;">압력계 상태</th>
-                    <th style="width: 12%;">외관/보관</th>
-                    <th style="width: 12%;">안전핀/호스</th>
-                    <th style="width: 15%;">현장 사진</th>
-                    <th style="width: 24%;">조치/교체 내용</th>
-                    <th style="width: 15%;">조치 완료 여부</th>
+                    <th style="width: 130px;">위치 / 장소</th>
+                    <th style="width: 75px;">설치장소</th>
+                    <th style="width: 75px;">설치거리</th>
+                    <th style="width: 75px;">적응성</th>
+                    <th style="width: 75px;">위치표지</th>
+                    <th style="width: 75px;">소화약제</th>
+                    <th style="width: 80px;">레버상태</th>
+                    <th style="width: 80px;">본체상태</th>
+                    <th style="width: 80px;">호스/노즐</th>
+                    <th style="width: 80px;">지시압력계</th>
+                    <th style="width: 75px;">안전핀</th>
+                    <th style="width: 90px;">현장 사진</th>
+                    <th style="width: 150px;">조치/교체 내용</th>
+                    <th style="width: 95px;">조치 여부</th>
                 </tr>
             </thead>
             <tbody id="fire-table-body"></tbody>
         </table>
-
-        <button class="save-btn" onclick="saveFireData()">☁️ 파이어베이스 서버에 저장하기</button>
     </div>
 
+    <!-- 옥내소화전 점검 테이블 -->
+    <div id="hydrant-section" class="hidden" style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 150px;">위치 / 장소</th>
+                    <th style="width: 95px;">위치표시등</th>
+                    <th style="width: 95px;">가압송수장치</th>
+                    <th style="width: 95px;">주위장애물</th>
+                    <th style="width: 95px;">수원/개폐밸브</th>
+                    <th style="width: 95px;">배관/밸브부식</th>
+                    <th style="width: 95px;">호스/관창비치</th>
+                    <th style="width: 95px;">동파위험여부</th>
+                    <th style="width: 100px;">현장 사진</th>
+                    <th style="width: 170px;">조치/수리 내용</th>
+                    <th style="width: 95px;">조치 여부</th>
+                </tr>
+            </thead>
+            <tbody id="hydrant-table-body"></tbody>
+        </table>
+    </div>
+
+    <button class="save-btn" onclick="saveFireData()">☁️ 소방시설 점검 결과 서버에 저장하기</button>
+</div>
     <!-- 소화기 점검 이력 화면 -->
     <div id="page-fire-history" class="hidden">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1018,6 +1054,274 @@
         document.getElementById('fire-inspector-name').value = '';
     }
 </script>
+    // 1. 소화기 및 소화전 데이터셋
+const fireLocations = [
+    { floor: "B4", location: "주차장(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "B4", location: "주차장(부계단)", type: "ABC 3.3kg" },
+    { floor: "B4", location: "전기실1", type: "ABC 3.3kg" },
+    { floor: "B4", location: "전기실2", type: "CO2" },
+    { floor: "B4", location: "발전기실", type: "CO2" },
+    { floor: "B4", location: "기계실", type: "ABC 3.3kg" },
+    { floor: "B4", location: "저수조(물탱크실)", type: "ABC 3.3kg" },
+    { floor: "B3", location: "주차장(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "B3", location: "주차장(부계단)", type: "ABC 3.3kg" },
+    { floor: "B2", location: "주차장(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "B2", location: "주차장(부계단)", type: "ABC 3.3kg" },
+    { floor: "B2", location: "방재실", type: "ABC 3.3kg" },
+    { floor: "B1", location: "복도", type: "ABC 3.3kg" },
+    { floor: "B1", location: "식당", type: "ABC 3.3kg" },
+    { floor: "B1", location: "조리실1", type: "ABC 3.3kg" },
+    { floor: "B1", location: "조리실2", type: "K급" },
+    { floor: "B1", location: "음식물처리기실", type: "ABC 3.3kg" },
+    { floor: "B1", location: "영양사실", type: "ABC 3.3kg" },
+    { floor: "B1", location: "조리원휴게실", type: "ABC 3.3kg" },
+    { floor: "B1", location: "운동트랙(GX룸)", type: "ABC 3.3kg" },
+    { floor: "B1", location: "온열휴게실", type: "ABC 3.3kg" },
+    { floor: "B1", location: "서버실/의무기록실", type: "CO2" },
+    { floor: "2F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "2F", location: "복도(대피공간 앞)", type: "ABC 3.3kg" },
+    { floor: "2F", location: "복도(한방치료실 앞)", type: "ABC 3.3kg" },
+    { floor: "2F", location: "고주파치료실", type: "ABC 3.3kg" },
+    { floor: "2F", location: "산소치료실", type: "ABC 3.3kg" },
+    { floor: "2F", location: "물리치료실", type: "ABC 3.3kg" },
+    { floor: "3F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "3F", location: "복도(대피공간 앞)", type: "ABC 3.3kg" },
+    { floor: "3F", location: "복도(307호 앞)", type: "ABC 3.3kg" },
+    { floor: "3F", location: "탕비실", type: "ABC 3.3kg" },
+    { floor: "3F", location: "직원휴게실(미화)", type: "ABC 3.3kg" },
+    { floor: "3F", location: "301호~309호 병실", type: "ABC 3.3kg" },
+    { floor: "3F", location: "산소보관실", type: "ABC 3.3kg" },
+    { floor: "4F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "4F", location: "복도(대피공간 앞)", type: "ABC 3.3kg" },
+    { floor: "4F", location: "복도(407호 앞)", type: "ABC 3.3kg" },
+    { floor: "4F", location: "탕비실", type: "ABC 3.3kg" },
+    { floor: "4F", location: "비품창고", type: "ABC 3.3kg" },
+    { floor: "4F", location: "401호~409호 병실", type: "ABC 3.3kg" },
+    { floor: "5F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "5F", location: "복도(대피공간 앞)", type: "ABC 3.3kg" },
+    { floor: "5F", location: "복도(508호 앞)", type: "ABC 3.3kg" },
+    { floor: "5F", location: "탕비실", type: "ABC 3.3kg" },
+    { floor: "5F", location: "약국", type: "ABC 3.3kg" },
+    { floor: "5F", location: "의당당직실", type: "ABC 3.3kg" },
+    { floor: "5F", location: "501호~509호 병실", type: "ABC 3.3kg" },
+    { floor: "6F", location: "601호~608호 병실", type: "ABC 3.3kg" },
+    { floor: "6F", location: "승강기 옆", type: "ABC 3.3kg" },
+    { floor: "6F", location: "탕비실", type: "ABC 3.3kg" },
+    { floor: "6F", location: "보일러실", type: "ABC 3.3kg" },
+    { floor: "6F", location: "대피소 앞", type: "ABC 3.3kg" },
+    { floor: "6F", location: "복도 안쪽 끝", type: "ABC 3.3kg" },
+    { floor: "7F", location: "복도(E/V 앞)", type: "ABC 3.3kg" },
+    { floor: "7F", location: "옥상 출입구", type: "ABC 3.3kg" },
+    { floor: "7F", location: "식당", type: "ABC 3.3kg" }
+];
+
+const hydrantLocations = [
+    { floor: "B4", location: "왼쪽 비상계단 출입문 옆" },
+    { floor: "B4", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "B3", location: "왼쪽 비상계단 출입문 옆" },
+    { floor: "B3", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "B2", location: "왼쪽 비상계단 출입문 옆" },
+    { floor: "B2", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "B1", location: "식당 입구" },
+    { floor: "B1", location: "오른쪽 비상계단 출입문 옆" },
+    { floor: "2F", location: "비상계단 출입문 옆" },
+    { floor: "2F", location: "화장실 사이" },
+    { floor: "3F", location: "비상계단 출입문 옆" },
+    { floor: "3F", location: "여자화장실 옆" },
+    { floor: "4F", location: "비상계단 출입문 옆" },
+    { floor: "4F", location: "여자화장실 옆" },
+    { floor: "5F", location: "비상계단 출입문 옆" },
+    { floor: "5F", location: "여자화장실 옆" },
+    { floor: "6F", location: "비상계단 출입문 옆" },
+    { floor: "6F", location: "여자화장실 옆" },
+    { floor: "7F", location: "비상계단 출입문 옆" },
+    { floor: "7F", location: "여자화장실 옆" }
+];
+
+// 2. Select 옵션 태그 도우미
+const makeSelect = (name) => `
+    <select name="${name}" style="width:100%; padding: 4px; border-radius: 4px; border: 1px solid #ccc;">
+        <option value="양호">양호</option>
+        <option value="불량">불량</option>
+    </select>
+`;
+
+// 3. 소화기 테이블 동적 생성
+function renderExtinguisherTable() {
+    const tbody = document.getElementById('fire-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    fireLocations.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: bold; text-align: left;">
+                [${item.floor}] ${item.location}<br>
+                <span style="font-size: 11px; color: #6c757d; font-weight: normal;">(${item.type})</span>
+            </td>
+            <td>${makeSelect(`ext_place_${idx}`)}</td>
+            <td>${makeSelect(`ext_dist_${idx}`)}</td>
+            <td>${makeSelect(`ext_suit_${idx}`)}</td>
+            <td>${makeSelect(`ext_sign_${idx}`)}</td>
+            <td>${makeSelect(`ext_agent_${idx}`)}</td>
+            <td>${makeSelect(`ext_lever_${idx}`)}</td>
+            <td>${makeSelect(`ext_body_${idx}`)}</td>
+            <td>${makeSelect(`ext_hose_${idx}`)}</td>
+            <td>${makeSelect(`ext_gauge_${idx}`)}</td>
+            <td>${makeSelect(`ext_pin_${idx}`)}</td>
+            <td>
+                <input type="file" id="ext_img_${idx}" accept="image/*" style="display:none;">
+                <button type="button" style="font-size:11px; padding:3px 6px;" onclick="document.getElementById('ext_img_${idx}').click()">사진</button>
+            </td>
+            <td><input type="text" class="table-input" id="ext_action_${idx}" placeholder="조치사항"></td>
+            <td>
+                <select id="ext_status_${idx}" style="width: 100%; padding: 4px;">
+                    <option value="완료">완료</option>
+                    <option value="미조치" selected>미조치</option>
+                </select>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// 4. 소화전 테이블 동적 생성
+function renderHydrantTable() {
+    const tbody = document.getElementById('hydrant-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    hydrantLocations.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: bold; text-align: left;">
+                [${item.floor}] ${item.location}<br>
+                <span style="font-size: 11px; color: #17a2b8; font-weight: normal;">(옥내소화전)</span>
+            </td>
+            <td>${makeSelect(`hyd_lamp_${idx}`)}</td>
+            <td>${makeSelect(`hyd_pump_${idx}`)}</td>
+            <td>${makeSelect(`hyd_block_${idx}`)}</td>
+            <td>${makeSelect(`hyd_valve_${idx}`)}</td>
+            <td>${makeSelect(`hyd_pipe_${idx}`)}</td>
+            <td>${makeSelect(`hyd_hose_${idx}`)}</td>
+            <td>${makeSelect(`hyd_freeze_${idx}`)}</td>
+            <td>
+                <input type="file" id="hyd_img_${idx}" accept="image/*" style="display:none;">
+                <button type="button" style="font-size:11px; padding:3px 6px;" onclick="document.getElementById('hyd_img_${idx}').click()">사진</button>
+            </td>
+            <td><input type="text" class="table-input" id="hyd_action_${idx}" placeholder="조치사항"></td>
+            <td>
+                <select id="hyd_status_${idx}" style="width: 100%; padding: 4px;">
+                    <option value="완료">완료</option>
+                    <option value="미조치" selected>미조치</option>
+                </select>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// 5. 소화기 / 소화전 탭 전환
+function switchFireTab(tabType) {
+    const extSec = document.getElementById('extinguisher-section');
+    const hydSec = document.getElementById('hydrant-section');
+    const btnExt = document.getElementById('tab-btn-ext');
+    const btnHyd = document.getElementById('tab-btn-hyd');
+    const infoTitle = document.getElementById('fire-info-title');
+    const infoList = document.getElementById('fire-info-list');
+
+    if (tabType === 'extinguisher') {
+        extSec.classList.remove('hidden');
+        hydSec.classList.add('hidden');
+        btnExt.style.background = '#2b569a';
+        btnHyd.style.background = '#6c757d';
+        infoTitle.innerText = '📋 소화기 주요 점검 기준';
+        infoList.innerHTML = `
+            <li><b>외관/보관:</b> 지정장소 설치, 보관거리, 적응성, 위치표지, 본체/레버 부식 및 손상 상태</li>
+            <li><b>부품/압력:</b> 지시압력계(녹색 범위), 안전핀 고정, 호스/노즐 균열 및 소화약제 상태</li>
+        `;
+    } else {
+        extSec.classList.add('hidden');
+        hydSec.classList.remove('hidden');
+        btnExt.style.background = '#6c757d';
+        btnHyd.style.background = '#2b569a';
+        infoTitle.innerText = '📋 옥내소화전 주요 점검 기준';
+        infoList.innerHTML = `
+            <li><b>외관/전원:</b> 위치표시등 점등, 주변 장애물 유무, 호스/관창 비치 상태</li>
+            <li><b>설비/기능:</b> 가압송수장치 자동/수동 작동, 수원 개폐밸브, 배관 부식/누수 및 동파 위험</li>
+        `;
+    }
+}
+
+// 6. 파이어베이스 저장 연동
+function saveFireData() {
+    const checkDate = document.getElementById('fire-check-date').value;
+    const inspector = document.getElementById('fire-inspector-name').value;
+
+    if (!checkDate || !inspector) {
+        alert('점검일자와 점검자 이름을 입력해주세요.');
+        return;
+    }
+
+    const extinguisherData = fireLocations.map((item, idx) => ({
+        floor: item.floor,
+        location: item.location,
+        type: item.type,
+        checks: {
+            place: document.querySelector(`select[name="ext_place_${idx}"]`).value,
+            dist: document.querySelector(`select[name="ext_dist_${idx}"]`).value,
+            suit: document.querySelector(`select[name="ext_suit_${idx}"]`).value,
+            sign: document.querySelector(`select[name="ext_sign_${idx}"]`).value,
+            agent: document.querySelector(`select[name="ext_agent_${idx}"]`).value,
+            lever: document.querySelector(`select[name="ext_lever_${idx}"]`).value,
+            body: document.querySelector(`select[name="ext_body_${idx}"]`).value,
+            hose: document.querySelector(`select[name="ext_hose_${idx}"]`).value,
+            gauge: document.querySelector(`select[name="ext_gauge_${idx}"]`).value,
+            pin: document.querySelector(`select[name="ext_pin_${idx}"]`).value
+        },
+        action: document.getElementById(`ext_action_${idx}`).value,
+        isCompleted: document.getElementById(`ext_status_${idx}`).value === '완료'
+    }));
+
+    const hydrantData = hydrantLocations.map((item, idx) => ({
+        floor: item.floor,
+        location: item.location,
+        checks: {
+            lamp: document.querySelector(`select[name="hyd_lamp_${idx}"]`).value,
+            pump: document.querySelector(`select[name="hyd_pump_${idx}"]`).value,
+            block: document.querySelector(`select[name="hyd_block_${idx}"]`).value,
+            valve: document.querySelector(`select[name="hyd_valve_${idx}"]`).value,
+            pipe: document.querySelector(`select[name="hyd_pipe_${idx}"]`).value,
+            hose: document.querySelector(`select[name="hyd_hose_${idx}"]`).value,
+            freeze: document.querySelector(`select[name="hyd_freeze_${idx}"]`).value
+        },
+        action: document.getElementById(`hyd_action_${idx}`).value,
+        isCompleted: document.getElementById(`hyd_status_${idx}`).value === '완료'
+    }));
+
+    const fireReportPayload = {
+        date: checkDate,
+        inspector: inspector,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        extinguishers: extinguisherData,
+        hydrants: hydrantData
+    };
+
+    db.collection('fire_inspections').doc(checkDate).set(fireReportPayload)
+        .then(() => {
+            alert('소화기 및 소화전 점검표가 성공적으로 저장되었습니다!');
+        })
+        .catch((error) => {
+            console.error('저장 실패:', error);
+            alert('서버 저장 실패: 파이어베이스 설정을 확인해 주세요.');
+        });
+}
+
+// 7. 페이지 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    renderExtinguisherTable();
+    renderHydrantTable();
+});
 
 </body>
 </html>
