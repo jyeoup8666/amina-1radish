@@ -75,6 +75,8 @@
         .ledger-table th, .ledger-table td { font-size: 12px; padding: 5px; }
         .ledger-table td.ledger-o { color: #137333; font-weight: bold; }
         .ledger-table td.ledger-x { color: #dc3545; font-weight: bold; background: #fff5f5; }
+        .ledger-table td.ledger-clickable { cursor: pointer; text-decoration: underline; }
+        .ledger-table td.ledger-clickable:hover { filter: brightness(0.92); }
         .section-title { margin: 25px 0 5px 0; color: #2b569a; }
         .hydrant-sheet { margin-bottom: 25px; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; background: #fafbfc; }
         .hydrant-sheet h5 { margin: 0 0 8px 0; color: #17a2b8; }
@@ -1047,10 +1049,10 @@
 
     function updateFireHistoryOptions() {
         const select = document.getElementById('fire-history-select');
-        if (!select) return;
+        if (!select) return Promise.resolve();
         select.innerHTML = '<option value="">-- 날짜 선택 --</option>';
 
-        db.collection("fire_checks").get().then((querySnapshot) => {
+        return db.collection("fire_checks").get().then((querySnapshot) => {
             const datesSet = new Set();
             querySnapshot.forEach((doc) => {
                 const d = doc.data();
@@ -1602,9 +1604,13 @@ function renderExtinguisherLedger(floor, yearDocs) {
     floorItems.forEach(item => {
         let cells = '';
         for (let m = 1; m <= 12; m++) {
-            const status = getMonthlyExtStatus(yearDocs, floor, item.location, m);
-            const cls = status === 'X' ? 'ledger-x' : (status === 'O' ? 'ledger-o' : '');
-            cells += `<td class="${cls}">${status}</td>`;
+            const result = getMonthlyExtStatus(yearDocs, floor, item.location, m);
+            const cls = result.status === 'X' ? 'ledger-x' : (result.status === 'O' ? 'ledger-o' : '');
+            if (result.status === '-') {
+                cells += `<td class="${cls}">${result.status}</td>`;
+            } else {
+                cells += `<td class="${cls} ledger-clickable" onclick="goToFireDateForm('ext', '${result.date}')" title="${result.date} 점검표로 이동">${result.status}</td>`;
+            }
         }
         rows += `
             <tr>
@@ -1623,24 +1629,27 @@ function renderExtinguisherLedger(floor, yearDocs) {
     `;
 }
 
-// 해당 층/위치/월에 저장된 점검기록(fire_checks)에서 종합 O/X 산출
-// - 그 달에 저장된 점검이 없으면 '-'
+// 해당 층/위치/월에 저장된 점검기록(fire_checks)에서 종합 O/X 및 해당 점검 날짜를 산출
+// - 그 달에 저장된 점검이 없으면 status '-' (date는 null)
 // - 점검 항목 중 하나라도 '불량'이면 X, 전부 '양호'면 O
+// - 같은 달에 여러 번 점검했다면 가장 최근 날짜를 반환
 function getMonthlyExtStatus(yearDocs, floor, location, month) {
     const mm = String(month).padStart(2, '0');
     let found = false;
     let bad = false;
+    let lastDate = null;
 
     yearDocs.forEach(doc => {
         if (doc.type !== 'ext' || doc.floor !== floor || doc.location !== location) return;
         if (!doc.date || doc.date.substring(5, 7) !== mm) return;
         found = true;
+        if (!lastDate || doc.date > lastDate) lastDate = doc.date;
         const values = Object.values(doc.checks || {});
         if (values.some(v => v === '불량')) bad = true;
     });
 
-    if (!found) return '-';
-    return bad ? 'X' : 'O';
+    if (!found) return { status: '-', date: null };
+    return { status: bad ? 'X' : 'O', date: lastDate };
 }
 
 // ---- 소화전 관리대장 (위치별 개별 시트, 점검항목별 행) ----
@@ -1663,9 +1672,13 @@ function renderHydrantLedgerSheets(floor, yearDocs) {
         HYD_CHECK_ITEMS.forEach(ci => {
             let cells = '';
             for (let m = 1; m <= 12; m++) {
-                const status = getMonthlyHydStatus(yearDocs, item.floor, item.location, ci.key, m);
-                const cls = status === 'X' ? 'ledger-x' : (status === 'O' ? 'ledger-o' : '');
-                cells += `<td class="${cls}">${status}</td>`;
+                const result = getMonthlyHydStatus(yearDocs, item.floor, item.location, ci.key, m);
+                const cls = result.status === 'X' ? 'ledger-x' : (result.status === 'O' ? 'ledger-o' : '');
+                if (result.status === '-') {
+                    cells += `<td class="${cls}">${result.status}</td>`;
+                } else {
+                    cells += `<td class="${cls} ledger-clickable" onclick="goToFireDateForm('hyd', '${result.date}')" title="${result.date} 점검표로 이동">${result.status}</td>`;
+                }
             }
             rows += `<tr><td style="text-align:left;">${ci.label}</td>${cells}</tr>`;
         });
@@ -1683,19 +1696,34 @@ function renderHydrantLedgerSheets(floor, yearDocs) {
     });
 }
 
-// 해당 층/위치/항목/월의 O/X 산출 (항목별로 개별 판정)
+// 해당 층/위치/항목/월의 O/X 및 해당 점검 날짜 산출 (항목별로 개별 판정)
 function getMonthlyHydStatus(yearDocs, floor, location, key, month) {
     const mm = String(month).padStart(2, '0');
     let status = null;
+    let lastDate = null;
 
     yearDocs.forEach(doc => {
         if (doc.type !== 'hyd' || doc.floor !== floor || doc.location !== location) return;
         if (!doc.date || doc.date.substring(5, 7) !== mm) return;
-        if (doc.checks && doc.checks[key]) status = doc.checks[key];
+        if (doc.checks && doc.checks[key]) {
+            status = doc.checks[key];
+            lastDate = doc.date;
+        }
     });
 
-    if (status === null) return '-';
-    return status === '불량' ? 'X' : 'O';
+    if (status === null) return { status: '-', date: null };
+    return { status: status === '불량' ? 'X' : 'O', date: lastDate };
+}
+
+// 이력 관리대장의 O/X 칸을 클릭하면 해당 날짜의 소화기/소화전 점검표로 이동
+function goToFireDateForm(type, date) {
+    showPage('fire-form'); // initFireTable() 내부에서 updateFireHistoryOptions()가 다시 호출되어 날짜 목록을 채움
+    switchFireTab(type === 'hyd' ? 'hydrant' : 'extinguisher');
+    updateFireHistoryOptions().then(() => {
+        const select = document.getElementById('fire-history-select');
+        if (select) select.value = date;
+    });
+    loadFireHistory(date);
 }
 
 // =========================================================
