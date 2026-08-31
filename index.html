@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시설 점검 시스템</title>
+    <title>시설 점검 및 요청 관리 시스템</title>
     <!-- Firebase SDK (CDN) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -23,7 +23,7 @@
         .nav-btn { background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; font-weight: bold; }
         .save-btn { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 15px; width: 100%; }
         .save-btn:hover { background: #218838; }
-        .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .delete-btn { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 5px; }
         .delete-btn:hover { background: #c82333; }
         .sync-btn { background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; }
         
@@ -40,7 +40,6 @@
         .stat-title { font-size: 13px; color: #6c757d; font-weight: bold; margin-bottom: 5px; }
         .stat-value { font-size: 20px; font-weight: bold; color: #333; }
         
-        /* 날짜 태그 스타일 (X/기본: 빨강, O: 초록) */
         .date-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; margin: 2px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .date-tag.repair-x { background: #ffe3e3; color: #dc3545; border: 1px solid #f5c6cb; }
         .date-tag.repair-x:hover { background: #dc3545; color: white; }
@@ -53,6 +52,21 @@
         .close-modal { position: absolute; top: 20px; right: 35px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; }
         
         input[type="text"].table-input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+
+        /* 시설 요청 전용 스타일 */
+        .req-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .req-form-grid input, .req-form-grid select, .req-form-grid textarea { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; color: white; font-size: 12px; }
+        .bg-urgent { background-color: #dc3545; }
+        .bg-normal { background-color: #ff9800; }
+        .bg-low { background-color: #28a745; }
+        .bg-pending { background-color: #6c757d; }
+        .bg-done { background-color: #0d6efd; }
+        .action-btn { padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; color: white; font-size: 12px; }
+        
+        .reply-box { background-color: #eef7ff; border: 1px solid #cce5ff; padding: 8px; border-radius: 6px; margin-top: 5px; text-align: left; font-size: 13px; }
+        .reply-input-group { display: flex; gap: 5px; margin-top: 5px; }
+        .reply-input-group input { flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -60,13 +74,65 @@
 <div class="container">
     <!-- 메인 메뉴 -->
     <div id="main-menu">
-        <h2>📋 시설 점검 시스템</h2>
-        <p>조회 및 작성할 점검표를 선택하세요.</p>
+        <h2>📋 시설 점검 및 요청 관리 시스템</h2>
+        <p>조회 및 작성할 항목을 선택하세요.</p>
         <div class="menu-grid">
+            <div class="menu-btn" onclick="showPage('request-menu')">🚨 시설 요청 관리</div>
             <div class="menu-btn" onclick="showPage('boiler-menu')">🔥 보일러 점검</div>
             <div class="menu-btn" onclick="showPage('fire')">🧯 소화기 점검표</div>
             <div class="menu-btn" onclick="showPage('water')">💧 정수기 점검표</div>
         </div>
+    </div>
+
+    <!-- 시설 요청 관리 화면 -->
+    <div id="page-request-menu" class="hidden">
+        <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        <h2>🚨 시설 요청 및 민원 관리</h2>
+        
+        <div class="info-box">
+            <strong>📝 신규 시설 요청 등록</strong>
+            <div class="req-form-grid" style="margin-top: 10px;">
+                <div>
+                    <label>호수 선택</label>
+                    <select id="req-room"></select>
+                </div>
+                <div>
+                    <label>우선순위</label>
+                    <select id="req-priority">
+                        <option value="1">🚨 긴급 (에어컨/누수 등)</option>
+                        <option value="2" selected>⚠️ 보통 (기기 연결 등)</option>
+                        <option value="3">ℹ️ 일반 (짐 보관 등)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>요청 내용</label>
+                    <input type="text" id="req-detail" placeholder="예: 304호 태블릿 연결 요청">
+                </div>
+                <div>
+                    <label>요청자/담당자</label>
+                    <input type="text" id="req-person" placeholder="이름 입력">
+                </div>
+            </div>
+            <button class="save-btn" style="margin-top:0;" onclick="submitFacilityRequest()">🚨 요청 접수하기</button>
+        </div>
+
+        <h3>📋 접수된 시설 요청 목록</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8%;">우선순위</th>
+                    <th style="width: 8%;">호수</th>
+                    <th style="width: 44%;">요청 및 처리(답글) 내용</th>
+                    <th style="width: 10%;">요청자</th>
+                    <th style="width: 12%;">접수 시간</th>
+                    <th style="width: 8%;">상태</th>
+                    <th style="width: 10%;">관리</th>
+                </tr>
+            </thead>
+            <tbody id="request-table-body">
+                <tr><td colspan="7">요청 내역을 불러오는 중입니다...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- 보일러 메뉴 선택 화면 -->
@@ -212,6 +278,17 @@
         '601호', '602호', '603호', '604호', '605호', '606호', '607호', '608호-1', '608호-2'
     ];
 
+    function initRoomOptions() {
+        const select = document.getElementById('req-room');
+        select.innerHTML = '';
+        rooms.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            select.appendChild(opt);
+        });
+    }
+
     function initBoilerTable() {
         const tbody = document.getElementById('boiler-table-body');
         tbody.innerHTML = '';
@@ -244,7 +321,6 @@
         updateHistoryOptions();
     }
 
-    // 통화 자동 포맷팅 함수 (10000 -> 10,000원)
     function formatCurrency(input) {
         let value = input.value.replace(/[^0-9]/g, '');
         if (value) {
@@ -313,6 +389,10 @@
         
         if(pageId === 'boiler-form') initBoilerTable();
         if(pageId === 'boiler-history') renderHistoryTable();
+        if(pageId === 'request-menu') {
+            initRoomOptions();
+            loadFacilityRequests();
+        }
     }
 
     function showMain() {
@@ -320,6 +400,159 @@
         document.getElementById('main-menu').classList.remove('hidden');
     }
 
+    // --- 시설 요청 관리 Logic (답글 작성 시 자동 완려) ---
+    async function submitFacilityRequest() {
+        const room = document.getElementById('req-room').value;
+        const priority = parseInt(document.getElementById('req-priority').value);
+        const detail = document.getElementById('req-detail').value.trim();
+        const person = document.getElementById('req-person').value.trim();
+
+        if (!detail) {
+            alert('요청 내용을 입력해주세요.');
+            return;
+        }
+
+        try {
+            await db.collection("facility_requests").add({
+                room: room,
+                priority: priority,
+                detail: detail,
+                person: person || '익명',
+                status: 'PENDING',
+                reply: '',
+                replyTime: '',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                timeStr: new Date().toLocaleString('ko-KR', { hour12: false })
+            });
+            alert('시설 요청이 정상 등록되었습니다.');
+            document.getElementById('req-detail').value = '';
+            loadFacilityRequests();
+        } catch (err) {
+            console.error("요청 등록 실패:", err);
+            alert("요청 등록 중 오류가 발생했습니다.");
+        }
+    }
+
+    function loadFacilityRequests() {
+        const tbody = document.getElementById('request-table-body');
+        tbody.innerHTML = '<tr><td colspan="7">요청 내역을 불러오는 중입니다...</td></tr>';
+
+        db.collection("facility_requests").get().then((querySnapshot) => {
+            const list = [];
+            querySnapshot.forEach((doc) => {
+                list.push({ id: doc.id, ...doc.data() });
+            });
+
+            // 우선순위 정렬 (대기중 우선, 긴급 순서)
+            list.sort((a, b) => {
+                if (a.status !== b.status) return a.status === 'PENDING' ? -1 : 1;
+                return a.priority - b.priority;
+            });
+
+            tbody.innerHTML = '';
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">등록된 시설 요청 사항이 없습니다.</td></tr>';
+                return;
+            }
+
+            list.forEach(req => {
+                const priorityBadge = req.priority === 1 ? '<span class="status-badge bg-urgent">긴급</span>' :
+                                     (req.priority === 2 ? '<span class="status-badge bg-normal">보통</span>' : '<span class="status-badge bg-low">일반</span>');
+                const statusBadge = req.status === 'PENDING' ? '<span class="status-badge bg-pending">대기중</span>' : '<span class="status-badge bg-done">완료</span>';
+                
+                // 답글 UI 구성
+                let replyHtml = '';
+                if (req.reply) {
+                    replyHtml = `
+                        <div class="reply-box">
+                            <strong>💬 처리 답변:</strong> ${req.reply}
+                            <div style="font-size: 11px; color: #666; margin-top:2px;">완료 시각: ${req.replyTime}</div>
+                        </div>
+                    `;
+                }
+
+                const replyInputHtml = `
+                    <div class="reply-input-group">
+                        <input type="text" id="reply-input-${req.id}" placeholder="${req.reply ? '답글 수정 후 저장시 완료유지' : '답글 작성 시 자동으로 [처리 완료] 전환'}" value="${req.reply || ''}">
+                        <button class="action-btn bg-done" onclick="submitReply('${req.id}')">답글등록</button>
+                    </div>
+                `;
+
+                // 관리 상태 변경 버튼 (완료 ↔ 대기 재설정 용도)
+                const statusToggleBtn = req.status === 'COMPLETED' 
+                    ? `<button class="action-btn bg-pending" style="font-size:11px; padding:3px 6px;" onclick="reopenRequest('${req.id}')">대기 전환</button>`
+                    : '';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${priorityBadge}</td>
+                    <td><strong>${req.room}</strong></td>
+                    <td style="text-align: left;">
+                        <div><strong>요청:</strong> ${req.detail}</div>
+                        ${replyHtml}
+                        ${replyInputHtml}
+                    </td>
+                    <td>${req.person}</td>
+                    <td style="font-size: 12px; color: #666;">${req.timeStr || '-'}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${statusToggleBtn}
+                        <button class="delete-btn" style="padding: 3px 6px; font-size:11px;" onclick="deleteFacilityRequest('${req.id}')">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+    }
+
+    // 답글 등록 시 자동으로 COMPLETED 상태 변경 처리
+    async function submitReply(docId) {
+        const replyText = document.getElementById(`reply-input-${docId}`).value.trim();
+
+        if (!replyText) {
+            alert('답글 내용을 입력해 주세요.');
+            return;
+        }
+
+        const nowStr = new Date().toLocaleString('ko-KR', { hour12: false });
+
+        try {
+            await db.collection("facility_requests").doc(docId).update({
+                reply: replyText,
+                replyTime: nowStr,
+                status: 'COMPLETED' // 답글 등록 시 자동 완려
+            });
+            alert('답글이 등록되고 요청이 [처리 완료] 상태로 변경되었습니다.');
+            loadFacilityRequests();
+        } catch (err) {
+            console.error("답글 등록 실패:", err);
+            alert("답글 등록 중 오류가 발생했습니다.");
+        }
+    }
+
+    async function reopenRequest(docId) {
+        if (confirm('이 요청을 다시 [대기중] 상태로 변경하시겠습니까?')) {
+            try {
+                await db.collection("facility_requests").doc(docId).update({ status: 'PENDING' });
+                loadFacilityRequests();
+            } catch (err) {
+                console.error("상태 변경 실패:", err);
+            }
+        }
+    }
+
+    async function deleteFacilityRequest(docId) {
+        if (confirm('해당 요청 항목을 삭제하시겠습니까?')) {
+            try {
+                await db.collection("facility_requests").doc(docId).delete();
+                loadFacilityRequests();
+            } catch (err) {
+                console.error("삭제 실패:", err);
+            }
+        }
+    }
+
+    // --- 기존 보일러 기능 Logic ---
     async function saveData() {
         const date = document.getElementById('check-date').value;
         const inspector = document.getElementById('inspector-name').value;
@@ -435,10 +668,8 @@
 
             allDocs.sort((a, b) => a.date.localeCompare(b.date));
 
-            // 최근 점검 실시일
             document.getElementById('stat-last-date').textContent = allDocs.length > 0 ? allDocs[allDocs.length - 1].date : '-';
 
-            // 전월 및 당월 계산
             const now = new Date();
             const currYear = now.getFullYear();
             const currMonth = now.getMonth() + 1;
@@ -468,13 +699,12 @@
 
             tbody.innerHTML = '';
             rooms.forEach(room => {
-                let issueRecords = []; // { date: 'YYYY-MM-DD', status: 'O/X/-' }
+                let issueRecords = [];
                 let totalCost = 0;
 
                 allDocs.forEach(doc => {
                     const roomInfo = doc.roomData.find(r => r.room === room);
                     if (roomInfo) {
-                        // 점검필요 상태이거나 수리 금액이 존재하는 경우 기록에 추가
                         if (roomInfo.leak === '점검필요' || roomInfo.silicon === '점검필요' || roomInfo.noise === '점검필요') {
                             issueRecords.push({
                                 date: doc.date,
@@ -482,7 +712,6 @@
                             });
                         }
 
-                        // 누적 수리 금액 계산
                         if (roomInfo.repairCost) {
                             const costNum = parseInt(roomInfo.repairCost.replace(/[^0-9]/g, '')) || 0;
                             totalCost += costNum;
@@ -492,7 +721,6 @@
 
                 const lastIssueDate = issueRecords.length > 0 ? issueRecords[issueRecords.length - 1].date : '-';
                 
-                // 날짜 태그 생성 (O면 초록색, 그 외 빨간색)
                 const dateTagsHtml = issueRecords.map(item => {
                     const isCompleted = item.status === 'O';
                     const cssClass = isCompleted ? 'date-tag repair-o' : 'date-tag repair-x';
