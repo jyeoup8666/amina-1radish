@@ -1,7 +1,7 @@
 const line = require('@line/bot-sdk');
 const admin = require('firebase-admin');
 
-// 1. Firebase Admin 강제 초기화 (오류 방지)
+// 1. Firebase Admin 초기화
 if (!admin.apps.length) {
     try {
         admin.initializeApp({
@@ -14,13 +14,6 @@ if (!admin.apps.length) {
 }
 
 const db = admin.database();
-
-// 2. LINE SDK 클라이언트 생성
-const lineConfig = {
-    channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || '',
-    channelSecret: process.env.LINE_CHANNEL_SECRET || '',
-};
-const lineClient = new line.Client(lineConfig);
 
 module.exports = async (req, res) => {
     if (req.method !== 'POST') {
@@ -49,34 +42,18 @@ module.exports = async (req, res) => {
                         snapshot.forEach((child) => {
                             updates[`facility_requests/${child.key}/status`] = 'completed';
                             updates[`facility_requests/${child.key}/replyText`] = message.text;
+                            updates[`facility_requests/${child.key}/completedAt`] = admin.database.ServerValue.TIMESTAMP;
                         });
                         await db.ref().update(updates);
                     }
                     continue;
                 }
 
-                // [케이스 B] 신규 메시지인 경우 -> DB 저장
-                let userName = '알 수 없음';
-                try {
-                    if (source.type === 'group' && source.groupId && source.userId) {
-                        const profile = await lineClient.getGroupMemberProfile(source.groupId, source.userId);
-                        userName = profile.displayName;
-                    } else if (source.type === 'room' && source.roomId && source.userId) {
-                        const profile = await lineClient.getRoomMemberProfile(source.roomId, source.userId);
-                        userName = profile.displayName;
-                    } else if (source.userId) {
-                        const profile = await lineClient.getProfile(source.userId);
-                        userName = profile.displayName;
-                    }
-                } catch (err) {
-                    console.error('라인 프로필 조회 실패:', err.message);
-                }
-
+                // [케이스 B] 신규 메시지인 경우 -> DB에 바로 저장 (사용자 이름 조회 제거)
                 const newRequestRef = db.ref('facility_requests').push();
                 await newRequestRef.set({
                     originalMessageId: message.id,
                     text: message.text,
-                    userName: userName,
                     userId: source.userId || '',
                     status: 'pending',
                     timestamp: admin.database.ServerValue.TIMESTAMP
