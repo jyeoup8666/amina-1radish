@@ -1,16 +1,29 @@
 const line = require('@line/bot-sdk');
 const admin = require('firebase-admin');
 
-// Firebase Admin 초기화 (projectId 하드코딩 추가)
+// Firebase Admin 안전한 초기화
 if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID || "facility-check-74a17", // ★ 프로젝트 ID 직접 지정
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-        databaseURL: process.env.FIREBASE_DATABASE_URL || "https://facility-check-74a17-default-rtdb.firebaseio.com"
-    });
+    const serviceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID || "facility-check-74a17",
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY 
+            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
+            : undefined,
+    };
+
+    // 서비스 계정 인증 정보가 충분치 않을 경우를 대비한 세이프티 로직
+    if (serviceAccount.clientEmail && serviceAccount.privateKey) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: process.env.FIREBASE_DATABASE_URL || "https://facility-check-74a17-default-rtdb.firebaseio.com"
+        });
+    } else {
+        // 환경 변수가 없을 때 기본 앱 인증 구조 사용
+        admin.initializeApp({
+            projectId: "facility-check-74a17",
+            databaseURL: process.env.FIREBASE_DATABASE_URL || "https://facility-check-74a17-default-rtdb.firebaseio.com"
+        });
+    }
 }
 
 const db = admin.database();
@@ -41,7 +54,6 @@ module.exports = async (req, res) => {
                 if (message.quotedMessageId) {
                     const quotedId = message.quotedMessageId;
                     
-                    // DB에서 quotedMessageId와 일치하는 originalMessageId 검색
                     const snapshot = await db.ref('facility_requests')
                         .orderByChild('originalMessageId')
                         .equalTo(quotedId)
@@ -50,16 +62,13 @@ module.exports = async (req, res) => {
                     if (snapshot.exists()) {
                         const updates = {};
                         snapshot.forEach((child) => {
-                            // 상태를 completed로 변경하고 답변 내용 기록
                             updates[`facility_requests/${child.key}/status`] = 'completed';
                             updates[`facility_requests/${child.key}/replyText`] = message.text;
                         });
                         await db.ref().update(updates);
                         console.log(`[완료 처리 성공] 원본 메시지 ID: ${quotedId}`);
-                    } else {
-                        console.log(`[완료 처리 실패] 원본 메시지 ID(${quotedId})를 DB에서 찾을 수 없음`);
                     }
-                    continue; // 답장 자체는 대기 목록에 새로 등록하지 않고 다음 이벤트로 진행
+                    continue;
                 }
 
                 // ----------------------------------------------------
@@ -81,14 +90,13 @@ module.exports = async (req, res) => {
                     console.error('라인 프로필 조회 실패:', err.message);
                 }
 
-                // DB에 저장 (훗날 답장이 달렸을 때 찾을 수 있도록 originalMessageId도 함께 저장)
                 const newRequestRef = db.ref('facility_requests').push();
                 await newRequestRef.set({
-                    originalMessageId: message.id, // 라인 메시지 고유 ID
+                    originalMessageId: message.id,
                     text: message.text,
                     userName: userName,
                     userId: source.userId || '',
-                    status: 'pending',             // 대기 중 상태
+                    status: 'pending',
                     timestamp: admin.database.ServerValue.TIMESTAMP
                 });
             }
