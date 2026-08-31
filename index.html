@@ -78,53 +78,64 @@
         </div>
 
         <!-- 메인 화면 하단: 실시간 수리 요청 현황 표 -->
-        <div class="realtime-section">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h3 style="margin: 0; color: #333;">🔔 실시간 시설요청 현황</h3>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #6c757d;">라인 봇을 통해 접수된 실시간 수리 요청 목록입니다.</p>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button class="toggle-history-btn" onclick="toggleCompletedRequests()">📜 완료된 수리 요청 보기</button>
-                    <span class="badge-live"><span class="pulse-dot"></span> 실시간 연동 중</span>
-                </div>
+        <!-- 메인 화면 하단: 실시간 수리 요청 현황 영역 -->
+<div class="realtime-section">
+    <!-- 1) 진행 중인 수리 요청 화면 -->
+    <div id="activeRequestView">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; color: #333;">🔔 실시간 시설요청 현황</h3>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #6c757d;">라인 봇을 통해 접수된 실시간 수리 요청 목록입니다.</p>
             </div>
-
-            <!-- 1) 진행 중인 수리 요청 표 -->
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;">번호</th>
-                        <th style="width: 22%;">접수 시간</th>
-                        <th style="width: 60%;">요청 내용</th>
-                        <th style="width: 10%;">관리</th>
-                    </tr>
-                </thead>
-                <tbody id="requestTableBody">
-                    <tr><td colspan="4" style="color: #6c757d; padding: 20px;">수리 요청 내역을 불러오는 중입니다...</td></tr>
-                </tbody>
-            </table>
-
-            <!-- 2) 완료된 수리 요청 표 (버튼 클릭 시 토글) -->
-            <div id="completedRequestSection" class="hidden" style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc;">
-                <h4 style="margin: 0 0 10px 0; color: #28a745;">✅ 완료된 수리 요청 내역</h4>
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 8%;">번호</th>
-                            <th style="width: 20%;">접수 시간</th>
-                            <th style="width: 47%;">요청 및 답장 내용</th>
-                            <th style="width: 15%;">처리 완료 시각</th>
-                            <th style="width: 10%;">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody id="completedRequestTableBody">
-                        <tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>
-                    </tbody>
-                </table>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="toggle-history-btn" onclick="switchRequestView('completed')">📜 완료된 수리 요청 보기</button>
+                <span class="badge-live"><span class="pulse-dot"></span> 실시간 연동 중</span>
             </div>
         </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8%;">번호</th>
+                    <th style="width: 22%;">접수 시간</th>
+                    <th style="width: 60%;">요청 내용</th>
+                    <th style="width: 10%;">관리</th>
+                </tr>
+            </thead>
+            <tbody id="requestTableBody">
+                <tr><td colspan="4" style="color: #6c757d; padding: 20px;">수리 요청 내역을 불러오는 중입니다...</td></tr>
+            </tbody>
+        </table>
     </div>
+
+    <!-- 2) 완료된 수리 요청 화면 (버튼 클릭 시 교체) -->
+    <div id="completedRequestView" class="hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; color: #28a745;">✅ 완료된 수리 요청 내역</h3>
+                <p style="margin: 5px 0 0 0; font-size: 13px; color: #6c757d;">답장을 통해 처리가 완료된 수리 요청 목록입니다.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="back-btn" style="margin-bottom: 0;" onclick="switchRequestView('active')">← 진행 중인 현황 보기</button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 8%;">번호</th>
+                    <th style="width: 20%;">접수 시간</th>
+                    <th style="width: 47%;">요청 및 답장 내용</th>
+                    <th style="width: 15%;">처리 완료 시각</th>
+                    <th style="width: 10%;">관리</th>
+                </tr>
+            </thead>
+            <tbody id="completedRequestTableBody">
+                <tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
     <!-- 보일러 메뉴 선택 화면 -->
     <div id="page-boiler-menu" class="hidden">
@@ -268,99 +279,98 @@
     const rtdb = firebase.database();
 
     // 2. 실시간 시설요청 현황 (Realtime Database)
-    const requestRef = rtdb.ref('facility_requests');
-    requestRef.on('value', (snapshot) => {
-        const tbody = document.getElementById('requestTableBody');
-        const historyTbody = document.getElementById('completedRequestTableBody');
-        const data = snapshot.val();
+    // 2. 실시간 시설요청 현황 (Realtime Database)
+const requestRef = rtdb.ref('facility_requests');
+requestRef.on('value', (snapshot) => {
+    const tbody = document.getElementById('requestTableBody');
+    const historyTbody = document.getElementById('completedRequestTableBody');
+    const data = snapshot.val();
 
-        if (!data) {
-            tbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
-            if (historyTbody) {
-                historyTbody.innerHTML = '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
-            }
-            return;
-        }
-
-        let activeHtml = '';
-        let completedHtml = '';
-        let activeIndex = 1;
-        let completedIndex = 1;
-
-        const items = Object.entries(data).reverse();
-
-        items.forEach(([key, item]) => {
-            const dateStr = item.timestamp 
-                ? new Date(item.timestamp).toLocaleString('ko-KR') 
-                : '-';
-
-            // 답장으로 완료 처리된 항목
-            if (item.status === 'completed') {
-                const completedDateStr = item.completedAt 
-                    ? new Date(item.completedAt).toLocaleString('ko-KR') 
-                    : '-';
-                const replyNote = item.replyMessage ? `<br><small style="color:#28a745; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>` : '';
-
-                completedHtml += `
-                    <tr style="background-color: #f8f9fa; color: #6c757d;">
-                        <td>${completedIndex++}</td>
-                        <td>${dateStr}</td>
-                        <td style="text-align: left; padding-left: 15px;">
-                            <span style="text-decoration: line-through;">${item.text || ''}</span>
-                            ${replyNote}
-                        </td>
-                        <td><span style="color: #28a745; font-weight: bold;">완료 (${completedDateStr})</span></td>
-                        <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
-                    </tr>
-                `;
-            } 
-            // 진행 중인 요청
-            else {
-              activeHtml += `
-                  <tr>
-                      <td>${activeIndex++}</td>
-                      <td>${dateStr}</td>
-                      <td style="text-align: left; font-weight: bold; padding-left: 15px;">${item.text || ''}</td>
-                      <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
-                  </tr>
-              `;
-            }
-        });
-
-        tbody.innerHTML = activeHtml || '<tr><td colspan="4" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
-
+    if (!data) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
         if (historyTbody) {
-            historyTbody.innerHTML = completedHtml || '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
+            historyTbody.innerHTML = '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
         }
-    }, (error) => {
-        console.error("실시간 데이터 수신 에러:", error);
-        document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="4" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+        return;
+    }
+
+    let activeHtml = '';
+    let completedHtml = '';
+    let activeIndex = 1;
+    let completedIndex = 1;
+
+    const items = Object.entries(data).reverse();
+
+    items.forEach(([key, item]) => {
+        const dateStr = item.timestamp 
+            ? new Date(item.timestamp).toLocaleString('ko-KR') 
+            : '-';
+
+        // 답장으로 완료 처리된 항목
+        if (item.status === 'completed') {
+            const completedDateStr = item.completedAt 
+                ? new Date(item.completedAt).toLocaleString('ko-KR') 
+                : '-';
+            const replyNote = item.replyMessage ? `<br><small style="color:#28a745; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>` : '';
+
+            completedHtml += `
+                <tr style="background-color: #f8f9fa; color: #6c757d;">
+                    <td>${completedIndex++}</td>
+                    <td>${dateStr}</td>
+                    <td style="text-align: left; padding-left: 15px;">
+                        <span style="text-decoration: line-through;">${item.text || ''}</span>
+                        ${replyNote}
+                    </td>
+                    <td><span style="color: #28a745; font-weight: bold;">완료 (${completedDateStr})</span></td>
+                    <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
+                </tr>
+            `;
+        } 
+        // 진행 중인 요청
+        else {
+          activeHtml += `
+              <tr>
+                  <td>${activeIndex++}</td>
+                  <td>${dateStr}</td>
+                  <td style="text-align: left; font-weight: bold; padding-left: 15px;">${item.text || ''}</td>
+                  <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
+              </tr>
+          `;
+        }
     });
 
-    // 개별 수리 요청 삭제 기능
-    function deleteRequest(key) {
-        if (confirm("해당 수리 요청 항목을 삭제하시겠습니까?")) {
-            rtdb.ref(`facility_requests/${key}`).remove()
-                .then(() => alert("성공적으로 삭제되었습니다."))
-                .catch((err) => alert("삭제 실패: " + err.message));
-        }
-    }
+    tbody.innerHTML = activeHtml || '<tr><td colspan="4" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
 
-    // 완료된 수리 요청 영역 보기/숨기기 토글
-    function toggleCompletedRequests() {
-        const section = document.getElementById('completedRequestSection');
-        const btn = document.querySelector('.toggle-history-btn');
-        
-        if (section.classList.contains('hidden')) {
-            section.classList.remove('hidden');
-            btn.textContent = '🙈 완료된 수리 요청 숨기기';
-            btn.style.backgroundColor = '#495057';
-        } else {
-            section.classList.add('hidden');
-            btn.textContent = '📜 완료된 수리 요청 보기';
-            btn.style.backgroundColor = '#6c757d';
-        }
+    if (historyTbody) {
+        historyTbody.innerHTML = completedHtml || '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
     }
+}, (error) => {
+    console.error("실시간 데이터 수신 에러:", error);
+    document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="4" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+});
+
+// 화면 교체 함수 (진행 중 <-> 완료 내역)
+function switchRequestView(viewName) {
+    const activeView = document.getElementById('activeRequestView');
+    const completedView = document.getElementById('completedRequestView');
+
+    if (viewName === 'completed') {
+        activeView.classList.add('hidden');
+        completedView.classList.remove('hidden');
+    } else {
+        completedView.classList.add('hidden');
+        activeView.classList.remove('hidden');
+    }
+}
+
+// 개별 수리 요청 삭제 함수
+function deleteRequest(key) {
+    if (confirm("해당 수리 요청 항목을 삭제하시겠습니까?")) {
+        rtdb.ref(`facility_requests/${key}`).remove()
+            .then(() => alert("성공적으로 삭제되었습니다."))
+            .catch((err) => alert("삭제 실패: " + err.message));
+    }
+}
 
     // 3. 보일러 점검 로직
     const rooms = [
