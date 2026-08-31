@@ -1,86 +1,84 @@
-const line = require('@line/bot-sdk');
-const admin = require('firebase-admin');
+import { Client } from '@line/bot-sdk';
+import admin from 'firebase-admin';
 
-// Firebase Admin SDK 초기화
+// Firebase Admin 초기화 (기존 DB 설정 적용)
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert({
             projectId: process.env.FIREBASE_PROJECT_ID,
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n')
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
         }),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
+        databaseURL: "https://facility-check-74a17-default-rtdb.firebaseio.com"
     });
 }
 
-const lineClient = new line.Client({
+const db = admin.database();
+
+// LINE SDK 클라이언트 설정
+const lineConfig = {
     channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-    channelSecret: process.env.LINE_CHANNEL_SECRET
-});
+    channelSecret: process.env.LINE_CHANNEL_SECRET,
+};
+const lineClient = new Client(lineConfig);
 
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(200).send('OK');
+    if (req.method !== 'POST') {
+        return res.status(405).send('Method Not Allowed');
+    }
 
     const events = req.body.events || [];
 
-    for (let event of events) {
-        if (event.type === 'message' && event.message.type === 'text') {
-            const userId = event.source.userId;
-            const groupId = event.source.groupId;
-            const text = event.message.text;
-            const timestamp = event.timestamp;
-            const msgId = event.message.id;
+    try {
+        for (const event of events) {
+            if (event.type === 'message' && event.message.type === 'text') {
+                const message = event.message;
+                const source = event.source;
 
-            // 1. 라인 프로필 이름(최민원 팀장 등) 가져오기
-            let userName = '알 수 없음';
-            try {
-                if (groupId) {
-                    const profile = await lineClient.getGroupMemberProfile(groupId, userId);
-                    userName = profile.displayName;
-                } else {
-                    const profile = await lineClient.getProfile(userId);
-                    userName = profile.displayName;
+                // 1. 요청자 이름(displayName) 가져오기
+                let userName = '알 수 없음';
+                try {
+                    if (source.type === 'group' && source.groupId && source.userId) {
+                        // 단톡방 멤버 프로필 조회
+                        const profile = await lineClient.getGroupMemberProfile(source.groupId, source.userId);
+                        userName = profile.displayName;
+                    } else if (source.type === 'room' && source.roomId && source.userId) {
+                        // 룸 멤버 프로필 조회
+                        const profile = await lineClient.getRoomMemberProfile(source.roomId, source.userId);
+                        userName = profile.displayName;
+                    } else if (source.userId) {
+                        // 1:1 대화 프로필 조회
+                        const profile = await lineClient.getProfile(source.userId);
+                        userName = profile.displayName;
+                    }
+                } catch (err) {
+                    console.error('프로필 조회 실패:', err);
                 }
-            } catch (err) {
-                console.error("라인 프로필 조회 실패:", err);
-            }
 
-            const db = admin.database();
+                // 2. 답장(Reply) 메시지 여부 확인
+                const quotedMessageId = message.quotedMessageId;
 
-            // 2. 답장(Quote Reply) 인지 확인
-            const quotedMessageId = event.message.quotedMessageId;
-
-            if (quotedMessageId) {
-                // 답장인 경우: 대상 메시지의 현재 상태 조회
-                const targetRef = db.ref(`facility_requests/${quotedMessageId}`);
-                const snapshot = await targetRef.once('value');
-                const targetData = snapshot.val();
-
-                // 💡 [핵심] 대상 메시지가 존재하고, 아직 완료 처리 안 된 'pending' 건일 때만 완료로 전환!
-                if (targetData && targetData.status === 'pending') {
-                    await targetRef.update({
-                        status: 'completed',           // 완료 상태로 변경
-                        replyUser: userName,          // 답변자 이름
-                        replyUserId: userId,
-                        replyText: text,              // 답변 내용
-                        replyTimestamp: timestamp      // 답변 시간
+                if (quotedMessageId) {
+                    // 👉 [답장인 경우] 신규 등록하지 않고 로그 기록 또는 기존 건 상태 변경 처리
+                    console.log(`답장 메시지 수신: ${message.text} (원본 ID: ${quotedMessageId})`);
+                    
+                    // 필요 시 답장이 올 경우 완료 처리할 로직 작성 가능
+                } else {
+                    // 👉 [일반 메시지인 경우] 신규 수리 요청으로 Realtime Database에 저장
+                    const newRequestRef = db.ref('facility_requests').push();
+                    await newRequestRef.set({
+                        text: message.text,
+                        userName: userName,
+                        userId: source.userId || '',
+                        status: 'pending',
+                        timestamp: admin.database.ServerValue.TIMESTAMP
                     });
-                } else {
-                    // 대상 데이터가 없거나 이미 'completed' 상태라면 (즉, 답장에 답장한 경우) 무시합니다.
-                    console.log("이미 완료된 요청에 대한 답장이거나 대상을 찾을 수 없어 무시합니다.");
                 }
-            } else {
-                // 일반 메시지인 경우: 신규 수리/점검 요청 등록
-                await db.ref(`facility_requests/${msgId}`).set({
-                    userId: userId,
-                    userName: userName,
-                    text: text,
-                    timestamp: timestamp,
-                    status: 'pending'
-                });
             }
         }
+        return res.status(200).json({ status: 'success' });
+    } catch (error) {
+        console.error('웹훅 처리 중 에러:', error);
+        return res.status(500).end();
     }
-
-    return res.status(200).json({ status: 'success' });
 }
