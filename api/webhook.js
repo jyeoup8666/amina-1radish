@@ -1,7 +1,7 @@
 const line = require('@line/bot-sdk');
 const admin = require('firebase-admin');
 
-// Firebase Admin 초기화 (중복 실행 방지)
+// Firebase Admin 초기화
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert({
@@ -23,7 +23,6 @@ const lineConfig = {
 const lineClient = new line.Client(lineConfig);
 
 module.exports = async (req, res) => {
-    // POST 요청만 허용
     if (req.method !== 'POST') {
         return res.status(405).send('Method Not Allowed');
     }
@@ -36,40 +35,60 @@ module.exports = async (req, res) => {
                 const message = event.message;
                 const source = event.source;
 
-                // 1. 답장(Reply) 메시지 필터링
-                // 누군가의 메시지에 '답장' 기능으로 보낸 메시지는 quotedMessageId가 존재함
+                // ----------------------------------------------------
+                // [케이스 A] 답장 메시지인 경우 -> 원본 요청을 '완료' 처리
+                // ----------------------------------------------------
                 if (message.quotedMessageId) {
-                    console.log(`[답장 스킵] 원본ID: ${message.quotedMessageId} / 내용: ${message.text}`);
-                    continue; // DB에 저장하지 않고 다음 이벤트로 넘어감
+                    const quotedId = message.quotedMessageId;
+                    
+                    // DB에서 quotedMessageId와 일치하는 originalMessageId 검색
+                    const snapshot = await db.ref('facility_requests')
+                        .orderByChild('originalMessageId')
+                        .equalTo(quotedId)
+                        .once('value');
+
+                    if (snapshot.exists()) {
+                        const updates = {};
+                        snapshot.forEach((child) => {
+                            // 상태를 completed로 변경하고 답변 내용 기록
+                            updates[`facility_requests/${child.key}/status`] = 'completed';
+                            updates[`facility_requests/${child.key}/replyText`] = message.text;
+                        });
+                        await db.ref().update(updates);
+                        console.log(`[완료 처리 성공] 원본 메시지 ID: ${quotedId}`);
+                    } else {
+                        console.log(`[완료 처리 실패] 원본 메시지 ID(${quotedId})를 DB에서 찾을 수 없음`);
+                    }
+                    continue; // 답장 자체는 대기 목록에 새로 등록하지 않고 다음 이벤트로 진행
                 }
 
-                // 2. 단톡방/1:1 대화 요청자 이름(displayName) 조회
+                // ----------------------------------------------------
+                // [케이스 B] 신규 메시지인 경우 -> '대기중' 요청으로 DB 추가
+                // ----------------------------------------------------
                 let userName = '알 수 없음';
                 try {
                     if (source.type === 'group' && source.groupId && source.userId) {
-                        // 단톡방 멤버 프로필 조회
                         const profile = await lineClient.getGroupMemberProfile(source.groupId, source.userId);
                         userName = profile.displayName;
                     } else if (source.type === 'room' && source.roomId && source.userId) {
-                        // 일반 대화방 멤버 프로필 조회
                         const profile = await lineClient.getRoomMemberProfile(source.roomId, source.userId);
                         userName = profile.displayName;
                     } else if (source.userId) {
-                        // 1:1 대화 프로필 조회
                         const profile = await lineClient.getProfile(source.userId);
                         userName = profile.displayName;
                     }
                 } catch (err) {
-                    console.error('라인 프로필 조회 실패:', err);
+                    console.error('라인 프로필 조회 실패:', err.message);
                 }
 
-                // 3. 신규 수리/점검 요청만 Realtime Database에 저장
+                // DB에 저장 (훗날 답장이 달렸을 때 찾을 수 있도록 originalMessageId도 함께 저장)
                 const newRequestRef = db.ref('facility_requests').push();
                 await newRequestRef.set({
+                    originalMessageId: message.id, // 라인 메시지 고유 ID
                     text: message.text,
                     userName: userName,
                     userId: source.userId || '',
-                    status: 'pending',
+                    status: 'pending',             // 대기 중 상태
                     timestamp: admin.database.ServerValue.TIMESTAMP
                 });
             }
