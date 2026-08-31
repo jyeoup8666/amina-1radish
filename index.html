@@ -182,6 +182,7 @@
         <div class="menu-grid">
             <div class="menu-btn-sub" onclick="showPage('boiler-form')">📝 보일러 주간 점검표 작성/조회</div>
             <div class="menu-btn-sub" onclick="showPage('boiler-history')">📊 보일러 점검 이력 확인</div>
+            <div class="menu-btn-sub" onclick="showPage('boiler-qr')">🏷️ QR코드 라벨 생성/인쇄</div>
         </div>
     </div>
 
@@ -273,6 +274,18 @@
                 <tr><td colspan="5">데이터를 불러오는 중입니다...</td></tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- 보일러 QR코드 라벨 생성/인쇄 화면 -->
+    <div id="page-boiler-qr" class="hidden">
+        <button class="back-btn no-print" onclick="showPage('boiler-menu')">← 이전 메뉴로</button>
+        <h2 class="no-print">🏷️ 보일러 QR코드 라벨 생성 / 인쇄</h2>
+        <p class="no-print">각 호실 보일러 옆에 붙일 QR 라벨입니다. 라벨을 스캔하면 해당 호실 점검 화면으로 바로 열립니다. 층을 선택한 뒤 인쇄 버튼을 눌러주세요.</p>
+        <div class="floor-grid no-print" id="boiler-qr-floor-grid" style="margin-bottom: 15px;"></div>
+        <div class="no-print" style="margin-bottom: 15px;">
+            <button class="save-btn" style="width: auto; display: inline-block; padding: 10px 22px;" onclick="window.print()">🖨️ 인쇄하기</button>
+        </div>
+        <div id="boiler-qr-grid" class="qr-print-grid"></div>
     </div>
 
     <!-- 소방시설 점검 메뉴 선택 화면 -->
@@ -612,47 +625,54 @@
         }
     }
 
-    function previewAndCompressImage(input, type, index) {
+    // 사진을 최대 800px, JPEG 품질 0.7로 압축해서 지정한 <img id="previewId"> 에 표시.
+    // onDone(콜백)이 있으면 압축된 데이터를 인자로 넘겨줌 (QR 점검 화면 등에서 저장용으로 사용)
+    function compressImageToPreview(input, previewId, onDone) {
         const file = input.files[0];
-        const previewId = type === 'fire' ? `fire-preview-${index}` : `boiler-preview-${index}`;
         const preview = document.getElementById(previewId);
-        
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    const max_size = 800;
+        if (!preview || !file) return;
 
-                    if (width > height) {
-                        if (width > max_size) {
-                            height *= max_size / width;
-                            width = max_size;
-                        }
-                    } else {
-                        if (height > max_size) {
-                            width *= max_size / height;
-                            height = max_size;
-                        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const max_size = 800;
+
+                if (width > height) {
+                    if (width > max_size) {
+                        height *= max_size / width;
+                        width = max_size;
                     }
+                } else {
+                    if (height > max_size) {
+                        width *= max_size / height;
+                        height = max_size;
+                    }
+                }
 
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
 
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    
-                    preview.src = compressedDataUrl;
-                    preview.classList.remove('hidden');
-                };
-                img.src = e.target.result;
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                preview.src = compressedDataUrl;
+                preview.classList.remove('hidden');
+                if (onDone) onDone(compressedDataUrl);
             };
-            reader.readAsDataURL(file);
-        }
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // 기존 보일러/소방 일괄 작성표에서 쓰던 호출 방식과의 호환용 래퍼
+    function previewAndCompressImage(input, type, index) {
+        const previewId = type === 'fire' ? `fire-preview-${index}` : `boiler-preview-${index}`;
+        compressImageToPreview(input, previewId);
     }
 
     function openImageModal(src) {
@@ -672,6 +692,7 @@
         
         if(pageId === 'boiler-form') initBoilerTable();
         if(pageId === 'boiler-history') renderHistoryTable();
+        if(pageId === 'boiler-qr') { renderBoilerQrFloorButtons(); renderBoilerQrGrid('ALL'); }
         if(pageId === 'fire-form') initFireTable();
         if(pageId === 'fire-history') initFireHistoryFloorView();
         if(pageId === 'fire-qr') { renderQrPrintFloorButtons(); renderQrPrintGrid('ALL'); }
@@ -691,28 +712,29 @@
             return;
         }
 
-        const roomData = [];
+        const batch = db.batch();
         rooms.forEach((room, index) => {
             const leak = document.querySelectorAll('#page-boiler-form .status-leak')[index].value;
             const silicon = document.querySelectorAll('#page-boiler-form .status-silicon')[index].value;
             const noise = document.querySelectorAll('#page-boiler-form .status-noise')[index].value;
             const preview = document.getElementById(`boiler-preview-${index}`);
             const imgSrc = preview.classList.contains('hidden') ? '' : preview.src;
-            
+
             const repairDetail = document.querySelectorAll('#page-boiler-form .repair-detail')[index].value;
             const repairCost = document.querySelectorAll('#page-boiler-form .repair-cost')[index].value;
             const repairStatus = document.querySelectorAll('#page-boiler-form .repair-status')[index].value;
 
-            roomData.push({ room, leak, silicon, noise, imgSrc, repairDetail, repairCost, repairStatus });
+            const docId = `${toDocIdSafe(room)}__${date}`;
+            const ref = db.collection('boiler_room_checks').doc(docId);
+            batch.set(ref, {
+                room, date, inspector, leak, silicon, noise, imgSrc,
+                repairDetail, repairCost, repairStatus,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
         });
 
         try {
-            await db.collection("boiler_checks").doc(date).set({
-                date: date,
-                inspector: inspector,
-                roomData: roomData,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            await batch.commit();
             alert(`${date} 점검 기록이 서버에 저장되었습니다!`);
             updateHistoryOptions();
         } catch (error) {
@@ -731,7 +753,14 @@
 
         if (confirm(`정말로 ${selectedDate} 점검 기록을 서버에서 완전히 삭제하시겠습니까?`)) {
             try {
-                await db.collection("boiler_checks").doc(selectedDate).delete();
+                const snapshot = await db.collection('boiler_room_checks').where('date', '==', selectedDate).get();
+                if (snapshot.empty) {
+                    alert('해당 날짜의 저장된 기록이 없습니다.');
+                    return;
+                }
+                const batch = db.batch();
+                snapshot.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
                 alert(`${selectedDate} 점검 기록이 삭제되었습니다.`);
                 resetForm();
                 updateHistoryOptions();
@@ -746,11 +775,17 @@
         const select = document.getElementById('history-select');
         select.innerHTML = '<option value="">-- 날짜 선택 --</option>';
 
-        db.collection("boiler_checks").get().then((querySnapshot) => {
+        db.collection("boiler_room_checks").get().then((querySnapshot) => {
+            const datesSet = new Set();
             querySnapshot.forEach((doc) => {
+                const d = doc.data();
+                if (d.date) datesSet.add(d.date);
+            });
+            const dates = Array.from(datesSet).sort().reverse();
+            dates.forEach((dateStr) => {
                 const option = document.createElement('option');
-                option.value = doc.id;
-                option.textContent = doc.id;
+                option.value = dateStr;
+                option.textContent = dateStr;
                 select.appendChild(option);
             });
         });
@@ -759,31 +794,40 @@
     function loadHistory(date) {
         if (!date) return;
 
-        db.collection("boiler_checks").doc(date).get().then((doc) => {
-            if (doc.exists) {
-                const record = doc.data();
-                document.getElementById('check-date').value = record.date;
-                document.getElementById('inspector-name').value = record.inspector || '';
-
-                record.roomData.forEach((data, index) => {
-                    document.querySelectorAll('#page-boiler-form .status-leak')[index].value = data.leak || '양호';
-                    document.querySelectorAll('#page-boiler-form .status-silicon')[index].value = data.silicon || '양호';
-                    document.querySelectorAll('#page-boiler-form .status-noise')[index].value = data.noise || '양호';
-                    
-                    const preview = document.getElementById(`boiler-preview-${index}`);
-                    if (data.imgSrc) {
-                        preview.src = data.imgSrc;
-                        preview.classList.remove('hidden');
-                    } else {
-                        preview.src = '';
-                        preview.classList.add('hidden');
-                    }
-
-                    document.querySelectorAll('#page-boiler-form .repair-detail')[index].value = data.repairDetail || '';
-                    document.querySelectorAll('#page-boiler-form .repair-cost')[index].value = data.repairCost || '';
-                    document.querySelectorAll('#page-boiler-form .repair-status')[index].value = data.repairStatus || '-';
-                });
+        db.collection('boiler_room_checks').where('date', '==', date).get().then((snapshot) => {
+            if (snapshot.empty) {
+                alert('해당 날짜의 저장된 기록이 없습니다.');
+                return;
             }
+
+            document.getElementById('check-date').value = date;
+            let inspectorName = '';
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.inspector) inspectorName = data.inspector;
+                const index = rooms.indexOf(data.room);
+                if (index === -1) return;
+
+                document.querySelectorAll('#page-boiler-form .status-leak')[index].value = data.leak || '양호';
+                document.querySelectorAll('#page-boiler-form .status-silicon')[index].value = data.silicon || '양호';
+                document.querySelectorAll('#page-boiler-form .status-noise')[index].value = data.noise || '양호';
+
+                const preview = document.getElementById(`boiler-preview-${index}`);
+                if (data.imgSrc) {
+                    preview.src = data.imgSrc;
+                    preview.classList.remove('hidden');
+                } else {
+                    preview.src = '';
+                    preview.classList.add('hidden');
+                }
+
+                document.querySelectorAll('#page-boiler-form .repair-detail')[index].value = data.repairDetail || '';
+                document.querySelectorAll('#page-boiler-form .repair-cost')[index].value = data.repairCost || '';
+                document.querySelectorAll('#page-boiler-form .repair-status')[index].value = data.repairStatus || '-';
+            });
+
+            document.getElementById('inspector-name').value = inspectorName;
         });
     }
 
@@ -791,7 +835,7 @@
         const tbody = document.getElementById('history-table-body');
         tbody.innerHTML = '<tr><td colspan="5">데이터를 불러오는 중입니다...</td></tr>';
 
-        db.collection("boiler_checks").get().then((querySnapshot) => {
+        db.collection("boiler_room_checks").get().then((querySnapshot) => {
             const allDocs = [];
             querySnapshot.forEach((doc) => allDocs.push(doc.data()));
 
@@ -813,14 +857,12 @@
             let prevMonthIssues = 0;
             let currMonthIssues = 0;
 
-            allDocs.forEach(doc => {
-                const docMonth = doc.date.substring(0, 7);
-                doc.roomData.forEach(r => {
-                    if (r.leak === '점검필요' || r.silicon === '점검필요' || r.noise === '점검필요') {
-                        if (docMonth === currMonthStr) currMonthIssues++;
-                        if (docMonth === prevMonthStr) prevMonthIssues++;
-                    }
-                });
+            allDocs.forEach(r => {
+                const docMonth = r.date.substring(0, 7);
+                if (r.leak === '점검필요' || r.silicon === '점검필요' || r.noise === '점검필요') {
+                    if (docMonth === currMonthStr) currMonthIssues++;
+                    if (docMonth === prevMonthStr) prevMonthIssues++;
+                }
             });
 
             document.getElementById('stat-prev-month-issues').textContent = `${prevMonthIssues}회`;
@@ -831,20 +873,19 @@
                 let issueRecords = [];
                 let totalCost = 0;
 
-                allDocs.forEach(doc => {
-                    const roomInfo = doc.roomData.find(r => r.room === room);
-                    if (roomInfo) {
-                        if (roomInfo.leak === '점검필요' || roomInfo.silicon === '점검필요' || roomInfo.noise === '점검필요') {
-                            issueRecords.push({
-                                date: doc.date,
-                                status: roomInfo.repairStatus || '-'
-                            });
-                        }
+                allDocs.forEach(roomInfo => {
+                    if (roomInfo.room !== room) return;
 
-                        if (roomInfo.repairCost) {
-                            const costNum = parseInt(roomInfo.repairCost.replace(/[^0-9]/g, '')) || 0;
-                            totalCost += costNum;
-                        }
+                    if (roomInfo.leak === '점검필요' || roomInfo.silicon === '점검필요' || roomInfo.noise === '점검필요') {
+                        issueRecords.push({
+                            date: roomInfo.date,
+                            status: roomInfo.repairStatus || '-'
+                        });
+                    }
+
+                    if (roomInfo.repairCost) {
+                        const costNum = parseInt(roomInfo.repairCost.replace(/[^0-9]/g, '')) || 0;
+                        totalCost += costNum;
                     }
                 });
 
@@ -888,12 +929,25 @@
 
         for (let date of dates) {
             const record = localData[date];
-            await db.collection("boiler_checks").doc(date).set({
-                date: record.date,
-                inspector: record.inspector || '',
-                roomData: record.roomData,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            const batch = db.batch();
+            (record.roomData || []).forEach(r => {
+                const docId = `${toDocIdSafe(r.room)}__${date}`;
+                const ref = db.collection('boiler_room_checks').doc(docId);
+                batch.set(ref, {
+                    room: r.room,
+                    date: date,
+                    inspector: record.inspector || '',
+                    leak: r.leak,
+                    silicon: r.silicon,
+                    noise: r.noise,
+                    imgSrc: r.imgSrc || '',
+                    repairDetail: r.repairDetail || '',
+                    repairCost: r.repairCost || '',
+                    repairStatus: r.repairStatus || '-',
+                    savedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
             });
+            await batch.commit();
         }
         alert(`기존 PC에 있던 ${dates.length}개의 점검 기록을 파이어베이스 서버로 올렸습니다!`);
         updateHistoryOptions();
@@ -985,6 +1039,11 @@
                     if (actionEl) actionEl.value = d.action || '';
                     const statusEl = document.getElementById(`ext_status_${idx}`);
                     if (statusEl) statusEl.value = d.isCompleted ? '완료' : '미조치';
+                    const previewEl = document.getElementById(`ext_preview_${idx}`);
+                    if (previewEl) {
+                        if (d.imgSrc) { previewEl.src = d.imgSrc; previewEl.classList.remove('hidden'); }
+                        else { previewEl.src = ''; previewEl.classList.add('hidden'); }
+                    }
                 } else if (d.type === 'hyd') {
                     const idx = hydrantLocations.findIndex(i => i.floor === d.floor && i.location === d.location);
                     if (idx === -1) return;
@@ -996,6 +1055,11 @@
                     if (actionEl) actionEl.value = d.action || '';
                     const statusEl = document.getElementById(`hyd_status_${idx}`);
                     if (statusEl) statusEl.value = d.isCompleted ? '완료' : '미조치';
+                    const previewEl = document.getElementById(`hyd_preview_${idx}`);
+                    if (previewEl) {
+                        if (d.imgSrc) { previewEl.src = d.imgSrc; previewEl.classList.remove('hidden'); }
+                        else { previewEl.src = ''; previewEl.classList.add('hidden'); }
+                    }
                 }
             });
 
@@ -1173,8 +1237,9 @@ function renderExtinguisherTable(targetFloor = 'ALL') {
             <td>${makeSelect(`ext_gauge_${idx}`)}</td>
             <td>${makeSelect(`ext_pin_${idx}`)}</td>
             <td>
-                <input type="file" id="ext_img_${idx}" accept="image/*" style="display:none;" onchange="previewAndCompressImage(this, 'fire', ${idx})">
+                <input type="file" id="ext_img_${idx}" accept="image/*" style="display:none;" onchange="compressImageToPreview(this, 'ext_preview_${idx}')">
                 <button type="button" style="font-size:11px; padding:3px 6px;" onclick="document.getElementById('ext_img_${idx}').click()">사진</button>
+                <img id="ext_preview_${idx}" class="img-preview hidden" onclick="openImageModal(this.src)" title="클릭하여 확대">
             </td>
             <td><input type="text" class="table-input" id="ext_action_${idx}" placeholder="조치사항"></td>
             <td>
@@ -1225,8 +1290,9 @@ function renderHydrantTable(targetFloor = 'ALL') {
             <td>${makeSelect(`hyd_hose_${idx}`)}</td>
             <td>${makeSelect(`hyd_freeze_${idx}`)}</td>
             <td>
-                <input type="file" id="hyd_img_${idx}" accept="image/*" style="display:none;" onchange="previewAndCompressImage(this, 'fire', 'hyd_${idx}')">
+                <input type="file" id="hyd_img_${idx}" accept="image/*" style="display:none;" onchange="compressImageToPreview(this, 'hyd_preview_${idx}')">
                 <button type="button" style="font-size:11px; padding:3px 6px;" onclick="document.getElementById('hyd_img_${idx}').click()">사진</button>
+                <img id="hyd_preview_${idx}" class="img-preview hidden" onclick="openImageModal(this.src)" title="클릭하여 확대">
             </td>
             <td><input type="text" class="table-input" id="hyd_action_${idx}" placeholder="조치사항"></td>
             <td>
@@ -1299,6 +1365,8 @@ function saveFireData() {
         };
         const action = document.getElementById(`ext_action_${idx}`).value;
         const isCompleted = document.getElementById(`ext_status_${idx}`).value === '완료';
+        const preview = document.getElementById(`ext_preview_${idx}`);
+        const imgSrc = (preview && !preview.classList.contains('hidden')) ? preview.src : '';
         const docId = `ext__${toDocIdSafe(item.floor)}__${toDocIdSafe(item.location)}__${checkDate}`;
         const ref = db.collection('fire_checks').doc(docId);
         batch.set(ref, {
@@ -1311,6 +1379,7 @@ function saveFireData() {
             checks: checks,
             action: action,
             isCompleted: isCompleted,
+            imgSrc: imgSrc,
             savedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     });
@@ -1327,6 +1396,8 @@ function saveFireData() {
         };
         const action = document.getElementById(`hyd_action_${idx}`).value;
         const isCompleted = document.getElementById(`hyd_status_${idx}`).value === '완료';
+        const preview = document.getElementById(`hyd_preview_${idx}`);
+        const imgSrc = (preview && !preview.classList.contains('hidden')) ? preview.src : '';
         const docId = `hyd__${toDocIdSafe(item.floor)}__${toDocIdSafe(item.location)}__${checkDate}`;
         const ref = db.collection('fire_checks').doc(docId);
         batch.set(ref, {
@@ -1338,6 +1409,7 @@ function saveFireData() {
             checks: checks,
             action: action,
             isCompleted: isCompleted,
+            imgSrc: imgSrc,
             savedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
     });
@@ -1626,6 +1698,63 @@ function renderQrPrintGrid(targetFloor) {
 }
 
 // =========================================================
+// 8-1. 보일러 QR코드 라벨 인쇄
+// =========================================================
+
+const BOILER_FLOOR_ORDER = ['3F', '4F', '5F', '6F'];
+
+// '309호-1' 같은 호실 문자열에서 층을 추론 (앞자리 숫자 기준)
+function getRoomFloor(room) {
+    const digit = room.charAt(0);
+    return `${digit}F`;
+}
+
+function renderBoilerQrFloorButtons() {
+    const grid = document.getElementById('boiler-qr-floor-grid');
+    grid.innerHTML = '';
+
+    const allBtn = document.createElement('div');
+    allBtn.className = 'floor-btn';
+    allBtn.textContent = '전체';
+    allBtn.onclick = () => renderBoilerQrGrid('ALL');
+    grid.appendChild(allBtn);
+
+    BOILER_FLOOR_ORDER.forEach(floor => {
+        const btn = document.createElement('div');
+        btn.className = 'floor-btn';
+        btn.textContent = floor;
+        btn.onclick = () => renderBoilerQrGrid(floor);
+        grid.appendChild(btn);
+    });
+}
+
+function renderBoilerQrGrid(targetFloor) {
+    const container = document.getElementById('boiler-qr-grid');
+    container.innerHTML = '';
+    const base = window.location.origin + window.location.pathname;
+
+    const targetRooms = targetFloor === 'ALL'
+        ? rooms
+        : rooms.filter(r => getRoomFloor(r) === targetFloor);
+
+    targetRooms.forEach(room => {
+        const url = `${base}?t=boiler&room=${encodeURIComponent(room)}`;
+
+        const card = document.createElement('div');
+        card.className = 'qr-print-card';
+        const qrBoxId = 'qrbox_' + Math.random().toString(36).slice(2, 10);
+        card.innerHTML = `
+            <div class="qr-box" id="${qrBoxId}"></div>
+            <div class="qr-label">${room}<br><span style="font-weight:normal; color:#6c757d;">보일러</span></div>
+        `;
+        container.appendChild(card);
+
+        const qrBox = document.getElementById(qrBoxId);
+        new QRCode(qrBox, { text: url, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M });
+    });
+}
+
+// =========================================================
 // 9. QR 스캔 시 진입하는 단일 항목 현장 점검 화면
 // =========================================================
 
@@ -1634,10 +1763,12 @@ let qrCheckState = {};
 function initQrCheckFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const type = params.get('t');
-    if (type !== 'ext' && type !== 'hyd') return; // QR 링크로 들어온 경우가 아니면 평소처럼 메인 메뉴 표시
-    const floor = params.get('floor');
-    const loc = params.get('loc');
-    enterQrCheckMode(type, floor, loc);
+    if (type === 'ext' || type === 'hyd') {
+        enterQrCheckMode(type, params.get('floor'), params.get('loc'));
+    } else if (type === 'boiler') {
+        enterBoilerQrCheckMode(params.get('room'));
+    }
+    // 그 외에는 QR 링크로 들어온 경우가 아니므로 평소처럼 메인 메뉴 표시
 }
 
 function enterQrCheckMode(type, floor, loc) {
@@ -1694,6 +1825,11 @@ function enterQrCheckMode(type, floor, loc) {
             </p>
             ${toggleRows}
             <p style="margin-top:15px;">
+                현장 사진 (선택):<br>
+                <input type="file" id="qr-check-img-input" accept="image/*" capture="environment" style="margin-top:5px;" onchange="compressImageToPreview(this, 'qr-check-preview')">
+                <img id="qr-check-preview" class="img-preview hidden" style="max-width:160px; max-height:160px; margin-top:8px;" onclick="openImageModal(this.src)" title="클릭하여 확대">
+            </p>
+            <p style="margin-top:15px;">
                 조치/교체 내용 (이상 있을 때만 입력):<br>
                 <input type="text" id="qr-check-action" class="table-input" style="width:100%; margin-top:5px;" placeholder="예: 지시압력계 교체 필요">
             </p>
@@ -1732,6 +1868,9 @@ async function saveQrCheck(type) {
 
     localStorage.setItem('inspector_name_cache', inspector);
 
+    const previewEl = document.getElementById('qr-check-preview');
+    const imgSrc = (previewEl && !previewEl.classList.contains('hidden')) ? previewEl.src : '';
+
     const docId = `${type}__${toDocIdSafe(floor)}__${toDocIdSafe(loc)}__${date}`;
     const payload = {
         type: type,
@@ -1742,6 +1881,7 @@ async function saveQrCheck(type) {
         checks: qrCheckState,
         action: action,
         isCompleted: !Object.values(qrCheckState).some(v => v === '불량'),
+        imgSrc: imgSrc,
         savedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
@@ -1755,6 +1895,135 @@ async function saveQrCheck(type) {
         fireChecksCacheByYear = {};
         resultEl.style.color = '#28a745';
         resultEl.textContent = '✅ 저장되었습니다! 다음 위치로 이동해 다시 스캔해 주세요.';
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+// =========================================================
+// 9-1. QR 스캔 시 진입하는 보일러 단일 호실 현장 점검 화면
+// =========================================================
+
+const BOILER_CHECK_ITEMS = [
+    { key: 'leak', label: '누수 상태' },
+    { key: 'silicon', label: '실리콘 상태' },
+    { key: 'noise', label: '소음 / 진동' }
+];
+
+function enterBoilerQrCheckMode(room) {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-qr-check').classList.remove('hidden');
+
+    const content = document.getElementById('qr-check-content');
+
+    if (!room || !rooms.includes(room)) {
+        content.innerHTML = `
+            <div class="info-box" style="background:#fff5f5;">
+                ❌ 해당 호실 정보를 찾을 수 없습니다. QR 라벨을 다시 확인해 주세요.
+            </div>
+            <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        `;
+        return;
+    }
+
+    const cachedName = localStorage.getItem('inspector_name_cache') || '';
+    const todayStr = new Date().toISOString().substring(0, 10);
+
+    qrCheckState = {};
+    let toggleRows = '';
+    BOILER_CHECK_ITEMS.forEach(ci => {
+        qrCheckState[ci.key] = '양호';
+        toggleRows += `
+            <div class="qr-check-row">
+                <div class="qr-check-label">${ci.label}</div>
+                <div class="toggle-pair" data-key="${ci.key}">
+                    <button type="button" class="toggle-btn good active" onclick="setQrCheckValue('${ci.key}','양호',this)">양호</button>
+                    <button type="button" class="toggle-btn bad" onclick="setQrCheckValue('${ci.key}','점검필요',this)">점검필요</button>
+                </div>
+            </div>
+        `;
+    });
+
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0;">🔥 보일러 현장 점검</h2>
+            <div class="info-box" style="margin-bottom:15px;">
+                <strong>${room}</strong>
+            </div>
+            <p>
+                점검일자: <input type="date" id="qr-check-date" value="${todayStr}"><br><br>
+                점검자: <input type="text" id="qr-check-inspector" placeholder="이름 입력" value="${cachedName}">
+            </p>
+            ${toggleRows}
+            <p style="margin-top:15px;">
+                현장 사진 (선택):<br>
+                <input type="file" id="qr-check-img-input" accept="image/*" capture="environment" style="margin-top:5px;" onchange="compressImageToPreview(this, 'qr-check-preview')">
+                <img id="qr-check-preview" class="img-preview hidden" style="max-width:160px; max-height:160px; margin-top:8px;" onclick="openImageModal(this.src)" title="클릭하여 확대">
+            </p>
+            <p style="margin-top:15px;">
+                수리 내용 (이상 있을 때만 입력):<br>
+                <input type="text" id="qr-check-action" class="table-input" style="width:100%; margin-top:5px;" placeholder="예: 분배기 밸브 실리콘 재시공">
+            </p>
+            <p style="margin-top:15px;">
+                수리 금액:<br>
+                <input type="text" id="qr-check-cost" class="table-input" style="width:100%; margin-top:5px;" placeholder="0" oninput="formatCurrency(this)">
+            </p>
+            <p style="margin-top:15px;">
+                수리 여부:
+                <select id="qr-check-repair-status" style="padding:6px 10px; border-radius:5px; border:1px solid #ccc;">
+                    <option value="-">-</option>
+                    <option value="O">O (수리 완료)</option>
+                    <option value="X">X (수리 필요)</option>
+                </select>
+            </p>
+            <button class="save-btn" onclick="saveBoilerQrCheck('${room.replace(/'/g, "\\'")}')">☁️ 저장하기</button>
+            <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+            <p style="text-align:center; margin-top:20px;">
+                <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
+            </p>
+        </div>
+    `;
+
+    content.dataset.room = room;
+}
+
+async function saveBoilerQrCheck(room) {
+    const date = document.getElementById('qr-check-date').value;
+    const inspector = document.getElementById('qr-check-inspector').value.trim();
+    const action = document.getElementById('qr-check-action').value;
+    const cost = document.getElementById('qr-check-cost').value;
+    const repairStatus = document.getElementById('qr-check-repair-status').value;
+    const resultEl = document.getElementById('qr-check-result');
+
+    if (!date) { alert('점검일자를 확인해 주세요.'); return; }
+    if (!inspector) { alert('점검자 이름을 입력해 주세요.'); return; }
+
+    localStorage.setItem('inspector_name_cache', inspector);
+
+    const previewEl = document.getElementById('qr-check-preview');
+    const imgSrc = (previewEl && !previewEl.classList.contains('hidden')) ? previewEl.src : '';
+
+    const docId = `${toDocIdSafe(room)}__${date}`;
+    const payload = {
+        room: room,
+        date: date,
+        inspector: inspector,
+        leak: qrCheckState.leak,
+        silicon: qrCheckState.silicon,
+        noise: qrCheckState.noise,
+        imgSrc: imgSrc,
+        repairDetail: action,
+        repairCost: cost,
+        repairStatus: repairStatus,
+        savedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    try {
+        await db.collection('boiler_room_checks').doc(docId).set(payload);
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다! 다음 호실로 이동해 다시 스캔해 주세요.';
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
