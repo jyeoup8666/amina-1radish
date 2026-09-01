@@ -490,6 +490,28 @@
     const rtdb = firebase.database();
 
     // 2. 실시간 시설요청 현황 (Realtime Database)
+    // 답장 내용에 이런 표현이 들어있어야 "완료"로 간주합니다. (라인 답장이 오면 무조건 완료 처리되는 게 아니라,
+    // 실제로 처리됐다는 뜻의 답장일 때만 완료내역으로 넘어가고, 그 외의 답장(재요청/방문예정 등)은
+    // 진행중 목록에 남긴 채 답장 내용만 함께 보여줍니다.)
+    const RESOLVED_REPLY_KEYWORDS = ['완료', '처리했습니다', '처리완료', '수리완료', '수리했습니다', '조치했습니다', '조치완료', '교체했습니다', '교체완료', '해결했습니다', '해결완료', '고쳤습니다', '고쳤어요'];
+
+    function isReplyResolved(replyMessage) {
+        if (!replyMessage) return false;
+        return RESOLVED_REPLY_KEYWORDS.some(kw => replyMessage.includes(kw));
+    }
+
+    // 진행중 요청의 표시 순서를 정하는 우선순위 키워드입니다. 필요하면 이 두 목록만 수정하면 됩니다.
+    // 2: 생활 불편/고장 관련 - 먼저 보임 / 1: 그 외 일반 요청 / 0: 설치·비품 등 급하지 않은 요청 - 나중에 보임
+    const HIGH_PRIORITY_KEYWORDS = ['냉장고', '에어컨', '건조기', '세탁기', '보일러', '난방', '온수', '정수기', '화장실', '변기', '누수', '정전', '단수', '엘리베이터', '승강기'];
+    const LOW_PRIORITY_KEYWORDS = ['태블릿', '이어폰', '스탠드', '보관', '설치'];
+
+    function getRequestPriority(text) {
+        if (!text) return 1;
+        if (HIGH_PRIORITY_KEYWORDS.some(kw => text.includes(kw))) return 2;
+        if (LOW_PRIORITY_KEYWORDS.some(kw => text.includes(kw))) return 0;
+        return 1;
+    }
+
     const requestRef = rtdb.ref('facility_requests');
     requestRef.on('value', (snapshot) => {
         const tbody = document.getElementById('requestTableBody');
@@ -504,47 +526,77 @@
             return;
         }
 
-        let activeHtml = '';
-        let completedHtml = '';
-        let activeIndex = 1;
-        let completedIndex = 1;
+        const entries = Object.entries(data).map(([key, item]) => ({ key, item }));
 
-        const items = Object.entries(data).reverse();
+        const activeItems = [];
+        const completedItems = [];
 
-        items.forEach(([key, item]) => {
-            const dateStr = item.timestamp 
-                ? new Date(item.timestamp).toLocaleString('ko-KR') 
-                : '-';
-
-            if (item.status === 'completed') {
-                const completedDateStr = item.completedAt 
-                    ? new Date(item.completedAt).toLocaleString('ko-KR') 
-                    : '-';
-                const replyNote = item.replyMessage ? `<br><small style="color:#28a745; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>` : '';
-
-                completedHtml += `
-                    <tr style="background-color: #f8f9fa; color: #6c757d;">
-                        <td>${completedIndex++}</td>
-                        <td>${dateStr}</td>
-                        <td style="text-align: left; padding-left: 15px;">
-                            <span style="text-decoration: line-through;">${item.text || ''}</span>
-                            ${replyNote}
-                        </td>
-                        <td><span style="color: #28a745; font-weight: bold;">완료 (${completedDateStr})</span></td>
-                        <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
-                    </tr>
-                `;
-            } 
-            else {
-                activeHtml += `
-                    <tr>
-                        <td>${activeIndex++}</td>
-                        <td>${dateStr}</td>
-                        <td style="text-align: left; font-weight: bold; padding-left: 15px;">${item.text || ''}</td>
-                        <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
-                    </tr>
-                `;
+        entries.forEach(({ key, item }) => {
+            // status가 completed여도 답장 내용이 실제 처리완료로 보이지 않으면 진행중으로 취급합니다.
+            const trulyResolved = item.status === 'completed' && isReplyResolved(item.replyMessage);
+            if (trulyResolved) {
+                completedItems.push({ key, item });
+            } else {
+                activeItems.push({ key, item });
             }
+        });
+
+        // 진행중 요청: 우선순위 높은 것 먼저, 우선순위가 같으면 최근 접수 순
+        activeItems.sort((a, b) => {
+            const pa = getRequestPriority(a.item.text);
+            const pb = getRequestPriority(b.item.text);
+            if (pa !== pb) return pb - pa;
+            return (b.item.timestamp || 0) - (a.item.timestamp || 0);
+        });
+
+        // 완료된 요청: 최근 완료 순
+        completedItems.sort((a, b) => (b.item.completedAt || 0) - (a.item.completedAt || 0));
+
+        let activeHtml = '';
+        activeItems.forEach(({ key, item }, i) => {
+            const dateStr = item.timestamp
+                ? new Date(item.timestamp).toLocaleString('ko-KR')
+                : '-';
+            const priorityBadge = getRequestPriority(item.text) === 2
+                ? '<span style="color:#dc3545; font-size:11px; font-weight:bold; margin-right:5px;">⚠ 우선</span>'
+                : '';
+            // 완료를 뜻하지 않는 답장(재요청/방문예정 등)은 삭제선 없이 노트로만 붙여서 보여줍니다.
+            const replyNote = item.replyMessage
+                ? `<br><small style="color:#17a2b8; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>`
+                : '';
+
+            activeHtml += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${dateStr}</td>
+                    <td style="text-align: left; font-weight: bold; padding-left: 15px;">${priorityBadge}${item.text || ''}${replyNote}</td>
+                    <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
+                </tr>
+            `;
+        });
+
+        let completedHtml = '';
+        completedItems.forEach(({ key, item }, i) => {
+            const dateStr = item.timestamp
+                ? new Date(item.timestamp).toLocaleString('ko-KR')
+                : '-';
+            const completedDateStr = item.completedAt
+                ? new Date(item.completedAt).toLocaleString('ko-KR')
+                : '-';
+            const replyNote = item.replyMessage ? `<br><small style="color:#28a745; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>` : '';
+
+            completedHtml += `
+                <tr style="background-color: #f8f9fa; color: #6c757d;">
+                    <td>${i + 1}</td>
+                    <td>${dateStr}</td>
+                    <td style="text-align: left; padding-left: 15px;">
+                        <span style="text-decoration: line-through;">${item.text || ''}</span>
+                        ${replyNote}
+                    </td>
+                    <td><span style="color: #28a745; font-weight: bold;">완료 (${completedDateStr})</span></td>
+                    <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
+                </tr>
+            `;
         });
 
         tbody.innerHTML = activeHtml || '<tr><td colspan="4" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
