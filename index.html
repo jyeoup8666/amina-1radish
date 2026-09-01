@@ -570,7 +570,7 @@
                             <th>이어폰</th>
                             <th>충전기</th>
                             <th>제공직원</th>
-                            <th>회수일자</th>
+                            <th>회수일시</th>
                             <th>회수직원</th>
                             <th>반납사진</th>
                         </tr>
@@ -2550,6 +2550,12 @@ function getTermsHtml() {
             <canvas id="sig-canvas" class="sig-canvas" width="320" height="150"></canvas>
             <button type="button" class="back-btn" style="margin-top:8px; margin-bottom:0;" onclick="clearSignature()">✏️ 다시 서명하기</button>
         </p>
+        <p style="margin-top:10px;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px;">
+                <input type="checkbox" id="pre-explained-checkbox" style="width:16px; height:16px;">
+                서명 받기 어려운 상황이며, 사전에 이용약관 내용을 충분히 설명드렸습니다. (서명 없이 진행)
+            </label>
+        </p>
     `;
 }
 
@@ -2715,8 +2721,12 @@ async function saveAccessoryCheckout() {
     if (!stand && !earphone && !charger) { alert('대여 물품을 하나 이상 선택해 주세요.'); return; }
     const agreed = document.getElementById('terms-agree-checkbox').checked;
     if (!agreed) { alert('이용약관 동의가 필요합니다.'); return; }
+    const preExplained = document.getElementById('pre-explained-checkbox').checked;
     const signatureImg = getSignatureDataUrl();
-    if (!signatureImg) { alert('서명을 받아주세요.'); return; }
+    if (!signatureImg && !preExplained) {
+        alert('서명을 받거나, 서명을 받기 어려운 경우 "사전 설명 완료" 체크박스를 선택해 주세요.');
+        return;
+    }
 
     localStorage.setItem('inspector_name_cache', staff);
 
@@ -2733,6 +2743,7 @@ async function saveAccessoryCheckout() {
             checkoutStaff: staff,
             agreedTerms: true,
             signatureImg: signatureImg,
+            preExplainedNoSignature: preExplained,
             returnDate: '',
             returnStaff: '',
             standReturned: null,
@@ -2771,13 +2782,26 @@ async function renderTabletHistory() {
 
     document.getElementById('tablet-stat-out').textContent = `${activeDocs.length}대`;
 
-    // 대여중: 최근 제공일자 순 / 완료: 최근 회수일자 순
+    // 대여중: 최근 제공일자 순 / 완료: 실제 처리된 시각(updatedAt) 최신순 - 날짜만으로는 같은 날 여러 건일 때 순서가 뒤섞이기 때문입니다.
     activeDocs.sort((a, b) => (b.checkoutDate || '').localeCompare(a.checkoutDate || ''));
-    completedDocs.sort((a, b) => (b.returnDate || '').localeCompare(a.returnDate || ''));
+    completedDocs.sort((a, b) => {
+        const aTime = (a.updatedAt && typeof a.updatedAt.toMillis === 'function') ? a.updatedAt.toMillis() : 0;
+        const bTime = (b.updatedAt && typeof b.updatedAt.toMillis === 'function') ? b.updatedAt.toMillis() : 0;
+        if (aTime !== bTime) return bTime - aTime;
+        return (b.returnDate || '').localeCompare(a.returnDate || '');
+    });
 
     const photoCellFor = (d) => d.patientReturnPhotoSrc
         ? `<button class="nav-btn" style="padding:5px 10px; font-size:12px; margin:0; background:#6c757d;" onclick="viewLoanPhoto('${d._docId}')">📷 사진 보기</button>`
         : '<span style="color:#adb5bd; font-size:12px;">사진 없음</span>';
+
+    // 회수 처리된 실제 시각까지 보여줍니다. (updatedAt이 없는 옛 기록은 날짜만 표시)
+    const formatReturnDateTime = (d) => {
+        if (d.updatedAt && typeof d.updatedAt.toDate === 'function') {
+            return d.updatedAt.toDate().toLocaleString('ko-KR');
+        }
+        return d.returnDate || '-';
+    };
 
     activeBody.innerHTML = activeDocs.length ? activeDocs.map(d => `
         <tr>
@@ -2805,7 +2829,7 @@ async function renderTabletHistory() {
             <td>${d.earphoneProvided ? 'O' : 'X'}</td>
             <td>${d.chargerProvided ? 'O' : 'X'}</td>
             <td>${d.checkoutStaff || '-'}</td>
-            <td>${d.returnDate || '-'}</td>
+            <td>${formatReturnDateTime(d)}</td>
             <td>${d.returnStaff || '-'}</td>
             <td>${photoCellFor(d)}</td>
         </tr>
@@ -3023,8 +3047,12 @@ async function saveTabletCheckout(tabletId) {
     if (!staff) { alert('제공 직원 이름을 입력해 주세요.'); return; }
     const agreed = document.getElementById('terms-agree-checkbox').checked;
     if (!agreed) { alert('이용약관 동의가 필요합니다.'); return; }
+    const preExplained = document.getElementById('pre-explained-checkbox').checked;
     const signatureImg = getSignatureDataUrl();
-    if (!signatureImg) { alert('서명을 받아주세요.'); return; }
+    if (!signatureImg && !preExplained) {
+        alert('서명을 받거나, 서명을 받기 어려운 경우 "사전 설명 완료" 체크박스를 선택해 주세요.');
+        return;
+    }
 
     localStorage.setItem('inspector_name_cache', staff);
 
@@ -3041,6 +3069,7 @@ async function saveTabletCheckout(tabletId) {
             checkoutStaff: staff,
             agreedTerms: true,
             signatureImg: signatureImg,
+            preExplainedNoSignature: preExplained,
             returnDate: '',
             returnStaff: '',
             standReturned: null,
