@@ -107,6 +107,17 @@
         .terms-box ol { margin: 8px 0 0 18px; padding: 0; }
         .terms-box ul { margin: 5px 0 0 18px; padding: 0; }
         .sig-canvas { border: 1px solid #ccc; border-radius: 6px; touch-action: none; background: white; display: block; margin-top: 8px; max-width: 100%; }
+
+        /* --- 정수기/이온수기 필터 관리 상태 표시 --- */
+        .water-status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+        .wbadge-normal { background: #e6f4ea; color: #137333; }
+        .wbadge-soon { background: #fff3cd; color: #8a6d1a; }
+        .wbadge-overdue { background: #ffe3e3; color: #dc3545; }
+        .wbadge-vendor { background: #e7f1fb; color: #2b569a; }
+        tr.water-row-soon { background-color: #fffaf0; }
+        tr.water-row-overdue { background-color: #fff5f5; }
+        tr.water-row-clickable { cursor: pointer; }
+        tr.water-row-clickable:hover { filter: brightness(0.96); }
         .qr-check-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .qr-check-label { flex: 1; font-size: 14px; padding-right: 10px; }
         .toggle-pair { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #ccc; flex-shrink: 0; }
@@ -660,10 +671,142 @@
     </div>
 
     <!-- 정수기 점검표 -->
+    <!-- 정수기/이온수기 관리 메뉴 -->
     <div id="page-water" class="hidden">
         <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
-        <h2>💧 정수기 점검표</h2>
-        <p>준비 중입니다.</p>
+        <h2>💧 정수기 및 이온수기 필터 관리</h2>
+        <p>원하시는 작업을 선택하세요.</p>
+        <div class="menu-grid">
+            <div class="menu-btn-sub" onclick="showPage('water-dashboard')">📊 통합 관리 현황</div>
+            <div class="menu-btn-sub" onclick="showPage('water-log')">📝 필터 교체 입력</div>
+            <div class="menu-btn-sub" onclick="showPage('water-detail')">📋 필터별 교체 세부 계획표</div>
+        </div>
+    </div>
+
+    <!-- 정수기 통합 관리 현황 -->
+    <div id="page-water-dashboard" class="hidden">
+        <button class="back-btn" onclick="showPage('water')">← 이전 메뉴로</button>
+        <h2>📊 정수기 및 이온수기 통합 관리 현황</h2>
+        <p style="font-size: 13px; color: #6c757d;">* 차기 예정일 30일 이전이면 [점검예정], 지나면 [교체요망]으로 자동 전환됩니다. 행을 클릭하면 해당 기기의 교체 이력을 볼 수 있습니다.</p>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>설치 위치</th>
+                        <th>관리번호</th>
+                        <th>모델명</th>
+                        <th>제품명</th>
+                        <th>필터 구성 수</th>
+                        <th>최근 점검일</th>
+                        <th>차기 점검 예정일</th>
+                        <th>D-Day</th>
+                        <th>관리 상태</th>
+                        <th>교체 필요 필터</th>
+                        <th>비고</th>
+                    </tr>
+                </thead>
+                <tbody id="water-dashboard-body">
+                    <tr><td colspan="11">데이터를 불러오는 중입니다...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 필터 교체 입력 -->
+    <div id="page-water-log" class="hidden">
+        <button class="back-btn" onclick="showPage('water')">← 이전 메뉴로</button>
+        <h2>📝 필터 교체 입력</h2>
+        <p style="font-size: 13px; color: #6c757d;">관리번호를 고르면 제품명·모델명이 자동으로 표시되고, 교체한 필터도 그 기기에 맞는 목록에서 선택하게 됩니다 (오타 방지).</p>
+
+        <div class="qr-check-card" style="max-width: 520px; margin: 0;">
+            <p>
+                교체일자: <input type="date" id="water-log-date"><br><br>
+                관리번호: <select id="water-log-unit-select" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc; width: 100%;" onchange="onWaterLogUnitChange()"></select>
+            </p>
+            <p id="water-log-unit-info" style="color: #2b569a; font-weight: bold; font-size: 13px;"></p>
+            <p>
+                교체한 필터: <select id="water-log-filter-select" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc; width: 100%;">
+                    <option value="">-- 먼저 관리번호를 선택하세요 --</option>
+                </select>
+            </p>
+            <p>
+                비고 (선택): <input type="text" id="water-log-note" class="table-input" style="width: 100%;" placeholder="예: 정기 교체">
+            </p>
+            <button class="save-btn" onclick="saveWaterFilterLog()">☁️ 저장하기</button>
+            <div id="water-log-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+
+        <div class="history-box" style="margin-top: 25px;">
+            <strong>📅 초기 데이터 불러오기 (최초 1회만)</strong>
+            <p style="font-size: 13px; color: #6c757d; margin: 5px 0;">기존에 관리하시던 스프레드시트의 최근 교체 기록을 한 번에 불러옵니다. 이미 불러왔다면 다시 누르셔도 중복 저장되지 않습니다.</p>
+            <button class="sync-btn" onclick="seedWaterInitialData()">기존 스프레드시트 최근 기록 불러오기</button>
+        </div>
+
+        <h3 style="margin-top: 25px;">최근 입력 내역</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>교체일자</th>
+                        <th>관리번호</th>
+                        <th>제품명</th>
+                        <th>교체한 필터</th>
+                        <th>비고</th>
+                    </tr>
+                </thead>
+                <tbody id="water-recent-log-body">
+                    <tr><td colspan="5">데이터를 불러오는 중입니다...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 필터별 교체 세부 계획표 -->
+    <div id="page-water-detail" class="hidden">
+        <button class="back-btn" onclick="showPage('water')">← 이전 메뉴로</button>
+        <h2>📋 정수기/이온수기 필터별 교체 세부 계획표</h2>
+        <p style="font-size: 13px; color: #6c757d;">* 관리번호별 세부 필터 교체 주기 및 차기 교체 예정일입니다.</p>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>설치 위치</th>
+                        <th>관리번호</th>
+                        <th>모델명</th>
+                        <th>필터단계</th>
+                        <th>필터명 (관리명칭)</th>
+                        <th>교체주기</th>
+                        <th>최근 교체일</th>
+                        <th>차기 교체예정일</th>
+                        <th>D-Day</th>
+                        <th>교체 상태</th>
+                    </tr>
+                </thead>
+                <tbody id="water-detail-body">
+                    <tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 관리번호별 교체 이력 -->
+    <div id="page-water-history" class="hidden">
+        <button class="back-btn" onclick="showPage('water-dashboard')">← 현황판으로</button>
+        <h2 id="water-history-title">📍 교체 이력</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">NO</th>
+                        <th style="width: 25%;">교체일자</th>
+                        <th>교체한 필터</th>
+                    </tr>
+                </thead>
+                <tbody id="water-history-body">
+                    <tr><td colspan="3">불러오는 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -1073,6 +1216,9 @@
         if(pageId === 'tablet-qr') { renderTabletQrGrid(); renderAccessoryRegisterQr(); renderAccessoryReturnPhotoQr(); renderAccessoryReturnProcessQr(); }
         if(pageId === 'tablet-manual') renderTabletManualSelect();
         if(pageId === 'accessory-manual') initAccessoryManualForm();
+        if(pageId === 'water-dashboard') renderWaterDashboard();
+        if(pageId === 'water-log') initWaterLogForm();
+        if(pageId === 'water-detail') renderWaterDetailTable();
     }
 
     function showMain() {
@@ -3405,6 +3551,370 @@ async function submitPatientPhoto(loanDocId) {
         console.error(err);
         resultEl.style.color = '#dc3545';
         resultEl.textContent = '제출에 실패했습니다. 다시 시도해 주세요.';
+    }
+}
+
+// =========================================================
+// 11. 정수기 / 이온수기 필터 관리
+// =========================================================
+
+// 관리번호별 마스터 정보 (위치/모델/제품/필터단계별 이름+교체주기[개월]).
+// 실제로 기기가 추가/변경되면 이 배열만 수정하면 전체 시스템에 반영됩니다.
+const WATER_UNITS = [
+    { id: 'B1F-1', location: '지하 1층', model: 'AML 3010S', product: '알칼리 이온수 생성기',
+        filters: [ { stage: 1, name: '카본블럭 복합필터', cycleMonths: 8 } ] },
+    { id: 'B1F-2', location: '지하 1층', model: 'WPU-B600F', product: '대용량 스탠드 정수기',
+        filters: [
+            { stage: 1, name: '프리 블록카본 (Sediment)', cycleMonths: 4 },
+            { stage: 2, name: 'UF 멤브레인 필터', cycleMonths: 12 },
+            { stage: 3, name: '포스트 입상카본 필터', cycleMonths: 12 }
+        ] },
+    { id: '2F-1', location: '2층', model: 'WPU-A700C', product: '전기 냉온 정수기',
+        filters: [
+            { stage: 1, name: 'Sed.Free 복합필터 (프리블록)', cycleMonths: 4 },
+            { stage: 2, name: '나노테크 PAC 필터', cycleMonths: 12 },
+            { stage: 3, name: 'Sed.Free.NAF. 안심백 (포스트카본)', cycleMonths: 12 }
+        ] },
+    { id: '3F-1', location: '3층', model: 'WPU-A700C', product: '전기 냉온 정수기',
+        filters: [
+            { stage: 1, name: 'Sed.Free 복합필터 (프리블록)', cycleMonths: 4 },
+            { stage: 2, name: '나노테크 PAC 필터', cycleMonths: 12 },
+            { stage: 3, name: 'Sed.Free.NAF. 안심백 (포스트카본)', cycleMonths: 12 }
+        ] },
+    { id: '4F-1', location: '4층', model: 'WPU-A700C', product: '전기 냉온 정수기',
+        filters: [
+            { stage: 1, name: 'Sed.Free 복합필터 (프리블록)', cycleMonths: 4 },
+            { stage: 2, name: '나노테크 PAC 필터', cycleMonths: 12 },
+            { stage: 3, name: 'Sed.Free.NAF. 안심백 (포스트카본)', cycleMonths: 12 }
+        ] },
+    { id: '5F-1', location: '5층', model: 'WPU-A700C', product: '전기 냉온 정수기',
+        filters: [
+            { stage: 1, name: 'Sed.Free 복합필터 (프리블록)', cycleMonths: 4 },
+            { stage: 2, name: '나노테크 PAC 필터', cycleMonths: 12 },
+            { stage: 3, name: 'Sed.Free.NAF. 안심백 (포스트카본)', cycleMonths: 12 }
+        ] },
+    { id: '6F-1', location: '6층', model: 'WPU-A700C', product: '전기 냉온 정수기',
+        filters: [
+            { stage: 1, name: 'Sed.Free 복합필터 (프리블록)', cycleMonths: 4 },
+            { stage: 2, name: '나노테크 PAC 필터', cycleMonths: 12 },
+            { stage: 3, name: 'Sed.Free.NAF. 안심백 (포스트카본)', cycleMonths: 12 }
+        ] },
+    { id: '7F-1', location: '7층', model: 'AML 3010S', product: '알칼리 이온수 생성기',
+        filters: [ { stage: 1, name: '카본블럭 복합필터', cycleMonths: 8 } ] },
+    { id: '7F-2', location: '7층', model: 'WI-60C90511M', product: '청호나이스 정수기',
+        filters: [], vendorManaged: true,
+        vendorNote: '업체 관리중 (2030.05.30까지 / 2025.05.30~5년 계약, 2개월에 한번씩 방문)' }
+];
+
+function todayStr() {
+    return new Date().toISOString().substring(0, 10);
+}
+
+function addMonthsToDateStr(dateStr, months) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().substring(0, 10);
+}
+
+function daysBetweenDateStr(fromStr, toStr) {
+    const from = new Date(fromStr + 'T00:00:00');
+    const to = new Date(toStr + 'T00:00:00');
+    return Math.round((to - from) / 86400000);
+}
+
+// D-Day가 음수(지남)면 교체요망, 30일 이내면 점검예정, 그 외 정상. 교체 이력이 아예 없으면 미교체.
+function getWaterStatus(dday) {
+    if (dday === null || dday === undefined) return { label: '미교체', badge: 'wbadge-overdue', row: 'water-row-overdue' };
+    if (dday < 0) return { label: '교체요망', badge: 'wbadge-overdue', row: 'water-row-overdue' };
+    if (dday <= 30) return { label: '점검예정', badge: 'wbadge-soon', row: 'water-row-soon' };
+    return { label: '정상', badge: 'wbadge-normal', row: '' };
+}
+
+// 특정 기기(unit)의 필터단계별 최근교체일/차기교체예정일/D-Day/상태를 계산
+function computeUnitFilterStatuses(unit, logs) {
+    const today = todayStr();
+    return unit.filters.map(f => {
+        const matching = logs.filter(l => l.unitId === unit.id && l.filterName === f.name);
+        if (matching.length === 0) {
+            return { ...f, lastDate: null, nextDate: null, dday: null, status: getWaterStatus(null) };
+        }
+        const lastDate = matching.reduce((max, l) => (l.date > max ? l.date : max), matching[0].date);
+        const nextDate = addMonthsToDateStr(lastDate, f.cycleMonths);
+        const dday = daysBetweenDateStr(today, nextDate);
+        return { ...f, lastDate, nextDate, dday, status: getWaterStatus(dday) };
+    });
+}
+
+// 기기 하나를 대표하는 요약 정보 (현황판용) - 가장 급한(차기예정일이 가장 빠른) 필터를 기준으로 표시
+function computeUnitSummary(unit, logs) {
+    if (unit.vendorManaged) {
+        return {
+            filterCount: 0, lastDate: '-', nextDate: '-', dday: '-',
+            status: { label: '업체관리', badge: 'wbadge-vendor', row: '' }, neededFilter: '-'
+        };
+    }
+
+    const statuses = computeUnitFilterStatuses(unit, logs);
+    const withLast = statuses.filter(s => s.lastDate);
+    const lastDate = withLast.length ? withLast.reduce((max, s) => (s.lastDate > max ? s.lastDate : max), withLast[0].lastDate) : null;
+
+    const withNext = statuses.filter(s => s.nextDate);
+    if (withNext.length === 0) {
+        return { filterCount: unit.filters.length, lastDate: lastDate || '-', nextDate: '-', dday: '-', status: getWaterStatus(null), neededFilter: '-' };
+    }
+
+    const soonest = withNext.reduce((min, s) => (s.nextDate < min.nextDate ? s : min), withNext[0]);
+    return {
+        filterCount: unit.filters.length, lastDate: lastDate || '-', nextDate: soonest.nextDate,
+        dday: soonest.dday, status: soonest.status, neededFilter: soonest.name
+    };
+}
+
+// ---- 통합 관리 현황판 ----
+function renderWaterDashboard() {
+    const tbody = document.getElementById('water-dashboard-body');
+    tbody.innerHTML = '<tr><td colspan="11">데이터를 불러오는 중입니다...</td></tr>';
+
+    db.collection('water_filter_logs').get().then(snapshot => {
+        const logs = [];
+        snapshot.forEach(doc => logs.push(doc.data()));
+
+        tbody.innerHTML = WATER_UNITS.map(unit => {
+            const s = computeUnitSummary(unit, logs);
+            const ddayLabel = typeof s.dday === 'number' ? `${s.dday}일` : s.dday;
+            const rowClass = ['water-row-clickable', s.status.row].filter(Boolean).join(' ');
+            return `
+                <tr class="${rowClass}" onclick="showWaterUnitHistory('${unit.id}')">
+                    <td>${unit.location}</td>
+                    <td><strong>${unit.id}</strong></td>
+                    <td>${unit.model}</td>
+                    <td>${unit.product}</td>
+                    <td>${s.filterCount}</td>
+                    <td>${s.lastDate}</td>
+                    <td>${s.nextDate}</td>
+                    <td>${ddayLabel}</td>
+                    <td><span class="water-status-badge ${s.status.badge}">${s.status.label}</span></td>
+                    <td>${s.neededFilter}</td>
+                    <td style="text-align:left;">${unit.vendorNote || '-'}</td>
+                </tr>
+            `;
+        }).join('');
+    });
+}
+
+// ---- 필터별 교체 세부 계획표 ----
+function renderWaterDetailTable() {
+    const tbody = document.getElementById('water-detail-body');
+    tbody.innerHTML = '<tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>';
+
+    db.collection('water_filter_logs').get().then(snapshot => {
+        const logs = [];
+        snapshot.forEach(doc => logs.push(doc.data()));
+
+        let rows = '';
+        WATER_UNITS.forEach(unit => {
+            if (unit.vendorManaged) {
+                rows += `
+                    <tr>
+                        <td>${unit.location}</td>
+                        <td><strong>${unit.id}</strong></td>
+                        <td>${unit.model}</td>
+                        <td colspan="6" style="text-align:left; color:#6c757d;">${unit.vendorNote}</td>
+                        <td><span class="water-status-badge wbadge-vendor">업체관리</span></td>
+                    </tr>
+                `;
+                return;
+            }
+            const statuses = computeUnitFilterStatuses(unit, logs);
+            statuses.forEach(s => {
+                const ddayLabel = typeof s.dday === 'number' ? `${s.dday}일` : '-';
+                rows += `
+                    <tr>
+                        <td>${unit.location}</td>
+                        <td><strong>${unit.id}</strong></td>
+                        <td>${unit.model}</td>
+                        <td>${s.stage}단계</td>
+                        <td style="text-align:left;">${s.name}</td>
+                        <td>${s.cycleMonths}개월</td>
+                        <td>${s.lastDate || '-'}</td>
+                        <td>${s.nextDate || '-'}</td>
+                        <td>${ddayLabel}</td>
+                        <td><span class="water-status-badge ${s.status.badge}">${s.status.label}</span></td>
+                    </tr>
+                `;
+            });
+        });
+        tbody.innerHTML = rows;
+    });
+}
+
+// ---- 관리번호별 교체 이력 ----
+function showWaterUnitHistory(unitId) {
+    showPage('water-history');
+    const unit = WATER_UNITS.find(u => u.id === unitId);
+    document.getElementById('water-history-title').textContent = `📍 ${unitId} 교체 이력${unit ? ` (${unit.product})` : ''}`;
+
+    const tbody = document.getElementById('water-history-body');
+    tbody.innerHTML = '<tr><td colspan="3">불러오는 중...</td></tr>';
+
+    db.collection('water_filter_logs').where('unitId', '==', unitId).get().then(snapshot => {
+        const logs = [];
+        snapshot.forEach(doc => logs.push(doc.data()));
+        logs.sort((a, b) => a.date.localeCompare(b.date));
+
+        if (logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3">교체 이력이 없습니다.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = logs.map((l, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${l.date}</td>
+                <td style="text-align:left;">${l.filterName}${l.note ? `<br><small style="color:#6c757d;">${l.note}</small>` : ''}</td>
+            </tr>
+        `).join('');
+    });
+}
+
+// ---- 필터 교체 입력 화면 ----
+function initWaterLogForm() {
+    document.getElementById('water-log-date').value = todayStr();
+    document.getElementById('water-log-note').value = '';
+    document.getElementById('water-log-result').textContent = '';
+
+    const unitSelect = document.getElementById('water-log-unit-select');
+    unitSelect.innerHTML = '<option value="">-- 관리번호 선택 --</option>' +
+        WATER_UNITS.filter(u => !u.vendorManaged)
+            .map(u => `<option value="${u.id}">${u.id} (${u.product})</option>`)
+            .join('');
+    document.getElementById('water-log-unit-info').textContent = '';
+    document.getElementById('water-log-filter-select').innerHTML = '<option value="">-- 먼저 관리번호를 선택하세요 --</option>';
+
+    renderWaterRecentLogs();
+}
+
+function onWaterLogUnitChange() {
+    const unitId = document.getElementById('water-log-unit-select').value;
+    const unit = WATER_UNITS.find(u => u.id === unitId);
+    const infoEl = document.getElementById('water-log-unit-info');
+    const filterSelect = document.getElementById('water-log-filter-select');
+
+    if (!unit) {
+        infoEl.textContent = '';
+        filterSelect.innerHTML = '<option value="">-- 먼저 관리번호를 선택하세요 --</option>';
+        return;
+    }
+
+    infoEl.textContent = `${unit.product} / ${unit.model}`;
+    filterSelect.innerHTML = unit.filters.map(f => `<option value="${f.name}">${f.stage}단계 - ${f.name}</option>`).join('');
+}
+
+async function saveWaterFilterLog() {
+    const date = document.getElementById('water-log-date').value;
+    const unitId = document.getElementById('water-log-unit-select').value;
+    const filterName = document.getElementById('water-log-filter-select').value;
+    const note = document.getElementById('water-log-note').value.trim();
+    const resultEl = document.getElementById('water-log-result');
+
+    if (!date) { alert('교체일자를 선택해 주세요.'); return; }
+    if (!unitId) { alert('관리번호를 선택해 주세요.'); return; }
+    if (!filterName) { alert('교체한 필터를 선택해 주세요.'); return; }
+
+    try {
+        await db.collection('water_filter_logs').add({
+            date: date,
+            unitId: unitId,
+            filterName: filterName,
+            note: note,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+        renderWaterRecentLogs();
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+async function renderWaterRecentLogs() {
+    const tbody = document.getElementById('water-recent-log-body');
+    tbody.innerHTML = '<tr><td colspan="5">데이터를 불러오는 중입니다...</td></tr>';
+
+    const snapshot = await db.collection('water_filter_logs').get();
+    const logs = [];
+    snapshot.forEach(doc => logs.push(doc.data()));
+    logs.sort((a, b) => b.date.localeCompare(a.date));
+
+    if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">입력된 기록이 없습니다.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = logs.slice(0, 20).map(l => {
+        const unit = WATER_UNITS.find(u => u.id === l.unitId);
+        return `
+            <tr>
+                <td>${l.date}</td>
+                <td>${l.unitId}</td>
+                <td>${unit ? unit.product : '-'}</td>
+                <td style="text-align:left;">${l.filterName}</td>
+                <td>${l.note || '-'}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// 기존 스프레드시트의 "최근 교체일" 기준 현재 상태를 그대로 옮겨오는 1회성 초기화 데이터입니다.
+// (스프레드시트 캡처 화면에서 확인 가능했던 각 필터의 가장 최근 교체일만 반영했습니다.
+//  그보다 오래된 과거 이력까지는 전체가 보이지 않아 옮기지 못했으니, 필요하시면 필터 교체 입력 화면에서 직접 추가해 주세요.)
+async function seedWaterInitialData() {
+    if (!confirm('기존 스프레드시트의 최근 교체 기록을 불러옵니다. 계속할까요? (이미 불러왔다면 다시 눌러도 중복되지 않습니다)')) return;
+
+    const seedEntries = [
+        { unitId: 'B1F-1', filterName: '카본블럭 복합필터', date: '2026-05-01' },
+        { unitId: 'B1F-2', filterName: '프리 블록카본 (Sediment)', date: '2026-05-07' },
+        { unitId: 'B1F-2', filterName: 'UF 멤브레인 필터', date: '2026-05-07' },
+        { unitId: 'B1F-2', filterName: '포스트 입상카본 필터', date: '2026-05-07' },
+        { unitId: '2F-1', filterName: 'Sed.Free 복합필터 (프리블록)', date: '2026-05-07' },
+        { unitId: '2F-1', filterName: '나노테크 PAC 필터', date: '2026-05-07' },
+        { unitId: '2F-1', filterName: 'Sed.Free.NAF. 안심백 (포스트카본)', date: '2026-05-07' },
+        { unitId: '3F-1', filterName: 'Sed.Free 복합필터 (프리블록)', date: '2026-05-07' },
+        { unitId: '3F-1', filterName: '나노테크 PAC 필터', date: '2026-05-07' },
+        { unitId: '3F-1', filterName: 'Sed.Free.NAF. 안심백 (포스트카본)', date: '2026-05-07' },
+        { unitId: '4F-1', filterName: 'Sed.Free 복합필터 (프리블록)', date: '2026-05-07' },
+        { unitId: '4F-1', filterName: '나노테크 PAC 필터', date: '2026-05-07' },
+        { unitId: '4F-1', filterName: 'Sed.Free.NAF. 안심백 (포스트카본)', date: '2026-05-07' },
+        { unitId: '5F-1', filterName: 'Sed.Free 복합필터 (프리블록)', date: '2026-05-07' },
+        { unitId: '5F-1', filterName: '나노테크 PAC 필터', date: '2026-05-07' },
+        { unitId: '5F-1', filterName: 'Sed.Free.NAF. 안심백 (포스트카본)', date: '2026-05-07' },
+        { unitId: '6F-1', filterName: 'Sed.Free 복합필터 (프리블록)', date: '2026-05-07' },
+        { unitId: '6F-1', filterName: '나노테크 PAC 필터', date: '2026-05-07' },
+        { unitId: '6F-1', filterName: 'Sed.Free.NAF. 안심백 (포스트카본)', date: '2026-05-07' },
+        { unitId: '7F-1', filterName: '카본블럭 복합필터', date: '2026-07-01' }
+    ];
+
+    try {
+        const batch = db.batch();
+        seedEntries.forEach(e => {
+            const docId = `seed__${toDocIdSafe(e.unitId)}__${toDocIdSafe(e.filterName)}__${e.date}`;
+            const ref = db.collection('water_filter_logs').doc(docId);
+            batch.set(ref, {
+                unitId: e.unitId,
+                filterName: e.filterName,
+                date: e.date,
+                note: '초기 데이터',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        });
+        await batch.commit();
+        alert('초기 데이터를 불러왔습니다!');
+        renderWaterRecentLogs();
+    } catch (err) {
+        console.error(err);
+        alert('불러오기 실패: ' + err.message);
     }
 }
 
