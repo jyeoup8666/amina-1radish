@@ -69,6 +69,13 @@
         .badge-live { background-color: #e6f4ea; color: #137333; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
         .pulse-dot { width: 8px; height: 8px; background-color: #28a745; border-radius: 50%; display: inline-block; }
 
+        /* --- 실시간 시설요청 우선순위 표시 --- */
+        tr.priority-row-high { background-color: #fff5f5; box-shadow: inset 4px 0 0 #dc3545; }
+        tr.priority-row-low { background-color: #f8f9fa; box-shadow: inset 4px 0 0 #adb5bd; }
+        .priority-badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-right: 6px; white-space: nowrap; vertical-align: middle; }
+        .priority-badge.high { background: #dc3545; color: white; }
+        .priority-badge.low { background: #adb5bd; color: white; }
+
         /* --- 층별 소방시설 이력(관리대장) 스타일 --- */
         .floor-year-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .year-select { padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; }
@@ -490,14 +497,22 @@
     const rtdb = firebase.database();
 
     // 2. 실시간 시설요청 현황 (Realtime Database)
-    // 답장 내용에 이런 표현이 들어있어야 "완료"로 간주합니다. (라인 답장이 오면 무조건 완료 처리되는 게 아니라,
-    // 실제로 처리됐다는 뜻의 답장일 때만 완료내역으로 넘어가고, 그 외의 답장(재요청/방문예정 등)은
-    // 진행중 목록에 남긴 채 답장 내용만 함께 보여줍니다.)
-    const RESOLVED_REPLY_KEYWORDS = ['완료', '처리했습니다', '처리완료', '수리완료', '수리했습니다', '조치했습니다', '조치완료', '교체했습니다', '교체완료', '해결했습니다', '해결완료', '고쳤습니다', '고쳤어요'];
+    // 답장에 이런 표현이 들어있으면 "아직 완료된 게 아니다"로 보고 진행중 목록에 남깁니다.
+    // (완료를 뜻하는 표현은 '드렸습니다/보관했습니다/설치했습니다/가져다드렸습니다' 등 너무 다양해서
+    //  전부 나열하기 어렵기 때문에, 반대로 "아직 진행중"이라는 걸 알 수 있는 표현만 걸러내고
+    //  그 외의 답장은 전부 처리완료로 간주합니다.)
+    const PENDING_REPLY_KEYWORDS = [
+        '예정', '방문', '다음에', '다음번', '재요청', '다시 요청', '다시요청', '한번 더', '한 번 더',
+        '기다려', '진행중', '진행 중', '확인중', '확인 중', '준비중', '준비 중',
+        '검토', '문의해', '연락드리겠습니다', '알아보겠습니다', '조율중', '조율 중',
+        '수리요청', '수리 요청', '업체요청', '업체 요청', '업체에 요청', 'A/S', 'AS요청', 'AS 요청',
+        '기사님', '기사분', '접수했습니다', '접수했어요', '접수완료', '접수 완료',
+        '주문했습니다', '주문했어요', '주문 했습니다', '연락했습니다', '연락드렸습니다'
+    ];
 
     function isReplyResolved(replyMessage) {
         if (!replyMessage) return false;
-        return RESOLVED_REPLY_KEYWORDS.some(kw => replyMessage.includes(kw));
+        return !PENDING_REPLY_KEYWORDS.some(kw => replyMessage.includes(kw));
     }
 
     // 진행중 요청의 표시 순서를 정하는 우선순위 키워드입니다. 필요하면 이 두 목록만 수정하면 됩니다.
@@ -532,7 +547,7 @@
         const completedItems = [];
 
         entries.forEach(({ key, item }) => {
-            // status가 completed여도 답장 내용이 실제 처리완료로 보이지 않으면 진행중으로 취급합니다.
+            // status가 completed여도 답장 내용이 아직 진행중을 뜻하면 진행중으로 취급합니다.
             const trulyResolved = item.status === 'completed' && isReplyResolved(item.replyMessage);
             if (trulyResolved) {
                 completedItems.push({ key, item });
@@ -557,16 +572,18 @@
             const dateStr = item.timestamp
                 ? new Date(item.timestamp).toLocaleString('ko-KR')
                 : '-';
-            const priorityBadge = getRequestPriority(item.text) === 2
-                ? '<span style="color:#dc3545; font-size:11px; font-weight:bold; margin-right:5px;">⚠ 우선</span>'
-                : '';
+            const priority = getRequestPriority(item.text);
+            const rowClass = priority === 2 ? 'priority-row-high' : (priority === 0 ? 'priority-row-low' : '');
+            const priorityBadge = priority === 2
+                ? '<span class="priority-badge high">🔴 우선</span>'
+                : (priority === 0 ? '<span class="priority-badge low">⏳ 후순위</span>' : '');
             // 완료를 뜻하지 않는 답장(재요청/방문예정 등)은 삭제선 없이 노트로만 붙여서 보여줍니다.
             const replyNote = item.replyMessage
                 ? `<br><small style="color:#17a2b8; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>`
                 : '';
 
             activeHtml += `
-                <tr>
+                <tr class="${rowClass}">
                     <td>${i + 1}</td>
                     <td>${dateStr}</td>
                     <td style="text-align: left; font-weight: bold; padding-left: 15px;">${priorityBadge}${item.text || ''}${replyNote}</td>
