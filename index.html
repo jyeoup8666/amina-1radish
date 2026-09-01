@@ -524,29 +524,62 @@
             </div>
         </div>
 
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>구분</th>
-                        <th>기기번호</th>
-                        <th>상태</th>
-                        <th>병실</th>
-                        <th>환자명</th>
-                        <th>제공일자</th>
-                        <th>스탠드</th>
-                        <th>이어폰</th>
-                        <th>충전기</th>
-                        <th>제공직원</th>
-                        <th>회수일자</th>
-                        <th>회수직원</th>
-                        <th>반납사진</th>
-                    </tr>
-                </thead>
-                <tbody id="tablet-history-body">
-                    <tr><td colspan="13">데이터를 불러오는 중입니다...</td></tr>
-                </tbody>
-            </table>
+        <div id="tabletHistoryActiveView">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h3 style="margin: 0; color: #dc3545;">🔵 현재 대여중</h3>
+                <button class="toggle-history-btn" onclick="switchTabletHistoryView('completed')">✅ 회수완료 내역 보기</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>기기번호</th>
+                            <th>병실</th>
+                            <th>환자명</th>
+                            <th>제공일자</th>
+                            <th>스탠드</th>
+                            <th>이어폰</th>
+                            <th>충전기</th>
+                            <th>제공직원</th>
+                            <th>반납사진</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablet-history-active-body">
+                        <tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tabletHistoryCompletedView" class="hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h3 style="margin: 0; color: #28a745;">✅ 회수완료 내역</h3>
+                <button class="toggle-history-btn" onclick="switchTabletHistoryView('active')">🔵 현재 대여중 보기</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>기기번호</th>
+                            <th>병실</th>
+                            <th>환자명</th>
+                            <th>제공일자</th>
+                            <th>스탠드</th>
+                            <th>이어폰</th>
+                            <th>충전기</th>
+                            <th>제공직원</th>
+                            <th>회수일자</th>
+                            <th>회수직원</th>
+                            <th>반납사진</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablet-history-completed-body">
+                        <tr><td colspan="12">데이터를 불러오는 중입니다...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -2724,61 +2757,74 @@ async function saveAccessoryCheckout() {
 
 // ---- 대여/회수 이력 화면 ----
 async function renderTabletHistory() {
-    const tbody = document.getElementById('tablet-history-body');
-    tbody.innerHTML = '<tr><td colspan="13">데이터를 불러오는 중입니다...</td></tr>';
+    const activeBody = document.getElementById('tablet-history-active-body');
+    const completedBody = document.getElementById('tablet-history-completed-body');
+    activeBody.innerHTML = '<tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>';
+    completedBody.innerHTML = '<tr><td colspan="12">데이터를 불러오는 중입니다...</td></tr>';
 
     const snapshot = await db.collection('tablet_loans').get();
     const docs = [];
     snapshot.forEach(doc => docs.push({ ...doc.data(), _docId: doc.id }));
 
-    const outCount = docs.filter(d => d.status === 'out').length;
-    document.getElementById('tablet-stat-out').textContent = `${outCount}대`;
+    const activeDocs = docs.filter(d => d.status === 'out');
+    const completedDocs = docs.filter(d => d.status !== 'out');
 
-    // 대여중인 것 먼저, 그 다음 최근 제공일자 순
-    docs.sort((a, b) => {
-        if (a.status !== b.status) return a.status === 'out' ? -1 : 1;
-        return (b.checkoutDate || '').localeCompare(a.checkoutDate || '');
-    });
+    document.getElementById('tablet-stat-out').textContent = `${activeDocs.length}대`;
 
-    if (docs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="13">대여 이력이 없습니다.</td></tr>';
-        return;
-    }
+    // 대여중: 최근 제공일자 순 / 완료: 최근 회수일자 순
+    activeDocs.sort((a, b) => (b.checkoutDate || '').localeCompare(a.checkoutDate || ''));
+    completedDocs.sort((a, b) => (b.returnDate || '').localeCompare(a.returnDate || ''));
 
-    tbody.innerHTML = docs.map(d => {
-        const statusBadge = d.status === 'out'
-            ? '<span style="color:#dc3545; font-weight:bold;">🔵 대여중</span>'
-            : '<span style="color:#28a745; font-weight:bold;">✅ 회수완료</span>';
-        const typeLabel = d.tabletId ? '📱 태블릿' : '🎧 부속품';
+    const photoCellFor = (d) => d.patientReturnPhotoSrc
+        ? `<button class="nav-btn" style="padding:5px 10px; font-size:12px; margin:0; background:#6c757d;" onclick="viewLoanPhoto('${d._docId}')">📷 사진 보기</button>`
+        : '<span style="color:#adb5bd; font-size:12px;">사진 없음</span>';
 
-        let photoCell;
-        if (d.patientReturnPhotoSrc) {
-            photoCell = `<button class="nav-btn" style="padding:5px 10px; font-size:12px; margin:0; background:#6c757d;" onclick="viewLoanPhoto('${d._docId}')">📷 사진 보기</button>`;
-        } else {
-            photoCell = '<span style="color:#adb5bd; font-size:12px;">사진 없음</span>';
-        }
+    activeBody.innerHTML = activeDocs.length ? activeDocs.map(d => `
+        <tr>
+            <td>${d.tabletId ? '📱 태블릿' : '🎧 부속품'}</td>
+            <td><strong>${d.tabletId || '태블릿 미대여'}</strong></td>
+            <td>${d.room || '-'}</td>
+            <td>${d.patientName || '-'}</td>
+            <td>${d.checkoutDate || '-'}</td>
+            <td>${d.standProvided ? 'O' : 'X'}</td>
+            <td>${d.earphoneProvided ? 'O' : 'X'}</td>
+            <td>${d.chargerProvided ? 'O' : 'X'}</td>
+            <td>${d.checkoutStaff || '-'}</td>
+            <td>${photoCellFor(d)}</td>
+        </tr>
+    `).join('') : '<tr><td colspan="10" style="color:#28a745;">🎉 현재 대여중인 항목이 없습니다.</td></tr>';
 
-        return `
-            <tr>
-                <td>${typeLabel}</td>
-                <td><strong>${d.tabletId || '태블릿 미대여'}</strong></td>
-                <td>${statusBadge}</td>
-                <td>${d.room || '-'}</td>
-                <td>${d.patientName || '-'}</td>
-                <td>${d.checkoutDate || '-'}</td>
-                <td>${d.standProvided ? 'O' : 'X'}</td>
-                <td>${d.earphoneProvided ? 'O' : 'X'}</td>
-                <td>${d.chargerProvided ? 'O' : 'X'}</td>
-                <td>${d.checkoutStaff || '-'}</td>
-                <td>${d.returnDate || '-'}</td>
-                <td>${d.returnStaff || '-'}</td>
-                <td>${photoCell}</td>
-            </tr>
-        `;
-    }).join('');
+    completedBody.innerHTML = completedDocs.length ? completedDocs.map(d => `
+        <tr>
+            <td>${d.tabletId ? '📱 태블릿' : '🎧 부속품'}</td>
+            <td><strong>${d.tabletId || '태블릿 미대여'}</strong></td>
+            <td>${d.room || '-'}</td>
+            <td>${d.patientName || '-'}</td>
+            <td>${d.checkoutDate || '-'}</td>
+            <td>${d.standProvided ? 'O' : 'X'}</td>
+            <td>${d.earphoneProvided ? 'O' : 'X'}</td>
+            <td>${d.chargerProvided ? 'O' : 'X'}</td>
+            <td>${d.checkoutStaff || '-'}</td>
+            <td>${d.returnDate || '-'}</td>
+            <td>${d.returnStaff || '-'}</td>
+            <td>${photoCellFor(d)}</td>
+        </tr>
+    `).join('') : '<tr><td colspan="12" style="color:#6c757d;">회수완료된 내역이 없습니다.</td></tr>';
 }
 
-// 이력 목록의 "사진 보기" 버튼 - 이미 회수 완료된 건의 반납 사진 + 촬영 일시를 보여줍니다.
+function switchTabletHistoryView(viewName) {
+    const activeView = document.getElementById('tabletHistoryActiveView');
+    const completedView = document.getElementById('tabletHistoryCompletedView');
+    if (viewName === 'completed') {
+        activeView.classList.add('hidden');
+        completedView.classList.remove('hidden');
+    } else {
+        completedView.classList.add('hidden');
+        activeView.classList.remove('hidden');
+    }
+}
+
+// 이력 목록의 "사진 보기" 버튼 - 반납 사진 + 촬영 일시를 보여줍니다.
 async function viewLoanPhoto(docId) {
     try {
         const doc = await db.collection('tablet_loans').doc(docId).get();
