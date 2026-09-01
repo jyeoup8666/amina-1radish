@@ -143,13 +143,12 @@
                     <thead>
                         <tr>
                             <th style="width: 8%;">번호</th>
-                            <th style="width: 22%;">접수 시간</th>
-                            <th style="width: 60%;">요청 내용</th>
-                            <th style="width: 10%;">관리</th>
+                            <th style="width: 25%;">접수 시간</th>
+                            <th style="width: 67%;">요청 내용</th>
                         </tr>
                     </thead>
                     <tbody id="requestTableBody">
-                        <tr><td colspan="4" style="color: #6c757d; padding: 20px;">수리 요청 내역을 불러오는 중입니다...</td></tr>
+                        <tr><td colspan="3" style="color: #6c757d; padding: 20px;">수리 요청 내역을 불러오는 중입니다...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -169,14 +168,13 @@
                     <thead>
                         <tr>
                             <th style="width: 8%;">번호</th>
-                            <th style="width: 20%;">접수 시간</th>
-                            <th style="width: 47%;">요청 및 답장 내용</th>
-                            <th style="width: 15%;">처리 완료 시각</th>
-                            <th style="width: 10%;">관리</th>
+                            <th style="width: 22%;">접수 시간</th>
+                            <th style="width: 52%;">요청 및 답장 내용</th>
+                            <th style="width: 18%;">처리 완료 시각</th>
                         </tr>
                     </thead>
                     <tbody id="completedRequestTableBody">
-                        <tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>
+                        <tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -538,6 +536,48 @@
         return 1;
     }
 
+    // ---- 시설요청방과 무관한 메시지(다른 용무로 잘못 올라온 글) 걸러내기 ----
+    // 실제 라인방 대화 기록을 보니, 이 방에는 시설요청 외에도 환자 이송/외출 안내, 테스트 메시지,
+    // 오타로 자모가 흩어진 메시지 등이 섞여 있었습니다. 아래 조건에 해당하면 시설요청이 아닌
+    // 것으로 보고 현황판에서 제외합니다.
+
+    // 시설요청이 아닌 것으로 확실한 패턴 (이송/운행 안내, 테스트 메시지 등)
+    const NOISE_PATTERNS = [
+        '출발입니다', '출차완료', '출차 완료', '외출추가', '외출 추가', '재환입원',
+        '[테스트]', '테스트입니다', '테스트 입니다', '[완료]'
+    ];
+
+    // 시설요청일 가능성이 높은 키워드 (하나라도 있으면 시설요청으로 인정)
+    const FACILITY_SIGNAL_KEYWORDS = [
+        '요청', '부탁', '드렸', '드립니다', '드릴게요', '해드렸', '했습니다', '했읍니다', '했어요',
+        '확인', '점검', '조치', '교체', '설치', '보관', '짐', '택배', '생수',
+        '태블릿', '테블릿', '이어폰', '스탠드', '스텐드', '침대', '냉장고', '에어컨', '보일러', '난방',
+        '온수', '전등', '전구', '화장실', '변기', '샤워', '세탁', '건조', '수리', '고장', '안됩', '안돼',
+        '누수', '정전', '단수', '엘리베이', '승강기', '청소', '소독', '방역', '의자', '테이블', '멀티탭',
+        '충전', '리모컨', '커튼', '창문', '문짝', '문고리', '수도', '싱크대', '벽걸이', '시계', '어닝',
+        '목욕', '선풍기', '소음', 'A/S', 'AS신청', 'AS 신청'
+    ];
+
+    // 방 호실 번호 패턴 (예: 405호, 402-2, 306G호 등) - 거의 모든 실제 요청에 호실이 등장합니다.
+    const ROOM_NUMBER_PATTERN = /[2-7]\d{2}(-\d{1,2})?\s*(G호|호)?/;
+
+    // 자모가 낱개로 흩어진 오작동성 텍스트 (예: ㅣㅎㅍ챠9ㄹ4005그후ㅐ9ㅐ)
+    function looksLikeGibberish(text) {
+        const jamoMatches = text.match(/[\u3131-\u314e\u314f-\u3163]/g);
+        return !!jamoMatches && jamoMatches.length >= 3;
+    }
+
+    function isLikelyFacilityRequest(text) {
+        if (!text) return false;
+        const trimmed = text.trim();
+        if (!trimmed) return false;
+        if (looksLikeGibberish(trimmed)) return false;
+        if (NOISE_PATTERNS.some(p => trimmed.includes(p))) return false;
+        if (ROOM_NUMBER_PATTERN.test(trimmed)) return true;
+        if (FACILITY_SIGNAL_KEYWORDS.some(k => trimmed.includes(k))) return true;
+        return false;
+    }
+
     const requestRef = rtdb.ref('facility_requests');
     requestRef.on('value', (snapshot) => {
         const tbody = document.getElementById('requestTableBody');
@@ -545,14 +585,16 @@
         const data = snapshot.val();
 
         if (!data) {
-            tbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
             if (historyTbody) {
-                historyTbody.innerHTML = '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
+                historyTbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
             }
             return;
         }
 
-        const entries = Object.entries(data).map(([key, item]) => ({ key, item }));
+        const entries = Object.entries(data)
+            .map(([key, item]) => ({ key, item }))
+            .filter(({ item }) => isLikelyFacilityRequest(item.text)); // 시설요청이 아닌 메시지는 아예 표시하지 않음
 
         const activeItems = [];
         const completedItems = [];
@@ -585,9 +627,10 @@
                 : '-';
             const priority = getRequestPriority(item.text);
             const rowClass = priority === 2 ? 'priority-row-high' : (priority === 0 ? 'priority-row-low' : '');
+            // 뱃지는 우선(긴급) 항목에만 표시합니다. 후순위는 배경만 옅게 표시하고 뱃지는 넣지 않습니다.
             const priorityBadge = priority === 2
                 ? '<span class="priority-badge high">🔴 우선</span>'
-                : (priority === 0 ? '<span class="priority-badge low">⏳ 후순위</span>' : '');
+                : '';
             // 완료를 뜻하지 않는 답장(재요청/방문예정 등)은 삭제선 없이 노트로만 붙여서 보여줍니다.
             const replyNote = item.replyMessage
                 ? `<br><small style="color:#17a2b8; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>`
@@ -598,7 +641,6 @@
                     <td>${i + 1}</td>
                     <td>${dateStr}</td>
                     <td style="text-align: left; font-weight: bold; padding-left: 15px;">${priorityBadge}${item.text || ''}${replyNote}</td>
-                    <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
                 </tr>
             `;
         });
@@ -622,19 +664,18 @@
                         ${replyNote}
                     </td>
                     <td><span style="color: #28a745; font-weight: bold;">완료 (${completedDateStr})</span></td>
-                    <td><button class="btn-small-danger" onclick="deleteRequest('${key}')">삭제</button></td>
                 </tr>
             `;
         });
 
-        tbody.innerHTML = activeHtml || '<tr><td colspan="4" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
+        tbody.innerHTML = activeHtml || '<tr><td colspan="3" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
 
         if (historyTbody) {
-            historyTbody.innerHTML = completedHtml || '<tr><td colspan="5" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
+            historyTbody.innerHTML = completedHtml || '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
         }
     }, (error) => {
         console.error("실시간 데이터 수신 에러:", error);
-        document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="4" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+        document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="3" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
     });
 
     function switchRequestView(viewName) {
@@ -647,14 +688,6 @@
         } else {
             completedView.classList.add('hidden');
             activeView.classList.remove('hidden');
-        }
-    }
-
-    function deleteRequest(key) {
-        if (confirm("해당 수리 요청 항목을 삭제하시겠습니까?")) {
-            rtdb.ref(`facility_requests/${key}`).remove()
-                .then(() => alert("성공적으로 삭제되었습니다."))
-                .catch((err) => alert("삭제 실패: " + err.message));
         }
     }
 
