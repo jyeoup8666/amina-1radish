@@ -76,6 +76,18 @@
         .priority-badge.high { background: #dc3545; color: white; }
         .priority-badge.low { background: #adb5bd; color: white; }
 
+        /* --- 작은 창(팝업) 현황판 --- */
+        body.mini-mode { background: white; padding: 0; }
+        body.mini-mode .container { max-width: 100%; padding: 12px; box-shadow: none; border-radius: 0; }
+        .mini-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 15px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e9ecef; }
+        .mini-status-list { display: flex; flex-direction: column; gap: 8px; }
+        .mini-item { padding: 8px 10px; border-radius: 6px; font-size: 13px; line-height: 1.45; border-left: 4px solid #ced4da; background: #f8f9fa; }
+        .mini-item.high { border-left-color: #dc3545; background: #fff5f5; }
+        .mini-item .mini-badge { display: inline-block; background: #dc3545; color: white; font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-right: 5px; font-weight: bold; }
+        .mini-item .mini-time { color: #999; font-size: 11px; margin-top: 4px; }
+        .mini-item .mini-reply { color: #17a2b8; font-size: 12px; font-weight: bold; margin-top: 3px; }
+        .mini-empty { text-align: center; color: #28a745; padding: 30px 10px; font-weight: bold; font-size: 13px; }
+
         /* --- 층별 소방시설 이력(관리대장) 스타일 --- */
         .floor-year-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .year-select { padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold; }
@@ -135,6 +147,7 @@
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <button class="toggle-history-btn" onclick="switchRequestView('completed')">📜 완료된 수리 요청 보기</button>
+                        <button class="toggle-history-btn" style="background:#2b569a;" onclick="openMiniStatusPopup()">🪟 작은 창으로 띄우기</button>
                         <span class="badge-live"><span class="pulse-dot"></span> 실시간 연동 중</span>
                     </div>
                 </div>
@@ -461,6 +474,17 @@
         <div id="qr-check-content"></div>
     </div>
 
+    <!-- 작은 창(팝업)으로 띄우는 실시간 현황판 -->
+    <div id="page-mini-status" class="hidden">
+        <div class="mini-header">
+            <span>🔔 시설요청 현황</span>
+            <span class="badge-live"><span class="pulse-dot"></span> 실시간</span>
+        </div>
+        <div id="mini-status-list" class="mini-status-list">
+            <div class="mini-empty">불러오는 중...</div>
+        </div>
+    </div>
+
     <!-- 정수기 점검표 -->
     <div id="page-water" class="hidden">
         <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
@@ -582,13 +606,15 @@
     requestRef.on('value', (snapshot) => {
         const tbody = document.getElementById('requestTableBody');
         const historyTbody = document.getElementById('completedRequestTableBody');
+        const miniList = document.getElementById('mini-status-list');
         const data = snapshot.val();
 
         if (!data) {
-            tbody.innerHTML = '<tr><td colspan="3" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="color: #6c757d; padding: 20px;">접수된 수리 요청이 없습니다.</td></tr>';
             if (historyTbody) {
                 historyTbody.innerHTML = '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
             }
+            if (miniList) miniList.innerHTML = '<div class="mini-empty">🎉 대기 중인 요청이 없습니다!</div>';
             return;
         }
 
@@ -668,15 +694,67 @@
             `;
         });
 
-        tbody.innerHTML = activeHtml || '<tr><td colspan="3" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
+        if (tbody) {
+            tbody.innerHTML = activeHtml || '<tr><td colspan="3" style="color: #28a745; padding: 20px;">🎉 현재 대기 중인 수리 요청이 없습니다!</td></tr>';
+        }
 
         if (historyTbody) {
             historyTbody.innerHTML = completedHtml || '<tr><td colspan="4" style="color: #6c757d; padding: 20px;">완료된 내역이 없습니다.</td></tr>';
         }
+
+        // 작은 창(팝업) 현황판: 진행중 요청만 우선순위 순서 그대로 간단히 보여줍니다.
+        if (miniList) {
+            if (activeItems.length === 0) {
+                miniList.innerHTML = '<div class="mini-empty">🎉 대기 중인 요청이 없습니다!</div>';
+            } else {
+                miniList.innerHTML = activeItems.map(({ item }) => {
+                    const priority = getRequestPriority(item.text);
+                    const cls = priority === 2 ? 'high' : '';
+                    const badge = priority === 2 ? '<span class="mini-badge">우선</span>' : '';
+                    const timeStr = item.timestamp
+                        ? new Date(item.timestamp).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        : '';
+                    const replyNote = item.replyMessage ? `<div class="mini-reply">ㄴ 답장: ${item.replyMessage}</div>` : '';
+                    return `
+                        <div class="mini-item ${cls}">
+                            ${badge}${item.text || ''}
+                            ${replyNote}
+                            <div class="mini-time">${timeStr}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
     }, (error) => {
         console.error("실시간 데이터 수신 에러:", error);
-        document.getElementById('requestTableBody').innerHTML = '<tr><td colspan="3" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+        const tbody = document.getElementById('requestTableBody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="color: #dc3545; padding: 20px;">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+        const miniList = document.getElementById('mini-status-list');
+        if (miniList) miniList.innerHTML = '<div class="mini-empty" style="color:#dc3545;">데이터를 불러오는 중 오류가 발생했습니다.</div>';
     });
+
+    // 실시간 현황을 화면 오른쪽 아래에 작은 별도 창으로 띄웁니다.
+    // (브라우저가 만드는 별도 창이라 위치/크기는 지정할 수 있지만, 다른 모든 프로그램 위에
+    //  항상 떠 있게 강제하는 것까지는 브라우저 기능만으로는 어렵습니다. 뜬 창을 화면 구석으로
+    //  옮겨두고 계속 열어두시는 방식으로 사용하시면 됩니다.)
+    function openMiniStatusPopup() {
+        const url = window.location.origin + window.location.pathname + '?view=mini';
+        const width = 380;
+        const height = 560;
+        const left = Math.max(0, window.screen.availWidth - width - 20);
+        const top = Math.max(0, window.screen.availHeight - height - 20);
+        window.open(
+            url,
+            'facility_status_popup',
+            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+        );
+    }
+
+    function initMiniStatusView() {
+        document.body.classList.add('mini-mode');
+        document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById('page-mini-status').classList.remove('hidden');
+    }
 
     function switchRequestView(viewName) {
         const activeView = document.getElementById('activeRequestView');
@@ -2230,8 +2308,14 @@ async function saveBoilerQrCheck(room) {
 // 10. 페이지 초기화
 document.addEventListener('DOMContentLoaded', () => {
     // fire-table-body / hydrant-table-body 는 '소방시설 점검표 작성' 화면 진입 시(initFireTable)에 그려집니다.
-    // QR코드로 접속한 경우(?t=ext... 또는 ?t=hyd...) 바로 단일 항목 점검 화면으로 진입시킵니다.
-    initQrCheckFromUrl();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('view') === 'mini') {
+        // 오른쪽 아래 작은 창으로 띄운 실시간 현황판입니다.
+        initMiniStatusView();
+    } else {
+        // QR코드로 접속한 경우(?t=ext... 또는 ?t=hyd...) 바로 단일 항목 점검 화면으로 진입시킵니다.
+        initQrCheckFromUrl();
+    }
 });
     </script>
 
