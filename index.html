@@ -103,6 +103,10 @@
 
         /* --- QR 현장 점검(스캔용) 스타일 --- */
         .qr-check-card { max-width: 480px; margin: 0 auto; }
+        .terms-box { max-height: 170px; overflow-y: auto; font-size: 12px; line-height: 1.6; background: #fff9e6; border: 1px solid #ffe58f; }
+        .terms-box ol { margin: 8px 0 0 18px; padding: 0; }
+        .terms-box ul { margin: 5px 0 0 18px; padding: 0; }
+        .sig-canvas { border: 1px solid #ccc; border-radius: 6px; touch-action: none; background: white; display: block; margin-top: 8px; max-width: 100%; }
         .qr-check-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .qr-check-label { flex: 1; font-size: 14px; padding-right: 10px; }
         .toggle-pair { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #ccc; flex-shrink: 0; }
@@ -475,6 +479,11 @@
         <div id="qr-check-content"></div>
     </div>
 
+    <!-- 환자용: 반납 사진만 남기는 화면 (다른 메뉴로 이동 불가) -->
+    <div id="page-patient-photo" class="hidden">
+        <div id="patient-photo-content"></div>
+    </div>
+
     <!-- 작은 창(팝업)으로 띄우는 실시간 현황판 -->
     <div id="page-mini-status" class="hidden">
         <div class="mini-header">
@@ -492,16 +501,17 @@
         <h2>📱 태블릿 대여 관리</h2>
         <p>원하시는 작업을 선택하세요.</p>
         <div class="menu-grid">
-            <div class="menu-btn-sub" onclick="showPage('tablet-history')">📊 대여/반납 현황 조회</div>
+            <div class="menu-btn-sub" onclick="showPage('tablet-history')">📊 대여/회수 현황 조회</div>
             <div class="menu-btn-sub" onclick="showPage('tablet-qr')">🏷️ QR코드 라벨 생성/인쇄</div>
-            <div class="menu-btn-sub" onclick="showPage('tablet-manual')">✍️ 수동으로 대여/반납 처리</div>
+            <div class="menu-btn-sub" onclick="showPage('tablet-manual')">✍️ 수동으로 대여/회수 처리</div>
+            <div class="menu-btn-sub" onclick="showPage('accessory-manual')">🎧 부속품 단독 대여 등록</div>
         </div>
     </div>
 
-    <!-- 태블릿 대여/반납 이력 -->
+    <!-- 태블릿 대여/회수 이력 -->
     <div id="page-tablet-history" class="hidden">
         <button class="back-btn" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
-        <h2>📊 태블릿 대여/반납 이력</h2>
+        <h2>📊 태블릿 대여/회수 이력</h2>
 
         <div class="stats-grid">
             <div class="stat-card warning">
@@ -518,20 +528,23 @@
             <table>
                 <thead>
                     <tr>
+                        <th>구분</th>
                         <th>기기번호</th>
                         <th>상태</th>
                         <th>병실</th>
                         <th>환자명</th>
-                        <th>출고일자</th>
+                        <th>제공일자</th>
                         <th>스탠드</th>
                         <th>이어폰</th>
-                        <th>출고직원</th>
-                        <th>입고일자</th>
-                        <th>입고직원</th>
+                        <th>충전기</th>
+                        <th>제공직원</th>
+                        <th>회수일자</th>
+                        <th>회수직원</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody id="tablet-history-body">
-                    <tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>
+                    <tr><td colspan="13">데이터를 불러오는 중입니다...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -541,23 +554,67 @@
     <div id="page-tablet-qr" class="hidden">
         <button class="back-btn no-print" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
         <h2 class="no-print">🏷️ 태블릿 QR코드 라벨 생성 / 인쇄</h2>
-        <p class="no-print">각 태블릿 뒷면에 붙일 QR 라벨입니다. 스캔하면 대여중이 아닌 태블릿은 출고 작성 화면이, 대여중인 태블릿은 반납 작성 화면이 자동으로 열립니다.</p>
+        <p class="no-print">
+            태블릿마다 QR이 두 개씩 나옵니다. <strong>직원용</strong>은 스캔하면 제공/회수 처리 화면이 열리고,
+            <strong>환자용</strong>은 스캔하면 반납 사진만 남길 수 있는 화면이 열리며 다른 메뉴로는 이동할 수 없습니다.
+            두 QR을 태블릿에 함께 붙여주세요.
+        </p>
         <div class="no-print" style="margin-bottom: 15px;">
             <button class="save-btn" style="width: auto; display: inline-block; padding: 10px 22px;" onclick="window.print()">🖨️ 인쇄하기</button>
         </div>
         <div id="tablet-qr-grid" class="qr-print-grid"></div>
+
+        <div class="no-print" style="margin-top: 25px; padding-top: 15px; border-top: 2px solid #e9ecef;">
+            <h3>📍 부속품 등록 바로가기 QR (직원용)</h3>
+            <p style="font-size: 13px; color: #6c757d;">부속품을 준비/전달하는 공간에 붙여두면, 이 QR을 스캔했을 때 "부속품 단독 대여 등록" 화면이 바로 열립니다.</p>
+        </div>
+        <div id="accessory-register-qr-box" style="display: flex; justify-content: center; margin-bottom: 20px;"></div>
+
+        <div class="no-print" style="margin-top: 10px; padding-top: 15px; border-top: 2px solid #e9ecef;">
+            <h3>📷 부속품 반납사진 QR (환자용, 1개만 인쇄해서 계속 재사용)</h3>
+            <p style="font-size: 13px; color: #6c757d;">
+                부속품(스탠드·이어폰·충전기)만 단독으로 빌리신 분이 반납하실 때 쓰는 QR입니다. 매번 새로 뽑을 필요 없이
+                이 QR 하나를 반납 장소에 붙여두시면 됩니다. 스캔하면 병실번호와 성함을 입력받아 해당 대여 건을 찾아 사진 업로드 화면으로 안내합니다.
+                (역시 다른 메뉴로는 이동할 수 없습니다.)
+            </p>
+        </div>
+        <div id="accessory-return-photo-qr-box" style="display: flex; justify-content: center; margin-bottom: 20px;"></div>
     </div>
 
-    <!-- 태블릿 수동 대여/반납 처리 -->
+    <!-- 태블릿 수동 대여/회수 처리 -->
     <div id="page-tablet-manual" class="hidden">
         <button class="back-btn" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
-        <h2>✍️ 수동으로 대여/반납 처리</h2>
+        <h2>✍️ 수동으로 대여/회수 처리</h2>
         <p>QR 스캔이 어려울 때, 태블릿 번호를 직접 선택해서 처리할 수 있습니다.</p>
         <p>
             태블릿 번호:
             <select id="tablet-manual-select" style="padding: 8px; font-size: 15px; border-radius: 5px; border: 1px solid #ccc;"></select>
             <button class="nav-btn" style="margin-left: 10px; margin-bottom: 0;" onclick="openTabletManualEntry()">선택한 태블릿 처리하기</button>
         </p>
+    </div>
+
+    <!-- 부속품(스탠드/이어폰/충전기) 단독 대여 등록 -->
+    <div id="page-accessory-manual" class="hidden">
+        <button class="back-btn" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
+        <h2>🎧 부속품 단독 대여 등록</h2>
+        <p>태블릿 없이 스탠드·이어폰·충전기만 빌려가시는 경우 여기서 등록합니다. (회수 처리는 "대여/회수 현황 조회" 목록에서 해당 항목의 "회수 처리" 버튼으로 합니다.)</p>
+        <div class="qr-check-card" style="margin:0; max-width:520px;">
+            <p>
+                제공일자: <input type="date" id="acc-checkout-date"><br><br>
+                병실번호: <input type="text" id="acc-room" class="table-input" style="width:100%;" placeholder="예: 405호"><br><br>
+                환자명: <input type="text" id="acc-patient" class="table-input" style="width:100%;" placeholder="이름 입력">
+            </p>
+            <p style="font-weight:bold; margin-top:15px; margin-bottom:5px;">대여 물품 (해당하는 것 모두 선택)</p>
+            <label style="display:block; margin:6px 0;"><input type="checkbox" id="acc-item-stand" style="width:16px; height:16px; vertical-align:middle;"> 스탠드</label>
+            <label style="display:block; margin:6px 0;"><input type="checkbox" id="acc-item-earphone" style="width:16px; height:16px; vertical-align:middle;"> 이어폰</label>
+            <label style="display:block; margin:6px 0;"><input type="checkbox" id="acc-item-charger" style="width:16px; height:16px; vertical-align:middle;"> 충전기</label>
+            <p style="margin-top:15px;">
+                제공직원: <input type="text" id="acc-checkout-staff" placeholder="이름 입력">
+            </p>
+            <div id="acc-terms-container"></div>
+            <button class="save-btn" onclick="saveAccessoryCheckout()">☁️ 제공 처리하기</button>
+            <div id="acc-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+        </div>
     </div>
 
     <!-- 정수기 점검표 -->
@@ -966,8 +1023,9 @@
         if(pageId === 'fire-history') initFireHistoryFloorView();
         if(pageId === 'fire-qr') { renderQrPrintFloorButtons(); renderQrPrintGrid('ALL'); }
         if(pageId === 'tablet-history') renderTabletHistory();
-        if(pageId === 'tablet-qr') renderTabletQrGrid();
+        if(pageId === 'tablet-qr') { renderTabletQrGrid(); renderAccessoryRegisterQr(); renderAccessoryReturnPhotoQr(); }
         if(pageId === 'tablet-manual') renderTabletManualSelect();
+        if(pageId === 'accessory-manual') initAccessoryManualForm();
     }
 
     function showMain() {
@@ -2121,6 +2179,18 @@ function initQrCheckFromUrl() {
         enterBoilerQrCheckMode(params.get('room'));
     } else if (type === 'tablet') {
         enterTabletQrCheckMode(params.get('id'));
+    } else if (type === 'tablet_photo') {
+        // 환자용: 반납 사진만 남기는 화면. 다른 메뉴로 이동할 방법이 없습니다.
+        enterPatientPhotoMode({ tabletId: params.get('id') });
+    } else if (type === 'return_photo') {
+        // 환자용(부속품 단독 대여 - 등록 시점에 QR을 미리 알 수 없는 경우): 반납 사진만 남기는 화면.
+        enterPatientPhotoMode({ loanId: params.get('loanId') });
+    } else if (type === 'accessory_register') {
+        // 직원용: 부속품 단독 대여 등록 화면으로 바로 이동
+        showPage('accessory-manual');
+    } else if (type === 'accessory_return_photo') {
+        // 환자용: 부속품 단독 대여 반납사진 QR (재사용 가능, 병실번호로 대여 건을 찾습니다)
+        enterAccessoryReturnLookup();
     }
     // 그 외에는 QR 링크로 들어온 경우가 아니므로 평소처럼 메인 메뉴 표시
 }
@@ -2386,32 +2456,161 @@ async function saveBoilerQrCheck(room) {
 }
 
 // =========================================================
-// 10. 태블릿 대여/반납 관리
+// 10. 태블릿 / 부속품 대여 관리
 // =========================================================
 
 // 보유 태블릿 번호 목록(01~80). 실제 기기번호 표기가 다르면 이 배열만 바꾸면 됩니다.
 const TABLET_IDS = Array.from({ length: 80 }, (_, i) => String(i + 1).padStart(2, '0'));
 
-let tabletCheckoutState = { stand: true, earphone: true };
+// 분실/파손 배상 금액 (예시로 임의 설정한 금액입니다. 실제 금액이 정해지면 이 부분만 바꾸면 됩니다.)
+const DAMAGE_FEES = { tablet: 200000, charger: 15000, stand: 10000, earphone: 5000 };
+
+let tabletCheckoutState = { stand: true, earphone: true, charger: true };
+
+// ---- 이용약관 + 서명 UI (태블릿 제공 / 부속품 단독 대여 공통으로 사용) ----
+function getTermsHtml() {
+    return `
+        <div class="info-box terms-box">
+            <strong>📄 태블릿 등 물품 대여 이용약관</strong>
+            <ol>
+                <li>대여 물품: 태블릿, 충전기, 스탠드, 이어폰 (제공된 항목에 한함)</li>
+                <li>대여 기간: 입원 기간 중이며, 퇴원 또는 사용 종료 시 반납합니다.</li>
+                <li>물품은 정상적인 용도로만 사용하며, 임의로 분해·개조하지 않습니다.</li>
+                <li>분실 또는 파손(고의·과실 포함) 시 아래 금액을 배상합니다. (통상적인 사용에 따른 자연 마모·고장은 배상 대상에서 제외됩니다.)
+                    <ul>
+                        <li>태블릿: ${DAMAGE_FEES.tablet.toLocaleString('ko-KR')}원</li>
+                        <li>충전기: ${DAMAGE_FEES.charger.toLocaleString('ko-KR')}원</li>
+                        <li>스탠드: ${DAMAGE_FEES.stand.toLocaleString('ko-KR')}원</li>
+                        <li>이어폰: ${DAMAGE_FEES.earphone.toLocaleString('ko-KR')}원</li>
+                    </ul>
+                </li>
+                <li>반납 시 대여 물품 일체(부속품 포함)를 함께 반납해야 합니다.</li>
+                <li>반납 시 QR을 스캔하여 반납 물품 사진을 남겨야 하며, 사진이 확인되지 않을 경우 분실물로 간주되어 배상 청구될 수 있습니다.</li>
+            </ol>
+            <p style="margin-top:8px; color:#dc3545; font-weight:bold;">※ 위 금액은 예시이며, 실제 배상 금액이 정해지면 수정이 필요합니다.</p>
+        </div>
+        <p style="margin-top:10px;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px;">
+                <input type="checkbox" id="terms-agree-checkbox" style="width:16px; height:16px;">
+                위 이용약관 내용을 확인하였으며 이에 동의합니다.
+            </label>
+        </p>
+        <p style="margin-top:10px;">
+            서명(환자 또는 보호자):
+            <canvas id="sig-canvas" class="sig-canvas" width="320" height="150"></canvas>
+            <button type="button" class="back-btn" style="margin-top:8px; margin-bottom:0;" onclick="clearSignature()">✏️ 다시 서명하기</button>
+        </p>
+    `;
+}
+
+let sigCtx = null;
+let sigDrawing = false;
+let sigHasContent = false;
+
+function initSignaturePad() {
+    const canvas = document.getElementById('sig-canvas');
+    if (!canvas) return;
+    sigCtx = canvas.getContext('2d');
+    sigCtx.lineWidth = 2;
+    sigCtx.lineCap = 'round';
+    sigCtx.strokeStyle = '#222';
+    sigHasContent = false;
+
+    const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches[0]) {
+            return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+
+    const start = (e) => {
+        sigDrawing = true;
+        sigHasContent = true;
+        const p = getPos(e);
+        sigCtx.beginPath();
+        sigCtx.moveTo(p.x, p.y);
+        e.preventDefault();
+    };
+    const move = (e) => {
+        if (!sigDrawing) return;
+        const p = getPos(e);
+        sigCtx.lineTo(p.x, p.y);
+        sigCtx.stroke();
+        e.preventDefault();
+    };
+    const end = () => { sigDrawing = false; };
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mouseup', end);
+    canvas.addEventListener('mouseleave', end);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', move, { passive: false });
+    canvas.addEventListener('touchend', end);
+}
+
+function clearSignature() {
+    const canvas = document.getElementById('sig-canvas');
+    if (!canvas || !sigCtx) return;
+    sigCtx.clearRect(0, 0, canvas.width, canvas.height);
+    sigHasContent = false;
+}
+
+function getSignatureDataUrl() {
+    const canvas = document.getElementById('sig-canvas');
+    if (!canvas || !sigHasContent) return '';
+    return canvas.toDataURL('image/png');
+}
 
 // ---- QR 라벨 인쇄 ----
+// QR 카드 하나를 생성해 컨테이너에 붙이는 공통 헬퍼
+function appendQrCard(container, url, label) {
+    const card = document.createElement('div');
+    card.className = 'qr-print-card';
+    const qrBoxId = 'qrbox_' + Math.random().toString(36).slice(2, 10);
+    card.innerHTML = `
+        <div class="qr-box" id="${qrBoxId}"></div>
+        <div class="qr-label">${label}</div>
+    `;
+    container.appendChild(card);
+    new QRCode(document.getElementById(qrBoxId), { text: url, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M });
+}
+
 function renderTabletQrGrid() {
     const container = document.getElementById('tablet-qr-grid');
     container.innerHTML = '';
     const base = window.location.origin + window.location.pathname;
 
     TABLET_IDS.forEach(id => {
-        const url = `${base}?t=tablet&id=${encodeURIComponent(id)}`;
-        const card = document.createElement('div');
-        card.className = 'qr-print-card';
-        const qrBoxId = 'qrbox_' + Math.random().toString(36).slice(2, 10);
-        card.innerHTML = `
-            <div class="qr-box" id="${qrBoxId}"></div>
-            <div class="qr-label">📱 태블릿 ${id}</div>
-        `;
-        container.appendChild(card);
-        new QRCode(document.getElementById(qrBoxId), { text: url, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M });
+        // 직원용: 제공/회수 처리 화면으로 이동
+        const staffUrl = `${base}?t=tablet&id=${encodeURIComponent(id)}`;
+        appendQrCard(container, staffUrl, `📱 태블릿 ${id}<br><span style="font-weight:normal;">(직원용)</span>`);
+
+        // 환자용: 반납 사진만 남기는 화면 (다른 메뉴 이동 불가)
+        const patientUrl = `${base}?t=tablet_photo&id=${encodeURIComponent(id)}`;
+        appendQrCard(container, patientUrl, `📷 태블릿 ${id}<br><span style="font-weight:normal;">(환자용 반납사진)</span>`);
     });
+}
+
+// 부속품 등록 화면으로 바로 이동하는 QR (직원용, 준비 공간에 비치)
+function renderAccessoryRegisterQr() {
+    const box = document.getElementById('accessory-register-qr-box');
+    if (!box) return;
+    box.innerHTML = '';
+    const base = window.location.origin + window.location.pathname;
+    const url = `${base}?t=accessory_register`;
+    new QRCode(box, { text: url, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.M });
+}
+
+// 부속품 단독 대여 반납사진용 QR - 병실번호 입력으로 대여 건을 찾는 방식이라 QR 하나만 계속 재사용하면 됩니다.
+function renderAccessoryReturnPhotoQr() {
+    const box = document.getElementById('accessory-return-photo-qr-box');
+    if (!box) return;
+    box.innerHTML = '';
+    const base = window.location.origin + window.location.pathname;
+    const url = `${base}?t=accessory_return_photo`;
+    new QRCode(box, { text: url, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.M });
 }
 
 // ---- 수동 처리용 태블릿 선택 ----
@@ -2425,52 +2624,205 @@ function openTabletManualEntry() {
     enterTabletQrCheckMode(id);
 }
 
-// ---- 대여/반납 이력 화면 ----
+// ---- 부속품 단독 대여 등록 화면 ----
+function initAccessoryManualForm() {
+    document.getElementById('acc-checkout-date').value = new Date().toISOString().substring(0, 10);
+    document.getElementById('acc-room').value = '';
+    document.getElementById('acc-patient').value = '';
+    document.getElementById('acc-item-stand').checked = false;
+    document.getElementById('acc-item-earphone').checked = false;
+    document.getElementById('acc-item-charger').checked = false;
+    document.getElementById('acc-checkout-staff').value = localStorage.getItem('inspector_name_cache') || '';
+    document.getElementById('acc-terms-container').innerHTML = getTermsHtml();
+    document.getElementById('acc-result').textContent = '';
+    initSignaturePad();
+}
+
+async function saveAccessoryCheckout() {
+    const date = document.getElementById('acc-checkout-date').value;
+    const room = document.getElementById('acc-room').value.trim();
+    const patient = document.getElementById('acc-patient').value.trim();
+    const staff = document.getElementById('acc-checkout-staff').value.trim();
+    const stand = document.getElementById('acc-item-stand').checked;
+    const earphone = document.getElementById('acc-item-earphone').checked;
+    const charger = document.getElementById('acc-item-charger').checked;
+    const resultEl = document.getElementById('acc-result');
+
+    if (!date) { alert('제공일자를 확인해 주세요.'); return; }
+    if (!room) { alert('병실번호를 입력해 주세요.'); return; }
+    if (!patient) { alert('환자명을 입력해 주세요.'); return; }
+    if (!staff) { alert('제공 직원 이름을 입력해 주세요.'); return; }
+    if (!stand && !earphone && !charger) { alert('대여 물품을 하나 이상 선택해 주세요.'); return; }
+    const agreed = document.getElementById('terms-agree-checkbox').checked;
+    if (!agreed) { alert('이용약관 동의가 필요합니다.'); return; }
+    const signatureImg = getSignatureDataUrl();
+    if (!signatureImg) { alert('서명을 받아주세요.'); return; }
+
+    localStorage.setItem('inspector_name_cache', staff);
+
+    try {
+        await db.collection('tablet_loans').add({
+            loanType: 'accessory',
+            tabletId: null,
+            checkoutDate: date,
+            room: room,
+            patientName: patient,
+            standProvided: stand,
+            earphoneProvided: earphone,
+            chargerProvided: charger,
+            checkoutStaff: staff,
+            agreedTerms: true,
+            signatureImg: signatureImg,
+            returnDate: '',
+            returnStaff: '',
+            standReturned: null,
+            earphoneReturned: null,
+            chargerReturned: null,
+            status: 'out',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        resultEl.style.color = '#28a745';
+        resultEl.innerHTML = `
+            ✅ 등록되었습니다! (병실: ${room})<br>
+            <div style="margin-top:8px; font-size:13px; color:#6c757d;">반납 사진은 별도 인쇄 없이, 이미 붙여둔 "부속품 반납사진 QR"로 남기시면 됩니다 (병실번호 입력).</div>
+            <button class="nav-btn" style="margin-top:12px;" onclick="initAccessoryManualForm()">➕ 다음 물품 등록하기</button>
+        `;
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+// ---- 대여/회수 이력 화면 ----
 async function renderTabletHistory() {
     const tbody = document.getElementById('tablet-history-body');
-    tbody.innerHTML = '<tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13">데이터를 불러오는 중입니다...</td></tr>';
 
     const snapshot = await db.collection('tablet_loans').get();
     const docs = [];
-    snapshot.forEach(doc => docs.push(doc.data()));
+    snapshot.forEach(doc => docs.push({ ...doc.data(), _docId: doc.id }));
 
     const outCount = docs.filter(d => d.status === 'out').length;
     document.getElementById('tablet-stat-out').textContent = `${outCount}대`;
 
-    // 대여중인 것 먼저, 그 다음 최근 출고일자 순
+    // 대여중인 것 먼저, 그 다음 최근 제공일자 순
     docs.sort((a, b) => {
         if (a.status !== b.status) return a.status === 'out' ? -1 : 1;
         return (b.checkoutDate || '').localeCompare(a.checkoutDate || '');
     });
 
     if (docs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10">대여 이력이 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13">대여 이력이 없습니다.</td></tr>';
         return;
     }
 
     tbody.innerHTML = docs.map(d => {
         const statusBadge = d.status === 'out'
             ? '<span style="color:#dc3545; font-weight:bold;">🔵 대여중</span>'
-            : '<span style="color:#28a745; font-weight:bold;">✅ 반납완료</span>';
+            : '<span style="color:#28a745; font-weight:bold;">✅ 회수완료</span>';
+        const typeLabel = d.tabletId ? '📱 태블릿' : '🎧 부속품';
+        const actionBtn = d.status === 'out'
+            ? `<button class="nav-btn" style="padding:5px 10px; font-size:12px; margin:0;" onclick="openReturnFormForLoan('${d._docId}')">회수 처리</button>`
+            : '-';
         return `
             <tr>
-                <td><strong>${d.tabletId || '-'}</strong></td>
+                <td>${typeLabel}</td>
+                <td><strong>${d.tabletId || '태블릿 미대여'}</strong></td>
                 <td>${statusBadge}</td>
                 <td>${d.room || '-'}</td>
                 <td>${d.patientName || '-'}</td>
                 <td>${d.checkoutDate || '-'}</td>
                 <td>${d.standProvided ? 'O' : 'X'}</td>
                 <td>${d.earphoneProvided ? 'O' : 'X'}</td>
+                <td>${d.chargerProvided ? 'O' : 'X'}</td>
                 <td>${d.checkoutStaff || '-'}</td>
                 <td>${d.returnDate || '-'}</td>
                 <td>${d.returnStaff || '-'}</td>
+                <td>${actionBtn}</td>
             </tr>
         `;
     }).join('');
 }
 
-// ---- QR 스캔(또는 수동 선택) 시 진입하는 출고/입고 화면 ----
-// 해당 태블릿이 현재 대여중이면 반납(입고) 화면을, 아니면 출고 화면을 자동으로 보여줍니다.
+// ---- 회수 화면 렌더링 (태블릿 QR 스캔 / 이력 목록의 "회수 처리" 버튼 공통으로 사용) ----
+function renderReturnFormHtml(loanDocId, loan) {
+    const cachedName = localStorage.getItem('inspector_name_cache') || '';
+    const todayStr = new Date().toISOString().substring(0, 10);
+    const titleLabel = loan.tabletId ? `태블릿 ${loan.tabletId}` : '부속품';
+
+    let accessoryCheckboxesHtml = '';
+    if (loan.standProvided) accessoryCheckboxesHtml += `<label style="display:block; margin:6px 0;"><input type="checkbox" id="return-check-stand" checked style="width:16px; height:16px; vertical-align:middle;"> 스탠드 회수 확인</label>`;
+    if (loan.earphoneProvided) accessoryCheckboxesHtml += `<label style="display:block; margin:6px 0;"><input type="checkbox" id="return-check-earphone" checked style="width:16px; height:16px; vertical-align:middle;"> 이어폰 회수 확인</label>`;
+    if (loan.chargerProvided) accessoryCheckboxesHtml += `<label style="display:block; margin:6px 0;"><input type="checkbox" id="return-check-charger" checked style="width:16px; height:16px; vertical-align:middle;"> 충전기 회수 확인</label>`;
+
+    const providedItems = [
+        loan.tabletId ? '태블릿' : null,
+        loan.standProvided ? '스탠드' : null,
+        loan.earphoneProvided ? '이어폰' : null,
+        loan.chargerProvided ? '충전기' : null
+    ].filter(Boolean).join(', ') || '-';
+
+    const patientPhotoHtml = loan.patientReturnPhotoSrc
+        ? `
+            <div style="margin-top:12px;">
+                <strong>📷 환자가 남긴 반납 사진</strong><br>
+                <img src="${loan.patientReturnPhotoSrc}" class="img-preview" style="max-width:180px; max-height:180px; display:block; margin-top:6px; cursor:pointer;" onclick="openImageModal('${loan.patientReturnPhotoSrc}')" title="클릭하여 확대">
+            </div>
+        `
+        : `<div style="margin-top:12px; color:#dc3545; font-size:13px; font-weight:bold;">⚠️ 환자가 남긴 반납 사진이 없습니다. (이용약관에 따라 분실물로 안내 가능)</div>`;
+
+    return `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0;">${loan.tabletId ? '📱' : '🎧'} ${titleLabel} 회수 처리</h2>
+            <div class="info-box" style="margin-bottom:15px;">
+                <strong>현재 대여중</strong><br>
+                병실: ${loan.room || '-'} / 환자명: ${loan.patientName || '-'}<br>
+                제공일자: ${loan.checkoutDate || '-'} / 제공직원: ${loan.checkoutStaff || '-'}<br>
+                제공 물품: ${providedItems}
+                ${patientPhotoHtml}
+            </div>
+            <p style="font-weight:bold; margin-bottom:5px;">회수 확인 (실제로 돌려받은 것만 체크된 상태로 두세요)</p>
+            ${accessoryCheckboxesHtml || '<p style="color:#6c757d; font-size:13px;">별도 부속품 없음</p>'}
+            <p style="margin-top:15px;">
+                회수일자: <input type="date" id="tablet-return-date" value="${todayStr}"><br><br>
+                회수직원: <input type="text" id="tablet-return-staff" placeholder="이름 입력" value="${cachedName}">
+            </p>
+            <button class="save-btn" onclick="saveTabletReturn('${loanDocId}', '${loan.tabletId || ''}')">☁️ 회수 처리하기</button>
+            <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+            <p style="text-align:center; margin-top:20px;">
+                <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
+            </p>
+        </div>
+    `;
+}
+
+// 이력 목록의 "회수 처리" 버튼 (QR이 없는 부속품 단독 대여를 포함해 모든 대여중 항목에 사용 가능)
+async function openReturnFormForLoan(loanDocId) {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-qr-check').classList.remove('hidden');
+    const content = document.getElementById('qr-check-content');
+    content.innerHTML = '<p style="text-align:center; padding:40px; color:#6c757d;">불러오는 중...</p>';
+
+    try {
+        const doc = await db.collection('tablet_loans').doc(loanDocId).get();
+        if (!doc.exists) {
+            content.innerHTML = `
+                <div class="info-box" style="background:#fff5f5;">❌ 해당 대여 기록을 찾을 수 없습니다.</div>
+                <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+            `;
+            return;
+        }
+        content.innerHTML = renderReturnFormHtml(doc.id, doc.data());
+    } catch (err) {
+        console.error(err);
+        content.innerHTML = `<div class="info-box" style="background:#fff5f5;">❌ 불러오기 실패: ${err.message}</div>`;
+    }
+}
+
+// ---- QR 스캔(또는 수동 선택) 시 진입하는 제공/회수 화면 ----
+// 해당 태블릿이 현재 대여중이면 회수 화면을, 아니면 제공 화면을 자동으로 보여줍니다.
 async function enterTabletQrCheckMode(tabletId) {
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     document.getElementById('page-qr-check').classList.remove('hidden');
@@ -2499,72 +2851,61 @@ async function enterTabletQrCheckMode(tabletId) {
         return;
     }
 
+    if (!snapshot.empty) {
+        // 현재 대여중 -> 회수 화면
+        const loanDoc = snapshot.docs[0];
+        content.innerHTML = renderReturnFormHtml(loanDoc.id, loanDoc.data());
+        return;
+    }
+
+    // 대여중이 아님 -> 제공 화면
+    tabletCheckoutState = { stand: true, earphone: true, charger: true };
     const cachedName = localStorage.getItem('inspector_name_cache') || '';
     const todayStr = new Date().toISOString().substring(0, 10);
 
-    if (!snapshot.empty) {
-        // 현재 대여중 -> 반납(입고) 화면
-        const loanDoc = snapshot.docs[0];
-        const loan = loanDoc.data();
-
-        content.innerHTML = `
-            <div class="qr-check-card">
-                <h2 style="margin-top:0;">📱 태블릿 ${tabletId} 반납 처리</h2>
-                <div class="info-box" style="margin-bottom:15px;">
-                    <strong>현재 대여중</strong><br>
-                    병실: ${loan.room || '-'} / 환자명: ${loan.patientName || '-'}<br>
-                    출고일자: ${loan.checkoutDate || '-'} / 출고직원: ${loan.checkoutStaff || '-'}<br>
-                    스탠드: ${loan.standProvided ? '제공' : '미제공'} / 이어폰: ${loan.earphoneProvided ? '제공' : '미제공'}
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0;">📱 태블릿 ${tabletId} 제공 처리</h2>
+            <div class="info-box" style="margin-bottom:15px;"><strong>태블릿 ${tabletId}</strong> - 현재 보관중 (대여 가능)</div>
+            <p>
+                제공일자: <input type="date" id="tablet-checkout-date" value="${todayStr}"><br><br>
+                병실번호: <input type="text" id="tablet-room" class="table-input" style="width:100%;" placeholder="예: 405호"><br><br>
+                환자명: <input type="text" id="tablet-patient" class="table-input" style="width:100%;" placeholder="이름 입력">
+            </p>
+            <div class="qr-check-row">
+                <div class="qr-check-label">스탠드 제공</div>
+                <div class="toggle-pair" data-key="stand">
+                    <button type="button" class="toggle-btn bad" onclick="setTabletToggle('stand', false, this)">미제공</button>
+                    <button type="button" class="toggle-btn good active" onclick="setTabletToggle('stand', true, this)">제공</button>
                 </div>
-                <p>
-                    입고일자: <input type="date" id="tablet-return-date" value="${todayStr}"><br><br>
-                    입고직원: <input type="text" id="tablet-return-staff" placeholder="이름 입력" value="${cachedName}">
-                </p>
-                <button class="save-btn" onclick="saveTabletReturn('${loanDoc.id}', '${tabletId}')">☁️ 반납 처리하기</button>
-                <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
-                <p style="text-align:center; margin-top:20px;">
-                    <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
-                </p>
             </div>
-        `;
-    } else {
-        // 대여중이 아님 -> 출고 화면
-        tabletCheckoutState = { stand: true, earphone: true };
-
-        content.innerHTML = `
-            <div class="qr-check-card">
-                <h2 style="margin-top:0;">📱 태블릿 ${tabletId} 출고 처리</h2>
-                <div class="info-box" style="margin-bottom:15px;"><strong>태블릿 ${tabletId}</strong> - 현재 보관중 (대여 가능)</div>
-                <p>
-                    출고일자: <input type="date" id="tablet-checkout-date" value="${todayStr}"><br><br>
-                    병실번호: <input type="text" id="tablet-room" class="table-input" style="width:100%;" placeholder="예: 405호"><br><br>
-                    환자명: <input type="text" id="tablet-patient" class="table-input" style="width:100%;" placeholder="이름 입력">
-                </p>
-                <div class="qr-check-row">
-                    <div class="qr-check-label">스탠드 제공</div>
-                    <div class="toggle-pair" data-key="stand">
-                        <button type="button" class="toggle-btn bad" onclick="setTabletToggle('stand', false, this)">미제공</button>
-                        <button type="button" class="toggle-btn good active" onclick="setTabletToggle('stand', true, this)">제공</button>
-                    </div>
+            <div class="qr-check-row">
+                <div class="qr-check-label">이어폰 제공</div>
+                <div class="toggle-pair" data-key="earphone">
+                    <button type="button" class="toggle-btn bad" onclick="setTabletToggle('earphone', false, this)">미제공</button>
+                    <button type="button" class="toggle-btn good active" onclick="setTabletToggle('earphone', true, this)">제공</button>
                 </div>
-                <div class="qr-check-row">
-                    <div class="qr-check-label">이어폰 제공</div>
-                    <div class="toggle-pair" data-key="earphone">
-                        <button type="button" class="toggle-btn bad" onclick="setTabletToggle('earphone', false, this)">미제공</button>
-                        <button type="button" class="toggle-btn good active" onclick="setTabletToggle('earphone', true, this)">제공</button>
-                    </div>
-                </div>
-                <p style="margin-top:15px;">
-                    출고직원: <input type="text" id="tablet-checkout-staff" placeholder="이름 입력" value="${cachedName}">
-                </p>
-                <button class="save-btn" onclick="saveTabletCheckout('${tabletId}')">☁️ 출고 처리하기</button>
-                <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
-                <p style="text-align:center; margin-top:20px;">
-                    <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
-                </p>
             </div>
-        `;
-    }
+            <div class="qr-check-row">
+                <div class="qr-check-label">충전기 제공</div>
+                <div class="toggle-pair" data-key="charger">
+                    <button type="button" class="toggle-btn bad" onclick="setTabletToggle('charger', false, this)">미제공</button>
+                    <button type="button" class="toggle-btn good active" onclick="setTabletToggle('charger', true, this)">제공</button>
+                </div>
+            </div>
+            <p style="margin-top:15px;">
+                제공직원: <input type="text" id="tablet-checkout-staff" placeholder="이름 입력" value="${cachedName}">
+            </p>
+            <div id="tablet-terms-container"></div>
+            <button class="save-btn" onclick="saveTabletCheckout('${tabletId}')">☁️ 제공 처리하기</button>
+            <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+            <p style="text-align:center; margin-top:20px;">
+                <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
+            </p>
+        </div>
+    `;
+    document.getElementById('tablet-terms-container').innerHTML = getTermsHtml();
+    initSignaturePad();
 }
 
 function setTabletToggle(key, value, btnEl) {
@@ -2581,29 +2922,40 @@ async function saveTabletCheckout(tabletId) {
     const staff = document.getElementById('tablet-checkout-staff').value.trim();
     const resultEl = document.getElementById('qr-check-result');
 
-    if (!date) { alert('출고일자를 확인해 주세요.'); return; }
+    if (!date) { alert('제공일자를 확인해 주세요.'); return; }
     if (!room) { alert('병실번호를 입력해 주세요.'); return; }
     if (!patient) { alert('환자명을 입력해 주세요.'); return; }
-    if (!staff) { alert('출고 직원 이름을 입력해 주세요.'); return; }
+    if (!staff) { alert('제공 직원 이름을 입력해 주세요.'); return; }
+    const agreed = document.getElementById('terms-agree-checkbox').checked;
+    if (!agreed) { alert('이용약관 동의가 필요합니다.'); return; }
+    const signatureImg = getSignatureDataUrl();
+    if (!signatureImg) { alert('서명을 받아주세요.'); return; }
 
     localStorage.setItem('inspector_name_cache', staff);
 
     try {
         await db.collection('tablet_loans').add({
+            loanType: 'tablet',
             tabletId: tabletId,
             checkoutDate: date,
             room: room,
             patientName: patient,
             standProvided: !!tabletCheckoutState.stand,
             earphoneProvided: !!tabletCheckoutState.earphone,
+            chargerProvided: !!tabletCheckoutState.charger,
             checkoutStaff: staff,
+            agreedTerms: true,
+            signatureImg: signatureImg,
             returnDate: '',
             returnStaff: '',
+            standReturned: null,
+            earphoneReturned: null,
+            chargerReturned: null,
             status: 'out',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         resultEl.style.color = '#28a745';
-        resultEl.textContent = `✅ 태블릿 ${tabletId} 출고 처리되었습니다!`;
+        resultEl.textContent = `✅ 태블릿 ${tabletId} 제공 처리되었습니다!`;
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
@@ -2616,8 +2968,22 @@ async function saveTabletReturn(loanDocId, tabletId) {
     const staff = document.getElementById('tablet-return-staff').value.trim();
     const resultEl = document.getElementById('qr-check-result');
 
-    if (!date) { alert('입고일자를 확인해 주세요.'); return; }
-    if (!staff) { alert('입고 직원 이름을 입력해 주세요.'); return; }
+    if (!date) { alert('회수일자를 확인해 주세요.'); return; }
+    if (!staff) { alert('회수 직원 이름을 입력해 주세요.'); return; }
+
+    const standEl = document.getElementById('return-check-stand');
+    const earphoneEl = document.getElementById('return-check-earphone');
+    const chargerEl = document.getElementById('return-check-charger');
+
+    const missing = [];
+    if (standEl && !standEl.checked) missing.push(`스탠드(${DAMAGE_FEES.stand.toLocaleString('ko-KR')}원)`);
+    if (earphoneEl && !earphoneEl.checked) missing.push(`이어폰(${DAMAGE_FEES.earphone.toLocaleString('ko-KR')}원)`);
+    if (chargerEl && !chargerEl.checked) missing.push(`충전기(${DAMAGE_FEES.charger.toLocaleString('ko-KR')}원)`);
+
+    if (missing.length > 0) {
+        const proceed = confirm(`다음 물품이 회수되지 않았습니다: ${missing.join(', ')}\n이용약관에 따른 배상 안내가 필요할 수 있습니다. 그래도 회수 처리하시겠습니까?`);
+        if (!proceed) return;
+    }
 
     localStorage.setItem('inspector_name_cache', staff);
 
@@ -2625,15 +2991,206 @@ async function saveTabletReturn(loanDocId, tabletId) {
         await db.collection('tablet_loans').doc(loanDocId).update({
             returnDate: date,
             returnStaff: staff,
+            standReturned: standEl ? standEl.checked : null,
+            earphoneReturned: earphoneEl ? earphoneEl.checked : null,
+            chargerReturned: chargerEl ? chargerEl.checked : null,
             status: 'returned',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         resultEl.style.color = '#28a745';
-        resultEl.textContent = `✅ 태블릿 ${tabletId} 반납 처리되었습니다!`;
+        resultEl.textContent = tabletId
+            ? `✅ 태블릿 ${tabletId} 회수 처리되었습니다!`
+            : '✅ 회수 처리되었습니다!';
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
         resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+// ---- 환자용: 부속품 단독 대여 반납사진 QR (재사용 가능) - 병실번호로 대여 건 찾기 ----
+function enterAccessoryReturnLookup() {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-patient-photo').classList.remove('hidden');
+    const content = document.getElementById('patient-photo-content');
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0; text-align:center;">📷 부속품 반납 사진 남기기</h2>
+            <div class="info-box" style="margin-bottom:15px;">대여하셨던 병실번호와 성함을 입력해 주세요.</div>
+            <p>
+                병실번호: <input type="text" id="acc-return-room-input" class="table-input" style="width:100%;" placeholder="예: 405호"><br><br>
+                성함: <input type="text" id="acc-return-name-input" class="table-input" style="width:100%;" placeholder="예: 홍길동">
+            </p>
+            <button class="save-btn" style="margin-top:15px;" onclick="searchAccessoryLoans()">확인</button>
+            <div id="acc-return-lookup-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+        </div>
+    `;
+}
+
+// 이름 뒤에 붙는 동명이인 구분 숫자(예: 이화성2)는 같은 병실 안에서는 겹칠 일이 없으므로 무시하고 비교합니다.
+function normalizePatientName(name) {
+    return (name || '').trim().replace(/\d+$/, '');
+}
+
+async function searchAccessoryLoans() {
+    const room = document.getElementById('acc-return-room-input').value.trim();
+    const nameInput = document.getElementById('acc-return-name-input').value.trim();
+    const resultEl = document.getElementById('acc-return-lookup-result');
+
+    if (!room) { alert('병실번호를 입력해 주세요.'); return; }
+    if (!nameInput) { alert('성함을 입력해 주세요.'); return; }
+
+    resultEl.style.color = '#6c757d';
+    resultEl.textContent = '확인 중...';
+
+    let snapshot;
+    try {
+        snapshot = await db.collection('tablet_loans')
+            .where('loanType', '==', 'accessory')
+            .where('status', '==', 'out')
+            .where('room', '==', room)
+            .get();
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '조회 중 오류가 발생했습니다. 다시 시도해 주세요.';
+        return;
+    }
+
+    const targetName = normalizePatientName(nameInput);
+    const matches = snapshot.docs.filter(doc => normalizePatientName(doc.data().patientName) === targetName);
+
+    if (matches.length === 0) {
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '해당 병실·성함으로 대여중인 부속품 내역을 찾을 수 없습니다. 병실번호와 성함을 다시 확인해 주세요.';
+        return;
+    }
+
+    if (matches.length === 1) {
+        enterPatientPhotoMode({ loanId: matches[0].id });
+        return;
+    }
+
+    // 같은 병실·같은 이름으로 여러 건이 있으면 골라서 진행
+    const content = document.getElementById('patient-photo-content');
+    const itemsHtml = matches.map(doc => {
+        const d = doc.data();
+        const items = [d.standProvided ? '스탠드' : null, d.earphoneProvided ? '이어폰' : null, d.chargerProvided ? '충전기' : null].filter(Boolean).join(', ') || '-';
+        return `
+            <div class="mini-item" style="cursor:pointer; margin-bottom:8px;" onclick="enterPatientPhotoMode({loanId:'${doc.id}'})">
+                ${items}<div class="mini-time">제공일자: ${d.checkoutDate || '-'}</div>
+            </div>
+        `;
+    }).join('');
+
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0; text-align:center;">📷 부속품 반납 사진 남기기</h2>
+            <div class="info-box" style="margin-bottom:15px;">대여중인 항목이 여러 건입니다. 반납하시는 항목을 선택해 주세요.</div>
+            ${itemsHtml}
+        </div>
+    `;
+}
+
+// ---- 환자용: 반납 사진만 남기는 화면 ----
+// 이 화면은 완전히 별도의 페이지로만 동작하며, 메인 메뉴나 다른 화면으로 이동하는 링크/버튼을 두지 않습니다.
+// (다만 이는 화면 안에서 다른 곳으로 갈 방법을 없앤 것으로, 주소창에서 직접 주소를 지우고 들어오는 것까지
+//  막을 수는 없다는 점은 참고해 주세요. 순수 웹페이지만으로는 그 부분까지 막기는 어렵습니다.)
+async function enterPatientPhotoMode(query) {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-patient-photo').classList.remove('hidden');
+    const content = document.getElementById('patient-photo-content');
+    content.innerHTML = '<p style="text-align:center; padding:40px; color:#6c757d;">불러오는 중...</p>';
+
+    let loanDocId = null;
+    let loan = null;
+
+    try {
+        if (query.loanId) {
+            const doc = await db.collection('tablet_loans').doc(query.loanId).get();
+            if (doc.exists && doc.data().status === 'out') {
+                loanDocId = doc.id;
+                loan = doc.data();
+            }
+        } else if (query.tabletId) {
+            const snapshot = await db.collection('tablet_loans')
+                .where('tabletId', '==', query.tabletId)
+                .where('status', '==', 'out')
+                .limit(1)
+                .get();
+            if (!snapshot.empty) {
+                loanDocId = snapshot.docs[0].id;
+                loan = snapshot.docs[0].data();
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        content.innerHTML = `<div class="info-box" style="background:#fff5f5; text-align:center;">정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</div>`;
+        return;
+    }
+
+    if (!loanDocId) {
+        content.innerHTML = `
+            <div class="qr-check-card" style="text-align:center;">
+                <div class="info-box">
+                    현재 진행 중인 대여 내역을 찾을 수 없습니다.<br>
+                    이미 반납 처리가 완료되었거나, 잘못 스캔하신 것 같습니다.
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    const providedItems = [
+        loan.tabletId ? '태블릿' : null,
+        loan.standProvided ? '스탠드' : null,
+        loan.earphoneProvided ? '이어폰' : null,
+        loan.chargerProvided ? '충전기' : null
+    ].filter(Boolean).join(', ') || '-';
+
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0; text-align:center;">📷 반납 물품 사진 남기기</h2>
+            <div class="info-box" style="margin-bottom:15px;">
+                대여하셨던 물품: <strong>${providedItems}</strong><br><br>
+                반납하시는 물품이 한 장에 잘 보이도록 사진을 찍어 제출해 주세요.
+            </div>
+            <input type="file" id="patient-photo-input" accept="image/*" capture="environment" style="width:100%;">
+            <img id="patient-photo-preview" class="img-preview hidden" style="max-width:220px; max-height:220px; margin-top:10px;">
+            <button class="save-btn" style="margin-top:15px;" onclick="submitPatientPhoto('${loanDocId}')">제출하기</button>
+            <div id="patient-photo-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+        </div>
+    `;
+
+    document.getElementById('patient-photo-input').addEventListener('change', function () {
+        compressImageToPreview(this, 'patient-photo-preview');
+    });
+}
+
+async function submitPatientPhoto(loanDocId) {
+    const preview = document.getElementById('patient-photo-preview');
+    const resultEl = document.getElementById('patient-photo-result');
+
+    if (!preview || preview.classList.contains('hidden')) {
+        alert('사진을 먼저 촬영하거나 선택해 주세요.');
+        return;
+    }
+
+    try {
+        await db.collection('tablet_loans').doc(loanDocId).update({
+            patientReturnPhotoSrc: preview.src,
+            patientReturnPhotoAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('patient-photo-content').innerHTML = `
+            <div class="qr-check-card" style="text-align:center;">
+                <h2>✅ 감사합니다</h2>
+                <p>사진이 정상적으로 접수되었습니다.</p>
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '제출에 실패했습니다. 다시 시도해 주세요.';
     }
 }
 
