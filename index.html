@@ -540,7 +540,7 @@
                         <th>제공직원</th>
                         <th>회수일자</th>
                         <th>회수직원</th>
-                        <th>관리</th>
+                        <th>반납사진</th>
                     </tr>
                 </thead>
                 <tbody id="tablet-history-body">
@@ -579,6 +579,15 @@
             </p>
         </div>
         <div id="accessory-return-photo-qr-box" style="display: flex; justify-content: center; margin-bottom: 20px;"></div>
+
+        <div class="no-print" style="margin-top: 10px; padding-top: 15px; border-top: 2px solid #e9ecef;">
+            <h3>🎧 부속품 회수 QR (직원용, 1개만 인쇄해서 계속 재사용)</h3>
+            <p style="font-size: 13px; color: #6c757d;">
+                직원이 부속품을 돌려받았을 때 회수 처리를 하는 QR입니다. 이력 목록을 따로 찾아볼 필요 없이,
+                이 QR 하나를 회수 처리하는 자리에 붙여두고 스캔 → 병실번호·성함 입력 → 바로 회수 처리 화면으로 이동합니다.
+            </p>
+        </div>
+        <div id="accessory-return-process-qr-box" style="display: flex; justify-content: center; margin-bottom: 20px;"></div>
     </div>
 
     <!-- 태블릿 수동 대여/회수 처리 -->
@@ -628,7 +637,10 @@
 <!-- 이미지 확대 모달 -->
 <div id="image-modal" class="modal" onclick="closeImageModal()">
     <span class="close-modal">&times;</span>
-    <img class="modal-content" id="modal-img">
+    <div style="display:flex; flex-direction:column; align-items:center; max-width:90%; max-height:90%;">
+        <img class="modal-content" id="modal-img">
+        <div id="modal-caption" style="color:white; text-align:center; margin-top:10px; font-size:14px;"></div>
+    </div>
 </div>
 
 <script>
@@ -1001,11 +1013,13 @@
         compressImageToPreview(input, previewId);
     }
 
-    function openImageModal(src) {
+    function openImageModal(src, caption) {
         const modal = document.getElementById('image-modal');
         const modalImg = document.getElementById('modal-img');
         modal.style.display = 'flex';
         modalImg.src = src;
+        const captionEl = document.getElementById('modal-caption');
+        if (captionEl) captionEl.textContent = caption || '';
     }
 
     function closeImageModal() {
@@ -1023,7 +1037,7 @@
         if(pageId === 'fire-history') initFireHistoryFloorView();
         if(pageId === 'fire-qr') { renderQrPrintFloorButtons(); renderQrPrintGrid('ALL'); }
         if(pageId === 'tablet-history') renderTabletHistory();
-        if(pageId === 'tablet-qr') { renderTabletQrGrid(); renderAccessoryRegisterQr(); renderAccessoryReturnPhotoQr(); }
+        if(pageId === 'tablet-qr') { renderTabletQrGrid(); renderAccessoryRegisterQr(); renderAccessoryReturnPhotoQr(); renderAccessoryReturnProcessQr(); }
         if(pageId === 'tablet-manual') renderTabletManualSelect();
         if(pageId === 'accessory-manual') initAccessoryManualForm();
     }
@@ -2189,8 +2203,11 @@ function initQrCheckFromUrl() {
         // 직원용: 부속품 단독 대여 등록 화면으로 바로 이동
         showPage('accessory-manual');
     } else if (type === 'accessory_return_photo') {
-        // 환자용: 부속품 단독 대여 반납사진 QR (재사용 가능, 병실번호로 대여 건을 찾습니다)
+        // 환자용: 부속품 단독 대여 반납사진 QR (재사용 가능, 병실번호+성함으로 대여 건을 찾습니다)
         enterAccessoryReturnLookup();
+    } else if (type === 'accessory_return_process') {
+        // 직원용: 부속품 단독 대여 회수 처리 QR (재사용 가능, 병실번호+성함으로 찾아 바로 회수 처리 화면으로 이동)
+        enterAccessoryReturnProcessLookup();
     }
     // 그 외에는 QR 링크로 들어온 경우가 아니므로 평소처럼 메인 메뉴 표시
 }
@@ -2613,6 +2630,16 @@ function renderAccessoryReturnPhotoQr() {
     new QRCode(box, { text: url, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.M });
 }
 
+// 부속품 단독 대여 회수 처리용 QR (직원용) - 병실번호·성함으로 대여 건을 찾아 바로 회수 처리 화면으로 이동합니다.
+function renderAccessoryReturnProcessQr() {
+    const box = document.getElementById('accessory-return-process-qr-box');
+    if (!box) return;
+    box.innerHTML = '';
+    const base = window.location.origin + window.location.pathname;
+    const url = `${base}?t=accessory_return_process`;
+    new QRCode(box, { text: url, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.M });
+}
+
 // ---- 수동 처리용 태블릿 선택 ----
 function renderTabletManualSelect() {
     const select = document.getElementById('tablet-manual-select');
@@ -2723,9 +2750,14 @@ async function renderTabletHistory() {
             ? '<span style="color:#dc3545; font-weight:bold;">🔵 대여중</span>'
             : '<span style="color:#28a745; font-weight:bold;">✅ 회수완료</span>';
         const typeLabel = d.tabletId ? '📱 태블릿' : '🎧 부속품';
-        const actionBtn = d.status === 'out'
-            ? `<button class="nav-btn" style="padding:5px 10px; font-size:12px; margin:0;" onclick="openReturnFormForLoan('${d._docId}')">회수 처리</button>`
-            : '-';
+
+        let photoCell;
+        if (d.patientReturnPhotoSrc) {
+            photoCell = `<button class="nav-btn" style="padding:5px 10px; font-size:12px; margin:0; background:#6c757d;" onclick="viewLoanPhoto('${d._docId}')">📷 사진 보기</button>`;
+        } else {
+            photoCell = '<span style="color:#adb5bd; font-size:12px;">사진 없음</span>';
+        }
+
         return `
             <tr>
                 <td>${typeLabel}</td>
@@ -2740,10 +2772,27 @@ async function renderTabletHistory() {
                 <td>${d.checkoutStaff || '-'}</td>
                 <td>${d.returnDate || '-'}</td>
                 <td>${d.returnStaff || '-'}</td>
-                <td>${actionBtn}</td>
+                <td>${photoCell}</td>
             </tr>
         `;
     }).join('');
+}
+
+// 이력 목록의 "사진 보기" 버튼 - 이미 회수 완료된 건의 반납 사진 + 촬영 일시를 보여줍니다.
+async function viewLoanPhoto(docId) {
+    try {
+        const doc = await db.collection('tablet_loans').doc(docId).get();
+        if (!doc.exists) { alert('해당 대여 기록을 찾을 수 없습니다.'); return; }
+        const d = doc.data();
+        if (!d.patientReturnPhotoSrc) { alert('등록된 반납 사진이 없습니다.'); return; }
+        const dateStr = (d.patientReturnPhotoAt && typeof d.patientReturnPhotoAt.toDate === 'function')
+            ? d.patientReturnPhotoAt.toDate().toLocaleString('ko-KR')
+            : '';
+        openImageModal(d.patientReturnPhotoSrc, dateStr ? `사진 촬영일시: ${dateStr}` : '');
+    } catch (err) {
+        console.error(err);
+        alert('사진을 불러오지 못했습니다.');
+    }
 }
 
 // ---- 회수 화면 렌더링 (태블릿 QR 스캔 / 이력 목록의 "회수 처리" 버튼 공통으로 사용) ----
@@ -3009,6 +3058,33 @@ async function saveTabletReturn(loanDocId, tabletId) {
 }
 
 // ---- 환자용: 부속품 단독 대여 반납사진 QR (재사용 가능) - 병실번호로 대여 건 찾기 ----
+// 이름 뒤에 붙는 동명이인 구분 숫자(예: 이화성2)는 같은 병실 안에서는 겹칠 일이 없으므로 무시하고 비교합니다.
+function normalizePatientName(name) {
+    return (name || '').trim().replace(/\d+$/, '');
+}
+
+// "405호", "405 호", "405"를 모두 같은 병실로 인식하도록 뒤에 붙는 "호"와 공백을 무시하고 비교합니다.
+function normalizeRoomNumber(room) {
+    return (room || '').trim().replace(/\s*호\s*$/, '').trim();
+}
+
+// 병실번호·성함으로 현재 대여중인 부속품 단독 대여 건을 찾는 공통 함수
+async function findActiveAccessoryLoans(roomInput, nameInput) {
+    // 방번호 표기(호 유무 등)가 다를 수 있어 방번호는 서버 쿼리로 거르지 않고, 정규화해서 비교합니다.
+    const snapshot = await db.collection('tablet_loans')
+        .where('loanType', '==', 'accessory')
+        .where('status', '==', 'out')
+        .get();
+
+    const targetRoom = normalizeRoomNumber(roomInput);
+    const targetName = normalizePatientName(nameInput);
+    return snapshot.docs.filter(doc => {
+        const d = doc.data();
+        return normalizeRoomNumber(d.room) === targetRoom && normalizePatientName(d.patientName) === targetName;
+    });
+}
+
+// ---- 환자용: 부속품 반납 "사진"만 남기는 조회 화면 ----
 function enterAccessoryReturnLookup() {
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     document.getElementById('page-patient-photo').classList.remove('hidden');
@@ -3027,38 +3103,26 @@ function enterAccessoryReturnLookup() {
     `;
 }
 
-// 이름 뒤에 붙는 동명이인 구분 숫자(예: 이화성2)는 같은 병실 안에서는 겹칠 일이 없으므로 무시하고 비교합니다.
-function normalizePatientName(name) {
-    return (name || '').trim().replace(/\d+$/, '');
-}
-
 async function searchAccessoryLoans() {
-    const room = document.getElementById('acc-return-room-input').value.trim();
+    const roomInput = document.getElementById('acc-return-room-input').value.trim();
     const nameInput = document.getElementById('acc-return-name-input').value.trim();
     const resultEl = document.getElementById('acc-return-lookup-result');
 
-    if (!room) { alert('병실번호를 입력해 주세요.'); return; }
+    if (!roomInput) { alert('병실번호를 입력해 주세요.'); return; }
     if (!nameInput) { alert('성함을 입력해 주세요.'); return; }
 
     resultEl.style.color = '#6c757d';
     resultEl.textContent = '확인 중...';
 
-    let snapshot;
+    let matches;
     try {
-        snapshot = await db.collection('tablet_loans')
-            .where('loanType', '==', 'accessory')
-            .where('status', '==', 'out')
-            .where('room', '==', room)
-            .get();
+        matches = await findActiveAccessoryLoans(roomInput, nameInput);
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
         resultEl.textContent = '조회 중 오류가 발생했습니다. 다시 시도해 주세요.';
         return;
     }
-
-    const targetName = normalizePatientName(nameInput);
-    const matches = snapshot.docs.filter(doc => normalizePatientName(doc.data().patientName) === targetName);
 
     if (matches.length === 0) {
         resultEl.style.color = '#dc3545';
@@ -3087,6 +3151,81 @@ async function searchAccessoryLoans() {
         <div class="qr-check-card">
             <h2 style="margin-top:0; text-align:center;">📷 부속품 반납 사진 남기기</h2>
             <div class="info-box" style="margin-bottom:15px;">대여중인 항목이 여러 건입니다. 반납하시는 항목을 선택해 주세요.</div>
+            ${itemsHtml}
+        </div>
+    `;
+}
+
+// ---- 직원용: 부속품 회수 "처리" 조회 화면 (병실번호·성함으로 찾아 바로 회수 처리 화면으로 이동) ----
+function enterAccessoryReturnProcessLookup() {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-qr-check').classList.remove('hidden');
+    const content = document.getElementById('qr-check-content');
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0;">🎧 부속품 회수 처리</h2>
+            <div class="info-box" style="margin-bottom:15px;">회수하실 대여 건의 병실번호와 성함을 입력해 주세요.</div>
+            <p>
+                병실번호: <input type="text" id="acc-process-room-input" class="table-input" style="width:100%;" placeholder="예: 405호"><br><br>
+                성함: <input type="text" id="acc-process-name-input" class="table-input" style="width:100%;" placeholder="예: 홍길동">
+            </p>
+            <button class="save-btn" style="margin-top:15px;" onclick="searchAccessoryLoansForProcessing()">확인</button>
+            <div id="acc-process-lookup-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+            <p style="text-align:center; margin-top:20px;">
+                <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
+            </p>
+        </div>
+    `;
+}
+
+async function searchAccessoryLoansForProcessing() {
+    const roomInput = document.getElementById('acc-process-room-input').value.trim();
+    const nameInput = document.getElementById('acc-process-name-input').value.trim();
+    const resultEl = document.getElementById('acc-process-lookup-result');
+
+    if (!roomInput) { alert('병실번호를 입력해 주세요.'); return; }
+    if (!nameInput) { alert('성함을 입력해 주세요.'); return; }
+
+    resultEl.style.color = '#6c757d';
+    resultEl.textContent = '확인 중...';
+
+    let matches;
+    try {
+        matches = await findActiveAccessoryLoans(roomInput, nameInput);
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '조회 중 오류가 발생했습니다. 다시 시도해 주세요.';
+        return;
+    }
+
+    if (matches.length === 0) {
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '해당 병실·성함으로 대여중인 부속품 내역을 찾을 수 없습니다. 병실번호와 성함을 다시 확인해 주세요.';
+        return;
+    }
+
+    if (matches.length === 1) {
+        openReturnFormForLoan(matches[0].id);
+        return;
+    }
+
+    // 같은 병실·같은 이름으로 여러 건이 있으면 골라서 진행
+    const content = document.getElementById('qr-check-content');
+    const itemsHtml = matches.map(doc => {
+        const d = doc.data();
+        const items = [d.standProvided ? '스탠드' : null, d.earphoneProvided ? '이어폰' : null, d.chargerProvided ? '충전기' : null].filter(Boolean).join(', ') || '-';
+        return `
+            <div class="mini-item" style="cursor:pointer; margin-bottom:8px;" onclick="openReturnFormForLoan('${doc.id}')">
+                ${items}<div class="mini-time">제공일자: ${d.checkoutDate || '-'}</div>
+            </div>
+        `;
+    }).join('');
+
+    content.innerHTML = `
+        <div class="qr-check-card">
+            <h2 style="margin-top:0;">🎧 부속품 회수 처리</h2>
+            <div class="info-box" style="margin-bottom:15px;">대여중인 항목이 여러 건입니다. 회수하시는 항목을 선택해 주세요.</div>
             ${itemsHtml}
         </div>
     `;
