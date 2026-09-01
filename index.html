@@ -135,6 +135,7 @@
             <div class="menu-btn" onclick="showPage('boiler-menu')">🔥 보일러 점검</div>
             <div class="menu-btn" onclick="showPage('fire-menu')">🧯 소화기 점검표</div>
             <div class="menu-btn" onclick="showPage('water')">💧 정수기 점검표</div>
+            <div class="menu-btn" onclick="showPage('tablet-menu')">📱 태블릿 대여 관리</div>
         </div>
 
         <!-- 메인 화면 하단: 실시간 수리 요청 현황 영역 -->
@@ -483,6 +484,80 @@
         <div id="mini-status-list" class="mini-status-list">
             <div class="mini-empty">불러오는 중...</div>
         </div>
+    </div>
+
+    <!-- 태블릿 대여 관리 메뉴 -->
+    <div id="page-tablet-menu" class="hidden">
+        <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        <h2>📱 태블릿 대여 관리</h2>
+        <p>원하시는 작업을 선택하세요.</p>
+        <div class="menu-grid">
+            <div class="menu-btn-sub" onclick="showPage('tablet-history')">📊 대여/반납 현황 조회</div>
+            <div class="menu-btn-sub" onclick="showPage('tablet-qr')">🏷️ QR코드 라벨 생성/인쇄</div>
+            <div class="menu-btn-sub" onclick="showPage('tablet-manual')">✍️ 수동으로 대여/반납 처리</div>
+        </div>
+    </div>
+
+    <!-- 태블릿 대여/반납 이력 -->
+    <div id="page-tablet-history" class="hidden">
+        <button class="back-btn" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
+        <h2>📊 태블릿 대여/반납 이력</h2>
+
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <div class="stat-title">현재 대여중</div>
+                <div class="stat-value" id="tablet-stat-out" style="color:#dc3545;">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">보유 태블릿 총 수</div>
+                <div class="stat-value">80대</div>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>기기번호</th>
+                        <th>상태</th>
+                        <th>병실</th>
+                        <th>환자명</th>
+                        <th>출고일자</th>
+                        <th>스탠드</th>
+                        <th>이어폰</th>
+                        <th>출고직원</th>
+                        <th>입고일자</th>
+                        <th>입고직원</th>
+                    </tr>
+                </thead>
+                <tbody id="tablet-history-body">
+                    <tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 태블릿 QR코드 라벨 생성/인쇄 -->
+    <div id="page-tablet-qr" class="hidden">
+        <button class="back-btn no-print" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
+        <h2 class="no-print">🏷️ 태블릿 QR코드 라벨 생성 / 인쇄</h2>
+        <p class="no-print">각 태블릿 뒷면에 붙일 QR 라벨입니다. 스캔하면 대여중이 아닌 태블릿은 출고 작성 화면이, 대여중인 태블릿은 반납 작성 화면이 자동으로 열립니다.</p>
+        <div class="no-print" style="margin-bottom: 15px;">
+            <button class="save-btn" style="width: auto; display: inline-block; padding: 10px 22px;" onclick="window.print()">🖨️ 인쇄하기</button>
+        </div>
+        <div id="tablet-qr-grid" class="qr-print-grid"></div>
+    </div>
+
+    <!-- 태블릿 수동 대여/반납 처리 -->
+    <div id="page-tablet-manual" class="hidden">
+        <button class="back-btn" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
+        <h2>✍️ 수동으로 대여/반납 처리</h2>
+        <p>QR 스캔이 어려울 때, 태블릿 번호를 직접 선택해서 처리할 수 있습니다.</p>
+        <p>
+            태블릿 번호:
+            <select id="tablet-manual-select" style="padding: 8px; font-size: 15px; border-radius: 5px; border: 1px solid #ccc;"></select>
+            <button class="nav-btn" style="margin-left: 10px; margin-bottom: 0;" onclick="openTabletManualEntry()">선택한 태블릿 처리하기</button>
+        </p>
     </div>
 
     <!-- 정수기 점검표 -->
@@ -890,6 +965,9 @@
         if(pageId === 'fire-form') initFireTable();
         if(pageId === 'fire-history') initFireHistoryFloorView();
         if(pageId === 'fire-qr') { renderQrPrintFloorButtons(); renderQrPrintGrid('ALL'); }
+        if(pageId === 'tablet-history') renderTabletHistory();
+        if(pageId === 'tablet-qr') renderTabletQrGrid();
+        if(pageId === 'tablet-manual') renderTabletManualSelect();
     }
 
     function showMain() {
@@ -2041,6 +2119,8 @@ function initQrCheckFromUrl() {
         enterQrCheckMode(type, params.get('floor'), params.get('loc'));
     } else if (type === 'boiler') {
         enterBoilerQrCheckMode(params.get('room'));
+    } else if (type === 'tablet') {
+        enterTabletQrCheckMode(params.get('id'));
     }
     // 그 외에는 QR 링크로 들어온 경우가 아니므로 평소처럼 메인 메뉴 표시
 }
@@ -2305,7 +2385,259 @@ async function saveBoilerQrCheck(room) {
     }
 }
 
-// 10. 페이지 초기화
+// =========================================================
+// 10. 태블릿 대여/반납 관리
+// =========================================================
+
+// 보유 태블릿 번호 목록(01~80). 실제 기기번호 표기가 다르면 이 배열만 바꾸면 됩니다.
+const TABLET_IDS = Array.from({ length: 80 }, (_, i) => String(i + 1).padStart(2, '0'));
+
+let tabletCheckoutState = { stand: true, earphone: true };
+
+// ---- QR 라벨 인쇄 ----
+function renderTabletQrGrid() {
+    const container = document.getElementById('tablet-qr-grid');
+    container.innerHTML = '';
+    const base = window.location.origin + window.location.pathname;
+
+    TABLET_IDS.forEach(id => {
+        const url = `${base}?t=tablet&id=${encodeURIComponent(id)}`;
+        const card = document.createElement('div');
+        card.className = 'qr-print-card';
+        const qrBoxId = 'qrbox_' + Math.random().toString(36).slice(2, 10);
+        card.innerHTML = `
+            <div class="qr-box" id="${qrBoxId}"></div>
+            <div class="qr-label">📱 태블릿 ${id}</div>
+        `;
+        container.appendChild(card);
+        new QRCode(document.getElementById(qrBoxId), { text: url, width: 100, height: 100, correctLevel: QRCode.CorrectLevel.M });
+    });
+}
+
+// ---- 수동 처리용 태블릿 선택 ----
+function renderTabletManualSelect() {
+    const select = document.getElementById('tablet-manual-select');
+    select.innerHTML = TABLET_IDS.map(id => `<option value="${id}">태블릿 ${id}</option>`).join('');
+}
+
+function openTabletManualEntry() {
+    const id = document.getElementById('tablet-manual-select').value;
+    enterTabletQrCheckMode(id);
+}
+
+// ---- 대여/반납 이력 화면 ----
+async function renderTabletHistory() {
+    const tbody = document.getElementById('tablet-history-body');
+    tbody.innerHTML = '<tr><td colspan="10">데이터를 불러오는 중입니다...</td></tr>';
+
+    const snapshot = await db.collection('tablet_loans').get();
+    const docs = [];
+    snapshot.forEach(doc => docs.push(doc.data()));
+
+    const outCount = docs.filter(d => d.status === 'out').length;
+    document.getElementById('tablet-stat-out').textContent = `${outCount}대`;
+
+    // 대여중인 것 먼저, 그 다음 최근 출고일자 순
+    docs.sort((a, b) => {
+        if (a.status !== b.status) return a.status === 'out' ? -1 : 1;
+        return (b.checkoutDate || '').localeCompare(a.checkoutDate || '');
+    });
+
+    if (docs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10">대여 이력이 없습니다.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = docs.map(d => {
+        const statusBadge = d.status === 'out'
+            ? '<span style="color:#dc3545; font-weight:bold;">🔵 대여중</span>'
+            : '<span style="color:#28a745; font-weight:bold;">✅ 반납완료</span>';
+        return `
+            <tr>
+                <td><strong>${d.tabletId || '-'}</strong></td>
+                <td>${statusBadge}</td>
+                <td>${d.room || '-'}</td>
+                <td>${d.patientName || '-'}</td>
+                <td>${d.checkoutDate || '-'}</td>
+                <td>${d.standProvided ? 'O' : 'X'}</td>
+                <td>${d.earphoneProvided ? 'O' : 'X'}</td>
+                <td>${d.checkoutStaff || '-'}</td>
+                <td>${d.returnDate || '-'}</td>
+                <td>${d.returnStaff || '-'}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ---- QR 스캔(또는 수동 선택) 시 진입하는 출고/입고 화면 ----
+// 해당 태블릿이 현재 대여중이면 반납(입고) 화면을, 아니면 출고 화면을 자동으로 보여줍니다.
+async function enterTabletQrCheckMode(tabletId) {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-qr-check').classList.remove('hidden');
+    const content = document.getElementById('qr-check-content');
+
+    if (!tabletId || !TABLET_IDS.includes(tabletId)) {
+        content.innerHTML = `
+            <div class="info-box" style="background:#fff5f5;">❌ 해당 태블릿 번호를 찾을 수 없습니다. QR 라벨을 다시 확인해 주세요.</div>
+            <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        `;
+        return;
+    }
+
+    content.innerHTML = '<p style="text-align:center; padding:40px; color:#6c757d;">불러오는 중...</p>';
+
+    let snapshot;
+    try {
+        snapshot = await db.collection('tablet_loans')
+            .where('tabletId', '==', tabletId)
+            .where('status', '==', 'out')
+            .limit(1)
+            .get();
+    } catch (err) {
+        console.error(err);
+        content.innerHTML = `<div class="info-box" style="background:#fff5f5;">❌ 대여 현황을 불러오지 못했습니다: ${err.message}</div>`;
+        return;
+    }
+
+    const cachedName = localStorage.getItem('inspector_name_cache') || '';
+    const todayStr = new Date().toISOString().substring(0, 10);
+
+    if (!snapshot.empty) {
+        // 현재 대여중 -> 반납(입고) 화면
+        const loanDoc = snapshot.docs[0];
+        const loan = loanDoc.data();
+
+        content.innerHTML = `
+            <div class="qr-check-card">
+                <h2 style="margin-top:0;">📱 태블릿 ${tabletId} 반납 처리</h2>
+                <div class="info-box" style="margin-bottom:15px;">
+                    <strong>현재 대여중</strong><br>
+                    병실: ${loan.room || '-'} / 환자명: ${loan.patientName || '-'}<br>
+                    출고일자: ${loan.checkoutDate || '-'} / 출고직원: ${loan.checkoutStaff || '-'}<br>
+                    스탠드: ${loan.standProvided ? '제공' : '미제공'} / 이어폰: ${loan.earphoneProvided ? '제공' : '미제공'}
+                </div>
+                <p>
+                    입고일자: <input type="date" id="tablet-return-date" value="${todayStr}"><br><br>
+                    입고직원: <input type="text" id="tablet-return-staff" placeholder="이름 입력" value="${cachedName}">
+                </p>
+                <button class="save-btn" onclick="saveTabletReturn('${loanDoc.id}', '${tabletId}')">☁️ 반납 처리하기</button>
+                <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+                <p style="text-align:center; margin-top:20px;">
+                    <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
+                </p>
+            </div>
+        `;
+    } else {
+        // 대여중이 아님 -> 출고 화면
+        tabletCheckoutState = { stand: true, earphone: true };
+
+        content.innerHTML = `
+            <div class="qr-check-card">
+                <h2 style="margin-top:0;">📱 태블릿 ${tabletId} 출고 처리</h2>
+                <div class="info-box" style="margin-bottom:15px;"><strong>태블릿 ${tabletId}</strong> - 현재 보관중 (대여 가능)</div>
+                <p>
+                    출고일자: <input type="date" id="tablet-checkout-date" value="${todayStr}"><br><br>
+                    병실번호: <input type="text" id="tablet-room" class="table-input" style="width:100%;" placeholder="예: 405호"><br><br>
+                    환자명: <input type="text" id="tablet-patient" class="table-input" style="width:100%;" placeholder="이름 입력">
+                </p>
+                <div class="qr-check-row">
+                    <div class="qr-check-label">스탠드 제공</div>
+                    <div class="toggle-pair" data-key="stand">
+                        <button type="button" class="toggle-btn bad" onclick="setTabletToggle('stand', false, this)">미제공</button>
+                        <button type="button" class="toggle-btn good active" onclick="setTabletToggle('stand', true, this)">제공</button>
+                    </div>
+                </div>
+                <div class="qr-check-row">
+                    <div class="qr-check-label">이어폰 제공</div>
+                    <div class="toggle-pair" data-key="earphone">
+                        <button type="button" class="toggle-btn bad" onclick="setTabletToggle('earphone', false, this)">미제공</button>
+                        <button type="button" class="toggle-btn good active" onclick="setTabletToggle('earphone', true, this)">제공</button>
+                    </div>
+                </div>
+                <p style="margin-top:15px;">
+                    출고직원: <input type="text" id="tablet-checkout-staff" placeholder="이름 입력" value="${cachedName}">
+                </p>
+                <button class="save-btn" onclick="saveTabletCheckout('${tabletId}')">☁️ 출고 처리하기</button>
+                <div id="qr-check-result" style="margin-top:15px; text-align:center; font-weight:bold;"></div>
+                <p style="text-align:center; margin-top:20px;">
+                    <a href="javascript:void(0)" onclick="showMain()" style="color:#6c757d; font-size:13px;">🏠 메인 메뉴로 돌아가기</a>
+                </p>
+            </div>
+        `;
+    }
+}
+
+function setTabletToggle(key, value, btnEl) {
+    tabletCheckoutState[key] = value;
+    const pair = btnEl.closest('.toggle-pair');
+    pair.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+}
+
+async function saveTabletCheckout(tabletId) {
+    const date = document.getElementById('tablet-checkout-date').value;
+    const room = document.getElementById('tablet-room').value.trim();
+    const patient = document.getElementById('tablet-patient').value.trim();
+    const staff = document.getElementById('tablet-checkout-staff').value.trim();
+    const resultEl = document.getElementById('qr-check-result');
+
+    if (!date) { alert('출고일자를 확인해 주세요.'); return; }
+    if (!room) { alert('병실번호를 입력해 주세요.'); return; }
+    if (!patient) { alert('환자명을 입력해 주세요.'); return; }
+    if (!staff) { alert('출고 직원 이름을 입력해 주세요.'); return; }
+
+    localStorage.setItem('inspector_name_cache', staff);
+
+    try {
+        await db.collection('tablet_loans').add({
+            tabletId: tabletId,
+            checkoutDate: date,
+            room: room,
+            patientName: patient,
+            standProvided: !!tabletCheckoutState.stand,
+            earphoneProvided: !!tabletCheckoutState.earphone,
+            checkoutStaff: staff,
+            returnDate: '',
+            returnStaff: '',
+            status: 'out',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = `✅ 태블릿 ${tabletId} 출고 처리되었습니다!`;
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+async function saveTabletReturn(loanDocId, tabletId) {
+    const date = document.getElementById('tablet-return-date').value;
+    const staff = document.getElementById('tablet-return-staff').value.trim();
+    const resultEl = document.getElementById('qr-check-result');
+
+    if (!date) { alert('입고일자를 확인해 주세요.'); return; }
+    if (!staff) { alert('입고 직원 이름을 입력해 주세요.'); return; }
+
+    localStorage.setItem('inspector_name_cache', staff);
+
+    try {
+        await db.collection('tablet_loans').doc(loanDocId).update({
+            returnDate: date,
+            returnStaff: staff,
+            status: 'returned',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = `✅ 태블릿 ${tabletId} 반납 처리되었습니다!`;
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+// 11. 페이지 초기화
 document.addEventListener('DOMContentLoaded', () => {
     // fire-table-body / hydrant-table-body 는 '소방시설 점검표 작성' 화면 진입 시(initFireTable)에 그려집니다.
     const params = new URLSearchParams(window.location.search);
