@@ -47,14 +47,25 @@ export default async function handler(req, res) {
                 key => data[key].messageId === quotedMessageId
               );
               if (targetKey) {
-                // 해당 요청의 상태를 completed로 변경
+                // 답장을 replies 목록에 "추가" (기존 답장을 덮어쓰지 않고 계속 쌓입니다)
+                await fetch(`${firebaseUrl}/${targetKey}/replies.json`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    message: userMessage,
+                    timestamp: Date.now()
+                  })
+                });
+
+                // status/completedAt/replyMessage도 계속 갱신합니다.
+                // (replyMessage는 항상 "가장 최근 답장"을 담고 있으며, 예전 화면과의 호환을 위해 유지합니다.)
                 await fetch(`${firebaseUrl}/${targetKey}.json`, {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     status: 'completed',
                     completedAt: Date.now(),
-                    replyMessage: userMessage // 답장으로 남긴 메모도 같이 기록
+                    replyMessage: userMessage
                   })
                 });
                 console.log(`답장 대상 수리요청 완료 처리 완료: ${targetKey}`);
