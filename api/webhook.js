@@ -6,8 +6,9 @@ export default async function handler(req, res) {
     for (let event of events) {
 
       // ─────────────────────────────────────────────
-      // CASE 0 (신규): 메시지를 보내기 취소(unsend)한 경우 -> 해당 요청을 DB에서 삭제
-      // 답장 매칭(quotedMessageId)과 똑같은 방식으로, 저장해둔 messageId로 원본 항목을 찾습니다.
+      // CASE 0 (신규): 메시지를 보내기 취소(unsend)한 경우
+      // - 취소된 게 "원본 요청 메시지"면 요청 자체를 삭제
+      // - 취소된 게 "답장"이면 그 답장만 replies 목록에서 삭제
       // ─────────────────────────────────────────────
       if (event.type === 'unsend') {
         const unsentMessageId = event.unsend.messageId;
@@ -23,6 +24,22 @@ export default async function handler(req, res) {
                 method: 'DELETE'
               });
               console.log(`취소된 메시지 삭제 완료: ${targetKey}`);
+            } else {
+              // 원본 요청이 아니라면, 답장 중 하나가 취소된 것인지 확인
+              for (const key of Object.keys(data)) {
+                const replies = data[key].replies;
+                if (!replies) continue;
+                const replyKey = Object.keys(replies).find(
+                  rk => replies[rk].messageId === unsentMessageId
+                );
+                if (replyKey) {
+                  await fetch(`${firebaseUrl}/${key}/replies/${replyKey}.json`, {
+                    method: 'DELETE'
+                  });
+                  console.log(`취소된 답장 삭제 완료: ${key}/${replyKey}`);
+                  break;
+                }
+              }
             }
           }
         } catch (error) {
@@ -42,18 +59,30 @@ export default async function handler(req, res) {
             const response = await fetch(`${firebaseUrl}.json`);
             const data = await response.json();
             if (data) {
-              // messageId가 답장 대상 ID와 일치하는 데이터 키(Key) 검색
-              const targetKey = Object.keys(data).find(
+              // 1) 원본 요청 메시지에 대한 답장인지 확인
+              let targetKey = Object.keys(data).find(
                 key => data[key].messageId === quotedMessageId
               );
+
+              // 2) 원본이 아니라면, "이전 답장"에 대한 답장(답장에 답장)인지 확인
+              if (!targetKey) {
+                targetKey = Object.keys(data).find(key => {
+                  const replies = data[key].replies;
+                  if (!replies) return false;
+                  return Object.values(replies).some(r => r.messageId === quotedMessageId);
+                });
+              }
+
               if (targetKey) {
                 // 답장을 replies 목록에 "추가" (기존 답장을 덮어쓰지 않고 계속 쌓입니다)
+                // 이 답장 자체의 messageId도 함께 저장해서, 나중에 "이 답장"에 또 답장이 달려도 추적할 수 있게 합니다.
                 await fetch(`${firebaseUrl}/${targetKey}/replies.json`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     message: userMessage,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    messageId: messageId
                   })
                 });
 
