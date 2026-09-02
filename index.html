@@ -849,8 +849,42 @@
         '검토', '문의해', '연락드리겠습니다', '알아보겠습니다', '조율중', '조율 중',
         '수리요청', '수리 요청', '업체요청', '업체 요청', '업체에 요청', 'A/S', 'AS요청', 'AS 요청',
         '기사님', '기사분', '접수했습니다', '접수했어요', '접수완료', '접수 완료',
-        '주문했습니다', '주문했어요', '주문 했습니다', '연락했습니다', '연락드렸습니다'
+        '주문했습니다', '주문했어요', '주문 했습니다', '연락했습니다', '연락드렸습니다',
+        '전달 주시면', '전달해 주시면', '전달주시면', '전달해주시면', '전달 부탁',
+        '가져다 주시면', '가져다주시면', '갖다 주시면', '갖다주시면', '로 전달', '으로 전달'
     ];
+
+    // "replies" 목록(여러 개 답장)이 있으면 시간순으로 정리해서 반환하고, 없으면 예전 방식의 단일 replyMessage를
+    // 답장 하나짜리 목록처럼 만들어서 반환합니다. (봇이 예전 방식으로만 저장해도 화면이 깨지지 않도록)
+    function getReplyList(item) {
+        if (item.replies && typeof item.replies === 'object') {
+            return Object.values(item.replies)
+                .filter(r => r && r.message)
+                .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+        }
+        if (item.replyMessage) {
+            return [{ message: item.replyMessage, timestamp: item.completedAt || null }];
+        }
+        return [];
+    }
+
+    // 완료 여부 판단은 "가장 최근 답장" 기준으로 합니다.
+    function getLatestReplyText(item) {
+        const list = getReplyList(item);
+        return list.length ? list[list.length - 1].message : '';
+    }
+
+    // 답장이 여러 개면 전부, 한 줄씩 이어서 보여줍니다.
+    function renderRepliesHtml(item, color) {
+        const list = getReplyList(item);
+        if (list.length === 0) return '';
+        return list.map(r => {
+            const timeStr = r.timestamp
+                ? new Date(r.timestamp).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '';
+            return `<br><small style="color:${color}; font-weight:bold;">ㄴ 답장: ${r.message}${timeStr ? ` (${timeStr})` : ''}</small>`;
+        }).join('');
+    }
 
     function isReplyResolved(replyMessage) {
         if (!replyMessage) return false;
@@ -948,7 +982,7 @@
 
         entries.forEach(({ key, item }) => {
             // status가 completed여도 답장 내용이 아직 진행중을 뜻하면 진행중으로 취급합니다.
-            const trulyResolved = item.status === 'completed' && isReplyResolved(item.replyMessage);
+            const trulyResolved = item.status === 'completed' && isReplyResolved(getLatestReplyText(item));
             if (trulyResolved) {
                 completedItems.push({ key, item });
             } else {
@@ -978,10 +1012,8 @@
             const priorityBadge = priority === 2
                 ? '<span class="priority-badge high">🔴 우선</span>'
                 : '';
-            // 완료를 뜻하지 않는 답장(재요청/방문예정 등)은 삭제선 없이 노트로만 붙여서 보여줍니다.
-            const replyNote = item.replyMessage
-                ? `<br><small style="color:#17a2b8; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>`
-                : '';
+            // 완료를 뜻하지 않는 답장(재요청/방문예정 등)은 삭제선 없이 노트로만 붙여서 보여줍니다. 답장이 여러 개면 전부 보여줍니다.
+            const replyNote = renderRepliesHtml(item, '#17a2b8');
 
             activeHtml += `
                 <tr class="${rowClass}">
@@ -1000,7 +1032,7 @@
             const completedDateStr = item.completedAt
                 ? new Date(item.completedAt).toLocaleString('ko-KR')
                 : '-';
-            const replyNote = item.replyMessage ? `<br><small style="color:#28a745; font-weight:bold;">ㄴ 답장: ${item.replyMessage}</small>` : '';
+            const replyNote = renderRepliesHtml(item, '#28a745');
 
             completedHtml += `
                 <tr style="background-color: #f8f9fa; color: #6c757d;">
@@ -1035,7 +1067,7 @@
                     const timeStr = item.timestamp
                         ? new Date(item.timestamp).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
                         : '';
-                    const replyNote = item.replyMessage ? `<div class="mini-reply">ㄴ 답장: ${item.replyMessage}</div>` : '';
+                    const replyNote = getReplyList(item).map(r => `<div class="mini-reply">ㄴ 답장: ${r.message}</div>`).join('');
                     return `
                         <div class="mini-item ${cls}">
                             ${badge}${item.text || ''}
