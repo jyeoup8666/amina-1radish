@@ -360,6 +360,15 @@
             <button class="save-btn hidden" id="pm-upload-btn" onclick="uploadNewPatients()">☁️ 신규 환자만 업로드</button>
             <div id="pm-upload-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
+
+        <div class="qr-check-card no-print" style="max-width: 520px; margin: 15px 0; border: 1px solid #ffd7d7;">
+            <h3 style="margin-top: 0; color: #dc3545;">⚠️ 전체 데이터 초기화</h3>
+            <p style="font-size: 13px; color: #6c757d;">
+                한글 이름이 깨져서 저장된 적이 있다면, 여기서 전체 삭제 후 파일을 다시 올려주세요.
+                이 작업은 되돌릴 수 없습니다.
+            </p>
+            <button class="back-btn" style="background:#dc3545; color:white; margin:0;" onclick="resetPatientMasterData()">🗑️ 환자 마스터 데이터 전체 삭제</button>
+        </div>
     </div>
 
     <!-- 낙상예방활동 체크리스트 (여러 부서 공용) -->
@@ -471,17 +480,20 @@
     <!-- 의무기록 사본발급 대장 -->
     <div id="page-medrecord-copy" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>📑 의무기록 사본발급 대장</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📑 의무기록 사본발급 대장</h2>
+            <button class="toggle-history-btn" onclick="showPage('medrecord-history')">📜 사본 발급 대장 이력</button>
+        </div>
         <div id="medrecord-copy-related"></div>
 
         <div class="qr-check-card" style="max-width: 560px; margin: 15px 0;">
             <p>
-                작성년도: <input type="number" id="mrc-year" class="table-input" style="width:100%;" onchange="renderMedRecordCopyHistory()"><br><br>
+                작성년도: <input type="number" id="mrc-year" class="table-input" style="width:100%;"><br><br>
                 발행일자: <input type="date" id="mrc-date"><br><br>
                 환자구분:
                 <select id="mrc-patient-type" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;">
-                    <option value="외래">외래</option>
                     <option value="입원">입원</option>
+                    <option value="외래">외래</option>
                 </select>
             </p>
             <p>
@@ -492,10 +504,10 @@
             </p>
             <p>
                 신청인 구분: <select id="mrc-applicant-category" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc; width:100%;" onchange="onMrcApplicantCategoryChange()">
+                    <option value="대리인">4. 대리인</option>
                     <option value="환자 본인">1. 환자 (본인)</option>
                     <option value="가족(배우자, 직계존비속)">2. 환자의 가족 (배우자, 직계존비속)</option>
                     <option value="형제, 자매">3. 형제, 자매</option>
-                    <option value="대리인">4. 대리인</option>
                 </select>
             </p>
             <p>
@@ -517,8 +529,15 @@
             <button class="save-btn" onclick="saveMedRecordCopy()">☁️ 저장하기</button>
             <div id="mrc-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
+    </div>
 
-        <h3 style="margin-top: 25px;">발급 대장 (<span id="mrc-history-year-label"></span>)</h3>
+    <!-- 의무기록 사본발급 대장 이력 (월별 조회) -->
+    <div id="page-medrecord-history" class="hidden">
+        <button class="back-btn" onclick="showPage('medrecord-copy')">← 발급대장 작성으로</button>
+        <h2>📜 의무기록 사본발급 대장 이력</h2>
+        <p>
+            조회할 월: <input type="month" id="mrh-month" onchange="renderMedRecordHistoryByMonth()">
+        </p>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -528,7 +547,7 @@
                         <th>제출서류</th><th>담당자</th>
                     </tr>
                 </thead>
-                <tbody id="mrc-history-body"><tr><td colspan="12">불러오는 중...</td></tr></tbody>
+                <tbody id="mrh-history-body"><tr><td colspan="12">불러오는 중...</td></tr></tbody>
             </table>
         </div>
     </div>
@@ -1705,6 +1724,7 @@
         if(pageId === 'social-report') initSocialReportForm();
         if(pageId === 'social-schedule') initSocialSchedulePage();
         if(pageId === 'medrecord-copy') initMedRecordCopyForm();
+        if(pageId === 'medrecord-history') initMedRecordHistoryPage();
         if(pageId === 'fallprevention-input') initFallPreventionInputForm();
         if(pageId === 'fallprevention-report') initFallPreventionReport();
         if(pageId === 'privacy-request') initPrivacyRequestForm();
@@ -5218,19 +5238,18 @@ function initMedRecordCopyForm() {
     document.getElementById('medrecord-copy-related').innerHTML = renderRelatedPolicyLink('11.1');
     document.getElementById('mrc-year').value = new Date().getFullYear();
     document.getElementById('mrc-date').value = todayStr();
-    document.getElementById('mrc-patient-type').value = '외래';
+    document.getElementById('mrc-patient-type').value = '입원';
     document.getElementById('mrc-regno').value = '';
     document.getElementById('mrc-patient-name').value = '';
     document.getElementById('mrc-birthdate').value = '';
     document.getElementById('mrc-name-matches').innerHTML = '';
-    document.getElementById('mrc-applicant-category').value = '환자 본인';
+    document.getElementById('mrc-applicant-category').value = '대리인';
     document.getElementById('mrc-purpose').value = '';
     document.getElementById('mrc-pages').value = '';
     document.getElementById('mrc-has-cost').value = '유';
-    document.getElementById('mrc-staff').value = localStorage.getItem('inspector_name_cache') || '';
+    document.getElementById('mrc-staff').value = localStorage.getItem('mrc_staff_name_cache') || '김하정';
     document.getElementById('mrc-result').textContent = '';
     onMrcApplicantCategoryChange();
-    renderMedRecordCopyHistory();
 }
 
 function onMrcApplicantCategoryChange() {
@@ -5254,7 +5273,7 @@ async function saveMedRecordCopy() {
     if (!birthDate) { alert('생년월일을 입력해 주세요.'); return; }
     if (!staff) { alert('담당자를 입력해 주세요.'); return; }
 
-    localStorage.setItem('inspector_name_cache', staff);
+    localStorage.setItem('mrc_staff_name_cache', staff);
 
     const purpose = document.getElementById('mrc-purpose').value.trim() || '보험회사 제출용';
 
@@ -5283,7 +5302,6 @@ async function saveMedRecordCopy() {
         document.getElementById('mrc-name-matches').innerHTML = '';
         document.getElementById('mrc-purpose').value = '';
         document.getElementById('mrc-pages').value = '';
-        renderMedRecordCopyHistory();
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
@@ -5291,19 +5309,32 @@ async function saveMedRecordCopy() {
     }
 }
 
-async function renderMedRecordCopyHistory() {
-    const year = document.getElementById('mrc-year').value.trim() || String(new Date().getFullYear());
-    document.getElementById('mrc-history-year-label').textContent = `${year}년`;
-    const tbody = document.getElementById('mrc-history-body');
+// ---- 사본발급 대장 이력 (월별 조회) ----
+
+function initMedRecordHistoryPage() {
+    const now = new Date();
+    document.getElementById('mrh-month').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    renderMedRecordHistoryByMonth();
+}
+
+async function renderMedRecordHistoryByMonth() {
+    const monthStr = document.getElementById('mrh-month').value; // "YYYY-MM"
+    const tbody = document.getElementById('mrh-history-body');
+    if (!monthStr) return;
     tbody.innerHTML = '<tr><td colspan="12">불러오는 중...</td></tr>';
+
+    const year = monthStr.split('-')[0];
 
     const snapshot = await db.collection('medrecord_copy_ledger').where('year', '==', year).get();
     const docs = [];
-    snapshot.forEach(doc => docs.push(doc.data()));
+    snapshot.forEach(doc => {
+        const d = doc.data();
+        if (d.date && d.date.startsWith(monthStr)) docs.push(d);
+    });
     docs.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 
     if (docs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12">등록된 발급 이력이 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12">해당 월에 등록된 발급 이력이 없습니다.</td></tr>';
         return;
     }
 
@@ -5811,6 +5842,50 @@ async function refreshPatientMasterCount() {
     }
 }
 
+async function resetPatientMasterData() {
+    if (!confirm('환자 마스터 데이터를 전부 삭제합니다. 계속할까요? 이 작업은 되돌릴 수 없습니다.')) return;
+    if (!confirm('정말로 전체 삭제하시겠습니까? 다시 한 번 확인해 주세요.')) return;
+
+    const resultEl = document.getElementById('pm-upload-result');
+    resultEl.style.color = '#6c757d';
+    resultEl.textContent = '삭제 중입니다...';
+
+    try {
+        const snapshot = await db.collection('patient_master').get();
+        const docs = snapshot.docs;
+        const chunkSize = 500;
+        for (let i = 0; i < docs.length; i += chunkSize) {
+            const chunk = docs.slice(i, i + chunkSize);
+            const batch = db.batch();
+            chunk.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+        }
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = `✅ 전체 ${docs.length}명 삭제 완료! 이제 파일을 다시 올려주세요.`;
+        refreshPatientMasterCount();
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 삭제 실패: ' + err.message;
+    }
+}
+
+// 이 파일은 실제로는(확장자만 .xls일 뿐) 탭으로 구분된 CP949/EUC-KR 텍스트인 경우가 대부분이라,
+// 그 경우 브라우저 내장 TextDecoder로 직접 읽는 게 SheetJS의 codepage 옵션보다 훨씬 안정적입니다.
+// (실제 바이너리 엑셀 파일인 경우에만 SheetJS로 처리합니다.)
+function isRealBinaryExcel(bytes) {
+    if (bytes.length < 4) return false;
+    // xlsx(zip) 시그니처: PK\x03\x04, 구버전 xls(OLE) 시그니처: D0 CF 11 E0
+    const isZip = bytes[0] === 0x50 && bytes[1] === 0x4B;
+    const isOle = bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0;
+    return isZip || isOle;
+}
+
+function parseTabSeparatedRows(bytes) {
+    const text = new TextDecoder('euc-kr').decode(bytes);
+    return text.split(/\r\n|\n/).filter(l => l.trim() !== '').map(l => l.split('\t'));
+}
+
 function handlePatientExcelUpload(input) {
     const file = input.files[0];
     const preview = document.getElementById('pm-preview');
@@ -5823,10 +5898,15 @@ function handlePatientExcelUpload(input) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const data = new Uint8Array(e.target.result);
-            const wb = XLSX.read(data, { type: 'array', codepage: 949 });
-            const sheet = wb.Sheets[wb.SheetNames[0]];
-            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            const bytes = new Uint8Array(e.target.result);
+            let rows;
+            if (isRealBinaryExcel(bytes)) {
+                const wb = XLSX.read(bytes, { type: 'array' });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            } else {
+                rows = parseTabSeparatedRows(bytes);
+            }
 
             parsedPatientRows = [];
             let skippedBadRows = 0;
@@ -5850,9 +5930,12 @@ function handlePatientExcelUpload(input) {
                 return;
             }
 
+            // 미리보기로 몇 건 보여드려서, 한글이 깨지지 않았는지 바로 확인할 수 있게 합니다.
+            const sampleHtml = parsedPatientRows.slice(0, 3).map(p => `${p.name}(${p.regNo}, ${p.birthDate})`).join(', ');
             preview.innerHTML = `
                 <div class="info-box">
                     파일에서 ${parsedPatientRows.length}명을 읽었습니다${skippedBadRows > 0 ? ` (형식이 맞지 않는 ${skippedBadRows}건 제외)` : ''}.<br>
+                    예시: ${sampleHtml}<br><br>
                     아래 버튼을 누르면 이미 등록된 환자는 건너뛰고 새 환자만 추가돼요.
                 </div>
             `;
