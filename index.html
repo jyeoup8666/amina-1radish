@@ -6100,7 +6100,7 @@ async function onMrcNameBlur() {
 
         if (snapshot.size === 1) {
             const d = snapshot.docs[0].data();
-            regNoField.value = d.regNo;
+            regNoField.value = normalizeRegNo(d.regNo);
             document.getElementById('mrc-birthdate').value = d.birthDate;
             return;
         }
@@ -6111,8 +6111,8 @@ async function onMrcNameBlur() {
             <div style="background:#fff3cd; padding:8px 10px; border-radius:6px; margin-top:6px; font-size:13px;">
                 동명이인이 ${patients.length}명 있어요. 등록번호를 선택해 주세요.
                 ${patients.map(p => `
-                    <div style="cursor:pointer; padding:4px 0; text-decoration:underline; color:#2b569a;" onclick="selectMrcPatient('${p.regNo}', '${p.name}', '${p.birthDate}')">
-                        등록번호 ${p.regNo} (생년월일 ${p.birthDate})
+                    <div style="cursor:pointer; padding:4px 0; text-decoration:underline; color:#2b569a;" onclick="selectMrcPatient('${normalizeRegNo(p.regNo)}', '${p.name}', '${p.birthDate}')">
+                        등록번호 ${normalizeRegNo(p.regNo)} (생년월일 ${p.birthDate})
                     </div>
                 `).join('')}
             </div>
