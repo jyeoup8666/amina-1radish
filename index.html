@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <!-- QR 코드 생성 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
@@ -22,6 +23,15 @@
             .side-banner { width: 100%; box-sizing: border-box; position: static; }
         }
         .hidden { display: none !important; }
+
+        /* --- 로그인 화면 --- */
+        .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .login-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 35px 30px; width: 100%; max-width: 360px; box-sizing: border-box; }
+        .login-card h2 { text-align: center; font-size: 20px; }
+        .user-badge { display: flex; align-items: center; justify-content: space-between; background: #f4f6f9; border-radius: 8px; padding: 10px 14px; margin-bottom: 15px; font-size: 13px; }
+        .user-badge .logout-link { color: #dc3545; cursor: pointer; font-weight: bold; }
+        .admin-user-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid #f1f1f1; gap: 10px; flex-wrap: wrap; }
+        .admin-team-check { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; margin-right: 8px; }
         
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
         .menu-btn { background: #2b569a; color: white; padding: 30px 20px; text-align: center; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 19px; }
@@ -174,20 +184,50 @@
 </head>
 <body>
 
-<div class="page-layout">
+<!-- 로그인 화면 -->
+<div id="login-screen" class="login-screen">
+    <div class="login-card">
+        <h2 style="margin-top:0;">🏥 아미나요양병원 업무포털</h2>
+
+        <div id="login-form">
+            <p style="color:#6c757d; font-size:14px; margin-top:0;">로그인이 필요합니다.</p>
+            <input type="text" id="login-username" placeholder="아이디" class="table-input" style="width:100%; margin-bottom:10px; box-sizing:border-box;" onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()">
+            <input type="password" id="login-password" placeholder="비밀번호" class="table-input" style="width:100%; margin-bottom:15px; box-sizing:border-box;" onkeydown="if(event.key==='Enter') loginUser()">
+            <button class="save-btn" style="width:100%;" onclick="loginUser()">로그인</button>
+            <div id="login-error" style="color:#dc3545; margin-top:10px; font-size:13px; text-align:center;"></div>
+        </div>
+
+        <!-- 최초 배포 시, 계정이 하나도 없을 때만 나타나는 관리자 계정 최초 설정 화면 -->
+        <div id="first-admin-setup" class="hidden">
+            <p style="color:#2b569a; font-weight:bold; font-size:14px; margin-top:0;">🎉 처음 설정이에요! 관리자 계정을 먼저 만들어주세요.</p>
+            <input type="text" id="setup-username" placeholder="관리자 아이디" class="table-input" style="width:100%; margin-bottom:10px; box-sizing:border-box;">
+            <input type="text" id="setup-displayname" placeholder="이름" class="table-input" style="width:100%; margin-bottom:10px; box-sizing:border-box;">
+            <input type="password" id="setup-password" placeholder="비밀번호 (6자 이상)" class="table-input" style="width:100%; margin-bottom:15px; box-sizing:border-box;">
+            <button class="save-btn" style="width:100%;" onclick="createFirstAdmin()">관리자 계정 만들기</button>
+            <div id="setup-error" style="color:#dc3545; margin-top:10px; font-size:13px; text-align:center;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="page-layout hidden" id="page-layout-root">
 <div class="container">
     <!-- 메인 메뉴 (팀 선택) -->
     <div id="main-menu">
+        <div class="user-badge">
+            <span>👤 <strong id="current-user-label">-</strong></span>
+            <span class="logout-link" onclick="logoutUser()">로그아웃</span>
+        </div>
         <h2>🏥 아미나요양병원 업무포털</h2>
         <p>팀을 선택하세요.</p>
         <div class="menu-grid">
-            <div class="menu-btn" onclick="showTeamWorkspace('원무팀')">📋 원무팀</div>
-            <div class="menu-btn" onclick="showTeamWorkspace('상담팀')">💬 상담팀</div>
-            <div class="menu-btn" onclick="showPage('facility-team')">🏢 시설팀</div>
-            <div class="menu-btn" onclick="showTeamWorkspace('진료원장')">🩺 진료원장</div>
-            <div class="menu-btn" onclick="showTeamWorkspace('영양팀')">🍽️ 영양팀</div>
-            <div class="menu-btn" onclick="showTeamWorkspace('간호팀')">👩‍⚕️ 간호팀</div>
-            <div class="menu-btn" onclick="showTeamWorkspace('재활치료팀')">🏃 재활치료팀</div>
+            <div class="menu-btn" data-team="원무팀" onclick="showTeamWorkspace('원무팀')">📋 원무팀</div>
+            <div class="menu-btn" data-team="상담팀" onclick="showTeamWorkspace('상담팀')">💬 상담팀</div>
+            <div class="menu-btn" data-team="시설팀" onclick="showPage('facility-team')">🏢 시설팀</div>
+            <div class="menu-btn" data-team="진료원장" onclick="showTeamWorkspace('진료원장')">🩺 진료원장</div>
+            <div class="menu-btn" data-team="영양팀" onclick="showTeamWorkspace('영양팀')">🍽️ 영양팀</div>
+            <div class="menu-btn" data-team="간호팀" onclick="showTeamWorkspace('간호팀')">👩‍⚕️ 간호팀</div>
+            <div class="menu-btn" data-team="재활치료팀" onclick="showTeamWorkspace('재활치료팀')">🏃 재활치료팀</div>
+            <div class="menu-btn hidden" id="admin-panel-btn" style="background:#6c3fa8;" onclick="showPage('admin')">⚙️ 관리자</div>
         </div>
     </div>
 
@@ -265,6 +305,34 @@
         <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
         <h2 id="team-workspace-title">📋 원무팀</h2>
         <div id="team-workspace-body"></div>
+    </div>
+
+    <!-- 관리자 패널 (계정 관리 / 팀 권한 부여) -->
+    <div id="page-admin" class="hidden">
+        <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
+        <h2>⚙️ 관리자 - 계정 관리</h2>
+
+        <div class="qr-check-card" style="max-width: 480px; margin: 0 0 25px 0;">
+            <h3 style="margin-top: 0;">➕ 새 계정 만들기</h3>
+            <p>
+                아이디: <input type="text" id="admin-new-username" class="table-input" style="width:100%;" placeholder="영문/숫자 아이디"><br><br>
+                이름: <input type="text" id="admin-new-displayname" class="table-input" style="width:100%;" placeholder="이름"><br><br>
+                비밀번호: <input type="password" id="admin-new-password" class="table-input" style="width:100%;" placeholder="6자 이상">
+            </p>
+            <p style="font-weight: bold; margin-bottom: 5px;">볼 수 있는 팀</p>
+            <div id="admin-new-team-checks"></div>
+            <p style="margin-top: 10px;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:13px;">
+                    <input type="checkbox" id="admin-new-isadmin" style="width:16px; height:16px;">
+                    관리자 권한 부여 (모든 팀 + 계정 관리 가능)
+                </label>
+            </p>
+            <button class="save-btn" onclick="createNewUserByAdmin()">☁️ 계정 만들기</button>
+            <div id="admin-create-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+
+        <h3>👥 전체 계정 목록</h3>
+        <div id="admin-user-list"><p style="color:#6c757d;">불러오는 중...</p></div>
     </div>
 
     <!-- 낙상예방활동 체크리스트 (여러 부서 공용) -->
@@ -1430,6 +1498,7 @@
         if(pageId === 'water-log') initWaterLogForm();
         if(pageId === 'water-detail') renderWaterDetailTable();
         if(pageId === 'policy-library') renderPolicyLibrary();
+        if(pageId === 'admin') initAdminPanel();
         if(pageId === 'fallprevention-input') initFallPreventionInputForm();
         if(pageId === 'fallprevention-report') initFallPreventionReport();
         if(pageId === 'privacy-request') initPrivacyRequestForm();
@@ -4688,17 +4757,302 @@ async function renderComplaintLogHistory() {
     `).join('');
 }
 
-// 11. 페이지 초기화
-document.addEventListener('DOMContentLoaded', () => {
-    // fire-table-body / hydrant-table-body 는 '소방시설 점검표 작성' 화면 진입 시(initFireTable)에 그려집니다.
+// =========================================================
+// 16. 로그인 / 권한 관리
+// =========================================================
+
+const ALL_TEAMS = ['원무팀', '상담팀', '시설팀', '진료원장', '영양팀', '간호팀', '재활치료팀'];
+const USERNAME_DOMAIN = '@amina-portal.local'; // 아이디를 Firebase Auth 이메일 형식으로 변환할 때 씁니다 (직원들이 이메일 대신 아이디로 로그인)
+
+let currentUserProfile = null; // { uid, username, displayName, allowedTeams, isAdmin }
+
+function usernameToEmail(username) {
+    return username.trim().toLowerCase() + USERNAME_DOMAIN;
+}
+
+function initAuthGate() {
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+            await loadUserProfileAndStartApp(user);
+        } else {
+            currentUserProfile = null;
+            await showLoginOrFirstSetup();
+        }
+    });
+}
+
+async function showLoginOrFirstSetup() {
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('page-layout-root').classList.add('hidden');
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('setup-error').textContent = '';
+
+    try {
+        const configDoc = await db.collection('system').doc('config').get();
+        const isFirstTime = !configDoc.exists;
+        document.getElementById('login-form').classList.toggle('hidden', isFirstTime);
+        document.getElementById('first-admin-setup').classList.toggle('hidden', !isFirstTime);
+    } catch (err) {
+        console.error(err);
+        document.getElementById('login-form').classList.remove('hidden');
+        document.getElementById('first-admin-setup').classList.add('hidden');
+    }
+}
+
+async function loadUserProfileAndStartApp(user) {
+    try {
+        const doc = await db.collection('portal_users').doc(user.uid).get();
+        if (!doc.exists) {
+            document.getElementById('login-error').textContent = '계정 정보를 찾을 수 없습니다. 관리자에게 문의해 주세요.';
+            await firebase.auth().signOut();
+            return;
+        }
+        const data = doc.data();
+        currentUserProfile = {
+            uid: user.uid,
+            username: data.username,
+            displayName: data.displayName || data.username,
+            allowedTeams: data.allowedTeams || [],
+            isAdmin: !!data.isAdmin
+        };
+    } catch (err) {
+        console.error(err);
+        document.getElementById('login-error').textContent = '로그인 중 오류가 발생했습니다: ' + err.message;
+        return;
+    }
+
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('page-layout-root').classList.remove('hidden');
+    document.getElementById('current-user-label').textContent = currentUserProfile.displayName;
+
+    applyTeamVisibility();
+    startAppAfterLogin();
+}
+
+function applyTeamVisibility() {
+    document.querySelectorAll('.menu-btn[data-team]').forEach(btn => {
+        const team = btn.getAttribute('data-team');
+        const allowed = currentUserProfile.isAdmin || currentUserProfile.allowedTeams.includes(team);
+        btn.classList.toggle('hidden', !allowed);
+    });
+    document.getElementById('admin-panel-btn').classList.toggle('hidden', !currentUserProfile.isAdmin);
+}
+
+function startAppAfterLogin() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('view') === 'mini') {
-        // 오른쪽 아래 작은 창으로 띄운 실시간 현황판입니다.
         initMiniStatusView();
-    } else {
-        // QR코드로 접속한 경우(?t=ext... 또는 ?t=hyd...) 바로 단일 항목 점검 화면으로 진입시킵니다.
+    } else if (params.get('t')) {
         initQrCheckFromUrl();
+    } else {
+        showMain();
     }
+}
+
+async function loginUser() {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errorEl = document.getElementById('login-error');
+    errorEl.textContent = '';
+
+    if (!username || !password) { errorEl.textContent = '아이디와 비밀번호를 입력해 주세요.'; return; }
+
+    try {
+        await firebase.auth().signInWithEmailAndPassword(usernameToEmail(username), password);
+    } catch (err) {
+        console.error(err);
+        errorEl.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+    }
+}
+
+function logoutUser() {
+    firebase.auth().signOut();
+}
+
+async function createFirstAdmin() {
+    const username = document.getElementById('setup-username').value.trim();
+    const displayName = document.getElementById('setup-displayname').value.trim();
+    const password = document.getElementById('setup-password').value;
+    const errorEl = document.getElementById('setup-error');
+    errorEl.textContent = '';
+
+    if (!username || !displayName || !password) { errorEl.textContent = '모두 입력해 주세요.'; return; }
+    if (password.length < 6) { errorEl.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
+
+    try {
+        const configDoc = await db.collection('system').doc('config').get();
+        if (configDoc.exists) {
+            errorEl.textContent = '이미 초기 설정이 완료되었습니다. 로그인해 주세요.';
+            await showLoginOrFirstSetup();
+            return;
+        }
+
+        const cred = await firebase.auth().createUserWithEmailAndPassword(usernameToEmail(username), password);
+        await db.collection('portal_users').doc(cred.user.uid).set({
+            username: username,
+            displayName: displayName,
+            allowedTeams: ALL_TEAMS.slice(),
+            isAdmin: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        // 최초 설정을 완료 표시해서, 이후로는 아무도 이 방식으로 관리자를 자체 생성할 수 없게 잠급니다.
+        await db.collection('system').doc('config').set({
+            setupComplete: true,
+            setupBy: username,
+            setupAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (err) {
+        console.error(err);
+        errorEl.textContent = '계정 생성 실패: ' + err.message;
+    }
+}
+
+// ---- 관리자 패널: 계정 관리 ----
+
+// 새 계정을 만들 때 관리자 본인의 로그인 세션이 끊기지 않도록, 별도의 보조 Firebase 앱 인스턴스를 사용합니다.
+function getSecondaryAuthApp() {
+    let secondaryApp = firebase.apps.find(a => a.name === 'Secondary');
+    if (!secondaryApp) {
+        secondaryApp = firebase.initializeApp(firebaseConfig, 'Secondary');
+    }
+    return secondaryApp;
+}
+
+function initAdminPanel() {
+    renderAdminNewTeamChecks();
+    renderAdminUserList();
+}
+
+function renderAdminNewTeamChecks() {
+    const container = document.getElementById('admin-new-team-checks');
+    container.innerHTML = ALL_TEAMS.map(team => `
+        <label class="admin-team-check">
+            <input type="checkbox" class="admin-new-team-checkbox" value="${team}"> ${team}
+        </label>
+    `).join('');
+}
+
+async function createNewUserByAdmin() {
+    const username = document.getElementById('admin-new-username').value.trim();
+    const displayName = document.getElementById('admin-new-displayname').value.trim();
+    const password = document.getElementById('admin-new-password').value;
+    const isAdminNew = document.getElementById('admin-new-isadmin').checked;
+    const allowedTeams = Array.from(document.querySelectorAll('.admin-new-team-checkbox:checked')).map(cb => cb.value);
+    const resultEl = document.getElementById('admin-create-result');
+
+    if (!username || !displayName || !password) { alert('아이디/이름/비밀번호를 모두 입력해 주세요.'); return; }
+    if (password.length < 6) { alert('비밀번호는 6자 이상이어야 합니다.'); return; }
+    if (!isAdminNew && allowedTeams.length === 0) { alert('최소 한 개 이상의 팀을 선택하거나, 관리자 권한을 부여해 주세요.'); return; }
+
+    const secondaryApp = getSecondaryAuthApp();
+
+    try {
+        const cred = await secondaryApp.auth().createUserWithEmailAndPassword(usernameToEmail(username), password);
+        await db.collection('portal_users').doc(cred.user.uid).set({
+            username: username,
+            displayName: displayName,
+            allowedTeams: isAdminNew ? ALL_TEAMS.slice() : allowedTeams,
+            isAdmin: isAdminNew,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await secondaryApp.auth().signOut();
+
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = `✅ ${displayName}(${username}) 계정이 생성되었습니다!`;
+        document.getElementById('admin-new-username').value = '';
+        document.getElementById('admin-new-displayname').value = '';
+        document.getElementById('admin-new-password').value = '';
+        document.getElementById('admin-new-isadmin').checked = false;
+        document.querySelectorAll('.admin-new-team-checkbox').forEach(cb => { cb.checked = false; });
+        renderAdminUserList();
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 계정 생성 실패: ' + err.message;
+    }
+}
+
+async function renderAdminUserList() {
+    const container = document.getElementById('admin-user-list');
+    container.innerHTML = '<p style="color:#6c757d;">불러오는 중...</p>';
+
+    const snapshot = await db.collection('portal_users').get();
+    const users = [];
+    snapshot.forEach(doc => users.push({ uid: doc.id, ...doc.data() }));
+    users.sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+
+    if (users.length === 0) {
+        container.innerHTML = '<p style="color:#6c757d;">계정이 없습니다.</p>';
+        return;
+    }
+
+    container.innerHTML = users.map(u => {
+        const teamChecks = ALL_TEAMS.map(team => `
+            <label class="admin-team-check">
+                <input type="checkbox" class="admin-edit-team-${u.uid}" value="${team}" ${u.allowedTeams && u.allowedTeams.includes(team) ? 'checked' : ''} ${u.isAdmin ? 'disabled' : ''}> ${team}
+            </label>
+        `).join('');
+        return `
+            <div class="admin-user-row" style="flex-direction:column; align-items:stretch;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong>${u.displayName || u.username} <span style="color:#6c757d; font-weight:normal; font-size:12px;">(${u.username})</span></strong>
+                    <label style="display:flex; align-items:center; gap:4px; font-size:12px;">
+                        <input type="checkbox" id="admin-isadmin-${u.uid}" ${u.isAdmin ? 'checked' : ''} onchange="toggleAdminFlagUI('${u.uid}')"> 관리자
+                    </label>
+                </div>
+                <div style="margin-top:6px;" id="admin-teamwrap-${u.uid}">${teamChecks}</div>
+                <div style="margin-top:8px;">
+                    <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="saveUserPermissions('${u.uid}')">💾 저장</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleAdminFlagUI(uid) {
+    const isAdminNow = document.getElementById(`admin-isadmin-${uid}`).checked;
+    document.querySelectorAll(`#admin-teamwrap-${uid} input[type="checkbox"]`).forEach(cb => {
+        cb.disabled = isAdminNow;
+        if (isAdminNow) cb.checked = true;
+    });
+}
+
+async function saveUserPermissions(uid) {
+    const isAdminNow = document.getElementById(`admin-isadmin-${uid}`).checked;
+    const checkedTeams = Array.from(document.querySelectorAll(`#admin-teamwrap-${uid} input[type="checkbox"]:checked`)).map(cb => cb.value);
+
+    try {
+        await db.collection('portal_users').doc(uid).update({
+            isAdmin: isAdminNow,
+            allowedTeams: isAdminNow ? ALL_TEAMS.slice() : checkedTeams
+        });
+        alert('저장되었습니다.');
+        if (uid === currentUserProfile.uid) {
+            currentUserProfile.isAdmin = isAdminNow;
+            currentUserProfile.allowedTeams = isAdminNow ? ALL_TEAMS.slice() : checkedTeams;
+            applyTeamVisibility();
+        }
+    } catch (err) {
+        console.error(err);
+        alert('저장 실패: ' + err.message);
+    }
+}
+
+// 11. 페이지 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const qrType = params.get('t');
+    // 환자용 QR(태블릿/부속품 반납사진)은 환자·보호자가 로그인 없이 바로 접근해야 하므로 로그인 화면을 건너뜁니다.
+    const PATIENT_FACING_TYPES = ['tablet_photo', 'return_photo', 'accessory_return_photo'];
+
+    if (PATIENT_FACING_TYPES.includes(qrType)) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('page-layout-root').classList.remove('hidden');
+        initQrCheckFromUrl();
+        return;
+    }
+
+    initAuthGate();
 });
     </script>
 
