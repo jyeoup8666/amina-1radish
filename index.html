@@ -314,7 +314,18 @@
     <!-- 관리자 패널 (계정 관리 / 팀 권한 부여) -->
     <div id="page-admin" class="hidden">
         <button class="back-btn" onclick="showMain()">← 메인 메뉴로 돌아가기</button>
-        <h2>⚙️ 관리자 - 계정 관리</h2>
+        <h2>⚙️ 관리자</h2>
+        <p>원하시는 작업을 선택하세요.</p>
+        <div class="menu-grid">
+            <div class="menu-btn" onclick="showPage('admin-accounts')">👤 계정 관리</div>
+            <div class="menu-btn" onclick="showPage('patient-master')">🗂️ 환자 데이터 관리</div>
+        </div>
+    </div>
+
+    <!-- 관리자 - 계정 관리 -->
+    <div id="page-admin-accounts" class="hidden">
+        <button class="back-btn" onclick="showPage('admin')">← 관리자 메뉴로</button>
+        <h2>👤 계정 관리</h2>
 
         <div class="qr-check-card" style="max-width: 480px; margin: 0 0 25px 0;">
             <h3 style="margin-top: 0;">➕ 새 계정 만들기</h3>
@@ -337,12 +348,6 @@
 
         <h3>👥 전체 계정 목록</h3>
         <div id="admin-user-list"><p style="color:#6c757d;">불러오는 중...</p></div>
-
-        <div class="qr-check-card" style="max-width: 480px; margin: 25px 0 0 0;">
-            <h3 style="margin-top: 0;">🗂️ 환자 마스터 데이터 관리</h3>
-            <p style="font-size: 13px; color: #6c757d;">의무기록 사본발급 대장 등에서 등록번호·환자명 자동완성에 쓰이는 환자 기본정보(차트번호/이름/생년월일)입니다.</p>
-            <button class="nav-btn" style="margin: 0;" onclick="showPage('patient-master')">관리 화면 열기</button>
-        </div>
     </div>
 
     <!-- 환자 마스터 데이터 관리 (관리자 전용) -->
@@ -368,6 +373,20 @@
                 이 작업은 되돌릴 수 없습니다.
             </p>
             <button class="back-btn" style="background:#dc3545; color:white; margin:0;" onclick="resetPatientMasterData()">🗑️ 환자 마스터 데이터 전체 삭제</button>
+        </div>
+
+        <h3 style="margin-top: 25px;">📋 등록된 환자 목록</h3>
+        <p>
+            검색: <input type="text" id="pm-search" class="table-input" style="width:100%; max-width:300px;" placeholder="등록번호 또는 환자명으로 검색" oninput="renderPatientMasterList()">
+        </p>
+        <p style="font-size: 13px; color: #6c757d;"><span id="pm-list-count">-</span>명 표시 중</p>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>등록번호</th><th>환자명</th><th>생년월일</th></tr>
+                </thead>
+                <tbody id="pm-list-body"><tr><td colspan="3">불러오는 중...</td></tr></tbody>
+            </table>
         </div>
     </div>
 
@@ -1715,7 +1734,7 @@
         if(pageId === 'water-log') initWaterLogForm();
         if(pageId === 'water-detail') renderWaterDetailTable();
         if(pageId === 'policy-library') renderPolicyLibrary();
-        if(pageId === 'admin') initAdminPanel();
+        if(pageId === 'admin-accounts') initAdminPanel();
         if(pageId === 'patient-master') initPatientMasterPage();
         if(pageId === 'fallprevention-menu') initFallPreventionMenu();
         if(pageId === 'med-prn') initPrnMedList();
@@ -5828,18 +5847,57 @@ function initPatientMasterPage() {
     document.getElementById('pm-preview').innerHTML = '';
     document.getElementById('pm-upload-btn').classList.add('hidden');
     document.getElementById('pm-upload-result').textContent = '';
+    document.getElementById('pm-search').value = '';
     parsedPatientRows = [];
-    refreshPatientMasterCount();
+    loadPatientMasterData();
 }
 
-async function refreshPatientMasterCount() {
+let patientMasterListCache = [];
+
+async function loadPatientMasterData() {
     try {
         const snapshot = await db.collection('patient_master').get();
-        document.getElementById('pm-current-count').textContent = snapshot.size;
+        patientMasterListCache = [];
+        snapshot.forEach(doc => patientMasterListCache.push(doc.data()));
+        document.getElementById('pm-current-count').textContent = patientMasterListCache.length;
+        renderPatientMasterList();
     } catch (err) {
         console.error(err);
         document.getElementById('pm-current-count').textContent = '-';
     }
+}
+
+function renderPatientMasterList() {
+    const query = (document.getElementById('pm-search').value || '').trim().toLowerCase();
+    let list = patientMasterListCache;
+    if (query) {
+        list = list.filter(p =>
+            (p.name || '').toLowerCase().includes(query) ||
+            String(p.regNo || '').toLowerCase().includes(query)
+        );
+    }
+    list = [...list].sort((a, b) => {
+        const na = parseInt(String(a.regNo).replace(/\D/g, ''), 10) || 0;
+        const nb = parseInt(String(b.regNo).replace(/\D/g, ''), 10) || 0;
+        return na - nb;
+    });
+
+    document.getElementById('pm-list-count').textContent = list.length;
+
+    const tbody = document.getElementById('pm-list-body');
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3">표시할 환자가 없습니다.</td></tr>';
+        return;
+    }
+
+    // 한 번에 너무 많이 그리면 느려질 수 있어 상한을 두고, 검색으로 좁혀보도록 안내합니다.
+    const MAX_ROWS = 500;
+    const shown = list.slice(0, MAX_ROWS);
+    let rowsHtml = shown.map(p => `<tr><td>${p.regNo}</td><td>${p.name}</td><td>${p.birthDate}</td></tr>`).join('');
+    if (list.length > MAX_ROWS) {
+        rowsHtml += `<tr><td colspan="3" style="color:#6c757d;">...외 ${list.length - MAX_ROWS}명 더 있습니다. 검색해서 좁혀보세요.</td></tr>`;
+    }
+    tbody.innerHTML = rowsHtml;
 }
 
 async function resetPatientMasterData() {
@@ -5862,7 +5920,7 @@ async function resetPatientMasterData() {
         }
         resultEl.style.color = '#28a745';
         resultEl.textContent = `✅ 전체 ${docs.length}명 삭제 완료! 이제 파일을 다시 올려주세요.`;
-        refreshPatientMasterCount();
+        loadPatientMasterData();
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
@@ -5990,7 +6048,7 @@ async function uploadNewPatients() {
         document.getElementById('pm-upload-btn').classList.add('hidden');
         document.getElementById('pm-file-input').value = '';
         parsedPatientRows = [];
-        refreshPatientMasterCount();
+        loadPatientMasterData();
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
