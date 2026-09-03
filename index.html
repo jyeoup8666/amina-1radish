@@ -339,6 +339,7 @@
     <div id="page-fallprevention-menu" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <h2>🏃 낙상예방활동 체크리스트</h2>
+        <div id="fp-menu-related"></div>
         <p style="font-size: 13px; color: #6c757d;">병동, 원무, 각 치료실 등 여러 부서에서 공통으로 사용하는 체크리스트입니다.</p>
         <div class="menu-grid">
             <div class="menu-btn-sub" onclick="showPage('fallprevention-input')">📝 오늘 점검 입력</div>
@@ -1499,6 +1500,7 @@
         if(pageId === 'water-detail') renderWaterDetailTable();
         if(pageId === 'policy-library') renderPolicyLibrary();
         if(pageId === 'admin') initAdminPanel();
+        if(pageId === 'fallprevention-menu') initFallPreventionMenu();
         if(pageId === 'fallprevention-input') initFallPreventionInputForm();
         if(pageId === 'fallprevention-report') initFallPreventionReport();
         if(pageId === 'privacy-request') initPrivacyRequestForm();
@@ -4471,13 +4473,14 @@ const FALL_PREVENTION_ITEMS = [
 
 let fpCheckState = {};
 let sharedToolEntryTeam = null; // 공용 도구를 어느 팀에서 열었는지 기억 (뒤로가기용)
+let fpPendingLocation = null; // 카탈로그에서 특정 위치를 클릭해 들어왔을 때, 메뉴에서 하위 화면으로 넘어갈 때 적용할 위치
 
-// 팀 업무 공간의 카탈로그에서 특정 위치의 낙상예방 체크리스트로 바로 진입
+// 팀 업무 공간의 카탈로그에서 특정 위치를 클릭하면, 메뉴 화면(오늘 점검 입력/월별 현황표 보기)으로 이동합니다.
+// 어느 화면으로 들어가든 그 위치가 미리 선택돼 있도록 기억해둡니다.
 function openFallPreventionFor(location) {
     sharedToolEntryTeam = currentTeamName;
-    showPage('fallprevention-input');
-    const select = document.getElementById('fp-location-select');
-    if (select) select.value = location;
+    fpPendingLocation = location;
+    showPage('fallprevention-menu');
 }
 
 function backFromSharedTool() {
@@ -4488,9 +4491,14 @@ function backFromSharedTool() {
     }
 }
 
+function initFallPreventionMenu() {
+    document.getElementById('fp-menu-related').innerHTML = renderRelatedPolicyLink('1.2');
+}
+
 function initFallPreventionInputForm() {
     const select = document.getElementById('fp-location-select');
     select.innerHTML = FALL_PREVENTION_LOCATIONS.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+    if (fpPendingLocation) select.value = fpPendingLocation;
     document.getElementById('fp-date').value = todayStr();
     document.getElementById('fp-inspector').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('fp-input-result').textContent = '';
@@ -4553,6 +4561,7 @@ async function saveFallPreventionCheck() {
 function initFallPreventionReport() {
     const select = document.getElementById('fp-report-location');
     select.innerHTML = FALL_PREVENTION_LOCATIONS.map(loc => `<option value="${loc}">${loc}</option>`).join('');
+    if (fpPendingLocation) select.value = fpPendingLocation;
     const now = new Date();
     document.getElementById('fp-report-month').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     renderFallPreventionReport();
