@@ -4423,10 +4423,18 @@ function togglePolicyChapter(chapterId) {
 }
 
 // ---- 규정 상세 내용 (규정집 / 팀 업무 공간 어디서든 공통으로 사용) ----
+let policyDetailPreviousPageId = null; // 관련규정 보기로 들어오기 직전에 보고 있던 화면 - 뒤로가기 시 그대로 복원
+
 function showPolicyDetail(docId, source) {
     const doc = POLICY_DOCS.find(d => d.id === docId);
     if (!doc) return;
     policyDetailSource = source || 'library';
+
+    // 지금 보고 있던 화면을 기억해뒀다가, 뒤로가기 누르면 다시 초기화하지 않고 그대로 복원합니다.
+    // (예: 작성 중이던 폼 내용이 사라지지 않게)
+    const currentVisible = document.querySelector('.container > div:not(.hidden)');
+    policyDetailPreviousPageId = currentVisible ? currentVisible.id : null;
+
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     document.getElementById('page-policy-detail').classList.remove('hidden');
     document.getElementById('policy-detail-title').textContent = `${doc.code} ${doc.title}`;
@@ -4434,6 +4442,17 @@ function showPolicyDetail(docId, source) {
 }
 
 function backToPolicySource() {
+    if (policyDetailPreviousPageId) {
+        const pageId = policyDetailPreviousPageId;
+        policyDetailPreviousPageId = null;
+        const target = document.getElementById(pageId);
+        if (target) {
+            document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+            target.classList.remove('hidden');
+            return;
+        }
+    }
+    // 대비책: 기억된 화면이 없으면 기존 방식대로 팀 업무 공간이나 규정집으로 돌아갑니다.
     if (policyDetailSource === 'team' && currentTeamName) {
         showTeamWorkspace(currentTeamName);
     } else {
