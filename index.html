@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- QR 코드 생성 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
@@ -336,6 +337,29 @@
 
         <h3>👥 전체 계정 목록</h3>
         <div id="admin-user-list"><p style="color:#6c757d;">불러오는 중...</p></div>
+
+        <div class="qr-check-card" style="max-width: 480px; margin: 25px 0 0 0;">
+            <h3 style="margin-top: 0;">🗂️ 환자 마스터 데이터 관리</h3>
+            <p style="font-size: 13px; color: #6c757d;">의무기록 사본발급 대장 등에서 등록번호·환자명 자동완성에 쓰이는 환자 기본정보(차트번호/이름/생년월일)입니다.</p>
+            <button class="nav-btn" style="margin: 0;" onclick="showPage('patient-master')">관리 화면 열기</button>
+        </div>
+    </div>
+
+    <!-- 환자 마스터 데이터 관리 (관리자 전용) -->
+    <div id="page-patient-master" class="hidden">
+        <button class="back-btn" onclick="showPage('admin')">← 관리자 화면으로</button>
+        <h2>🗂️ 환자 마스터 데이터 관리</h2>
+        <p style="font-size: 13px; color: #6c757d;">
+            엑셀 파일(차트번호 / 환자명 / 주민번호 앞자리)을 올리면, 이미 등록된 환자는 건너뛰고 새로 추가된 환자만 반영돼요.
+        </p>
+
+        <div class="qr-check-card" style="max-width: 520px; margin: 15px 0;">
+            <p>현재 등록된 환자 수: <strong id="pm-current-count">-</strong>명</p>
+            <input type="file" id="pm-file-input" accept=".xls,.xlsx,.csv" onchange="handlePatientExcelUpload(this)">
+            <div id="pm-preview" style="margin-top: 15px;"></div>
+            <button class="save-btn hidden" id="pm-upload-btn" onclick="uploadNewPatients()">☁️ 신규 환자만 업로드</button>
+            <div id="pm-upload-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
     </div>
 
     <!-- 낙상예방활동 체크리스트 (여러 부서 공용) -->
@@ -461,8 +485,9 @@
                 </select>
             </p>
             <p>
-                등록번호: <input type="text" id="mrc-regno" class="table-input" style="width:100%;" placeholder="예: 2158"><br><br>
-                환자성명: <input type="text" id="mrc-patient-name" class="table-input" style="width:100%;" placeholder="이름 입력"><br><br>
+                등록번호: <input type="text" id="mrc-regno" class="table-input" style="width:100%;" placeholder="예: 2158" onblur="onMrcRegNoBlur()"><br><br>
+                환자성명: <input type="text" id="mrc-patient-name" class="table-input" style="width:100%;" placeholder="이름 입력" onblur="onMrcNameBlur()"><br>
+                <div id="mrc-name-matches"></div><br>
                 생년월일: <input type="date" id="mrc-birthdate">
             </p>
             <p>
@@ -471,11 +496,10 @@
                     <option value="가족(배우자, 직계존비속)">2. 환자의 가족 (배우자, 직계존비속)</option>
                     <option value="형제, 자매">3. 형제, 자매</option>
                     <option value="대리인">4. 대리인</option>
-                </select><br><br>
-                신청인 상세 (선택): <input type="text" id="mrc-applicant-detail" class="table-input" style="width:100%;" placeholder="예: 보험사 대리인">
+                </select>
             </p>
             <p>
-                제출용도: <input type="text" id="mrc-purpose" class="table-input" style="width:100%;" placeholder="예: 보험회사 제출용"><br><br>
+                제출용도: <input type="text" id="mrc-purpose" class="table-input" style="width:100%;" placeholder="비워두면 '보험회사 제출용'으로 저장됩니다"><br><br>
                 총 매수: <input type="text" id="mrc-pages" class="table-input" style="width:100%;" placeholder="예: 30매">
             </p>
             <p>
@@ -1673,6 +1697,7 @@
         if(pageId === 'water-detail') renderWaterDetailTable();
         if(pageId === 'policy-library') renderPolicyLibrary();
         if(pageId === 'admin') initAdminPanel();
+        if(pageId === 'patient-master') initPatientMasterPage();
         if(pageId === 'fallprevention-menu') initFallPreventionMenu();
         if(pageId === 'med-prn') initPrnMedList();
         if(pageId === 'med-pairs') initMedPairsPage();
@@ -5179,8 +5204,8 @@ async function loadSocialScheduleImage() {
 // 신청인 구분에 따라 필요한 제출서류가 정해져 있어, 선택하면 자동으로 채워줍니다.
 const MEDICAL_RECORD_REQUESTER_DOCS = {
     '환자 본인': '본인 신분증',
-    '가족(배우자, 직계존비속)': '가족관계증명서, 신청자의 신분증 사본, 동의서',
-    '형제, 자매': '가족관계증명서, 신청자의 신분증 사본, 동의서\n(환자의 배우자 및 직계존속·비속, 배우자의 직계존속이 모두 없음을 증명하는 자료를 함께 제출하여야 한다.)',
+    '가족(배우자, 직계존비속)': '가족관계증명서, 신청자의 신분증 사본, 진료기록열람 및 사본발급 동의서',
+    '형제, 자매': '가족관계증명서, 신청자의 신분증 사본, 진료기록열람 및 사본발급 동의서\n(환자의 배우자 및 직계존속·비속, 배우자의 직계존속이 모두 없음을 증명하는 자료를 함께 제출하여야 한다.)',
     '대리인': '진료기록열람 및 사본발급 동의서·위임장, 신분증사본(신청자, 환자), 의무기록 발급신청서'
 };
 
@@ -5197,8 +5222,8 @@ function initMedRecordCopyForm() {
     document.getElementById('mrc-regno').value = '';
     document.getElementById('mrc-patient-name').value = '';
     document.getElementById('mrc-birthdate').value = '';
+    document.getElementById('mrc-name-matches').innerHTML = '';
     document.getElementById('mrc-applicant-category').value = '환자 본인';
-    document.getElementById('mrc-applicant-detail').value = '';
     document.getElementById('mrc-purpose').value = '';
     document.getElementById('mrc-pages').value = '';
     document.getElementById('mrc-has-cost').value = '유';
@@ -5231,6 +5256,8 @@ async function saveMedRecordCopy() {
 
     localStorage.setItem('inspector_name_cache', staff);
 
+    const purpose = document.getElementById('mrc-purpose').value.trim() || '보험회사 제출용';
+
     try {
         await db.collection('medrecord_copy_ledger').add({
             year: year,
@@ -5240,8 +5267,7 @@ async function saveMedRecordCopy() {
             patientName: patientName,
             birthDate: birthDate,
             applicantCategory: document.getElementById('mrc-applicant-category').value,
-            applicantDetail: document.getElementById('mrc-applicant-detail').value.trim(),
-            purpose: document.getElementById('mrc-purpose').value.trim(),
+            purpose: purpose,
             pages: document.getElementById('mrc-pages').value.trim(),
             hasCost: document.getElementById('mrc-has-cost').value,
             documents: document.getElementById('mrc-documents').value.trim(),
@@ -5254,7 +5280,7 @@ async function saveMedRecordCopy() {
         document.getElementById('mrc-regno').value = '';
         document.getElementById('mrc-patient-name').value = '';
         document.getElementById('mrc-birthdate').value = '';
-        document.getElementById('mrc-applicant-detail').value = '';
+        document.getElementById('mrc-name-matches').innerHTML = '';
         document.getElementById('mrc-purpose').value = '';
         document.getElementById('mrc-pages').value = '';
         renderMedRecordCopyHistory();
@@ -5738,6 +5764,216 @@ async function saveUserPermissions(uid) {
         console.error(err);
         alert('저장 실패: ' + err.message);
     }
+}
+
+// =========================================================
+// 17. 환자 마스터 데이터 (관리자 전용) - 등록번호/환자명 자동완성용
+// =========================================================
+
+let parsedPatientRows = [];
+
+// "0000002158" 이나 "2158"이나 같은 환자로 인식하도록, 앞자리 0을 지운 값을 문서ID로 씁니다.
+function normalizeRegNo(regNo) {
+    const s = String(regNo).trim().replace(/^0+/, '');
+    return s || '0';
+}
+
+// 주민번호 앞자리(YYMMDD-G)에서 G(성별/세기 구분 숫자)로 19XX/20XX를 판단해 생년월일을 계산합니다.
+function deriveBirthDateFromRRN(rrn) {
+    const m = String(rrn).trim().match(/^(\d{2})(\d{2})(\d{2})-?(\d)/);
+    if (!m) return null;
+    const [, yy, mm, dd, g] = m;
+    const century = ['1', '2', '5', '6'].includes(g) ? '19' : '20';
+    return `${century}${yy}-${mm}-${dd}`;
+}
+
+function initPatientMasterPage() {
+    if (!currentUserProfile || !currentUserProfile.isAdmin) {
+        alert('관리자만 접근할 수 있습니다.');
+        showMain();
+        return;
+    }
+    document.getElementById('pm-file-input').value = '';
+    document.getElementById('pm-preview').innerHTML = '';
+    document.getElementById('pm-upload-btn').classList.add('hidden');
+    document.getElementById('pm-upload-result').textContent = '';
+    parsedPatientRows = [];
+    refreshPatientMasterCount();
+}
+
+async function refreshPatientMasterCount() {
+    try {
+        const snapshot = await db.collection('patient_master').get();
+        document.getElementById('pm-current-count').textContent = snapshot.size;
+    } catch (err) {
+        console.error(err);
+        document.getElementById('pm-current-count').textContent = '-';
+    }
+}
+
+function handlePatientExcelUpload(input) {
+    const file = input.files[0];
+    const preview = document.getElementById('pm-preview');
+    const uploadBtn = document.getElementById('pm-upload-btn');
+    if (!file) return;
+
+    preview.innerHTML = '<p style="color:#6c757d;">파일을 읽는 중입니다...</p>';
+    uploadBtn.classList.add('hidden');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, { type: 'array', codepage: 949 });
+            const sheet = wb.Sheets[wb.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+            parsedPatientRows = [];
+            let skippedBadRows = 0;
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                if (!r || r[0] === undefined || String(r[0]).trim() === '' || !r[1]) continue;
+                const chartNo = String(r[0]).trim();
+                const name = String(r[1]).trim();
+                const birthDate = deriveBirthDateFromRRN(r[2] || '');
+                if (!birthDate) { skippedBadRows++; continue; }
+                parsedPatientRows.push({
+                    regNo: chartNo,
+                    regNoNormalized: normalizeRegNo(chartNo),
+                    name: name,
+                    birthDate: birthDate
+                });
+            }
+
+            if (parsedPatientRows.length === 0) {
+                preview.innerHTML = '<p style="color:#dc3545;">읽을 수 있는 환자 데이터가 없습니다. 파일 형식을 확인해 주세요 (차트번호 / 환자명 / 주민번호 순서).</p>';
+                return;
+            }
+
+            preview.innerHTML = `
+                <div class="info-box">
+                    파일에서 ${parsedPatientRows.length}명을 읽었습니다${skippedBadRows > 0 ? ` (형식이 맞지 않는 ${skippedBadRows}건 제외)` : ''}.<br>
+                    아래 버튼을 누르면 이미 등록된 환자는 건너뛰고 새 환자만 추가돼요.
+                </div>
+            `;
+            uploadBtn.classList.remove('hidden');
+        } catch (err) {
+            console.error(err);
+            preview.innerHTML = `<p style="color:#dc3545;">파일을 읽는 중 오류가 발생했습니다: ${err.message}</p>`;
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+async function uploadNewPatients() {
+    const resultEl = document.getElementById('pm-upload-result');
+    if (parsedPatientRows.length === 0) { alert('먼저 파일을 선택해 주세요.'); return; }
+
+    resultEl.style.color = '#6c757d';
+    resultEl.textContent = '처리 중입니다... (환자 수가 많으면 시간이 걸릴 수 있어요)';
+
+    try {
+        const existingSnapshot = await db.collection('patient_master').get();
+        const existingIds = new Set();
+        existingSnapshot.forEach(doc => existingIds.add(doc.id));
+
+        const newRows = parsedPatientRows.filter(p => !existingIds.has(p.regNoNormalized));
+
+        if (newRows.length === 0) {
+            resultEl.style.color = '#28a745';
+            resultEl.textContent = `✅ 새로 추가할 환자가 없습니다. (전체 ${parsedPatientRows.length}명 모두 이미 등록되어 있음)`;
+            return;
+        }
+
+        // Firestore 배치는 한 번에 최대 500건이라 나눠서 저장합니다.
+        const chunkSize = 500;
+        for (let i = 0; i < newRows.length; i += chunkSize) {
+            const chunk = newRows.slice(i, i + chunkSize);
+            const batch = db.batch();
+            chunk.forEach(p => {
+                const ref = db.collection('patient_master').doc(p.regNoNormalized);
+                batch.set(ref, {
+                    regNo: p.regNo,
+                    name: p.name,
+                    birthDate: p.birthDate,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            });
+            await batch.commit();
+        }
+
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = `✅ 완료! 전체 ${parsedPatientRows.length}명 중 ${newRows.length}명 신규 추가, ${parsedPatientRows.length - newRows.length}명은 이미 등록되어 있어 건너뛰었습니다.`;
+        document.getElementById('pm-upload-btn').classList.add('hidden');
+        document.getElementById('pm-file-input').value = '';
+        parsedPatientRows = [];
+        refreshPatientMasterCount();
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 업로드 실패: ' + err.message;
+    }
+}
+
+// ---- 의무기록 사본발급 대장에서 등록번호/환자명으로 자동완성 ----
+
+async function onMrcRegNoBlur() {
+    const regNo = document.getElementById('mrc-regno').value.trim();
+    document.getElementById('mrc-name-matches').innerHTML = '';
+    if (!regNo) return;
+
+    try {
+        const doc = await db.collection('patient_master').doc(normalizeRegNo(regNo)).get();
+        if (doc.exists) {
+            const d = doc.data();
+            document.getElementById('mrc-patient-name').value = d.name;
+            document.getElementById('mrc-birthdate').value = d.birthDate;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function onMrcNameBlur() {
+    const name = document.getElementById('mrc-patient-name').value.trim();
+    const regNoField = document.getElementById('mrc-regno');
+    const matchesEl = document.getElementById('mrc-name-matches');
+    matchesEl.innerHTML = '';
+    if (!name || regNoField.value.trim()) return; // 이미 등록번호로 채워진 경우는 건너뜀
+
+    try {
+        const snapshot = await db.collection('patient_master').where('name', '==', name).get();
+        if (snapshot.empty) return;
+
+        if (snapshot.size === 1) {
+            const d = snapshot.docs[0].data();
+            regNoField.value = d.regNo;
+            document.getElementById('mrc-birthdate').value = d.birthDate;
+            return;
+        }
+
+        // 동명이인 - 골라서 채우게 함
+        const patients = snapshot.docs.map(doc => doc.data());
+        matchesEl.innerHTML = `
+            <div style="background:#fff3cd; padding:8px 10px; border-radius:6px; margin-top:6px; font-size:13px;">
+                동명이인이 ${patients.length}명 있어요. 등록번호를 선택해 주세요.
+                ${patients.map(p => `
+                    <div style="cursor:pointer; padding:4px 0; text-decoration:underline; color:#2b569a;" onclick="selectMrcPatient('${p.regNo}', '${p.name}', '${p.birthDate}')">
+                        등록번호 ${p.regNo} (생년월일 ${p.birthDate})
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function selectMrcPatient(regNo, name, birthDate) {
+    document.getElementById('mrc-regno').value = regNo;
+    document.getElementById('mrc-patient-name').value = name;
+    document.getElementById('mrc-birthdate').value = birthDate;
+    document.getElementById('mrc-name-matches').innerHTML = '';
 }
 
 // 11. 페이지 초기화
