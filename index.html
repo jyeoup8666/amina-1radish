@@ -200,7 +200,7 @@
         <!-- 최초 배포 시, 계정이 하나도 없을 때만 나타나는 관리자 계정 최초 설정 화면 -->
         <div id="first-admin-setup" class="hidden">
             <p style="color:#2b569a; font-weight:bold; font-size:14px; margin-top:0;">🎉 처음 설정이에요! 관리자 계정을 먼저 만들어주세요.</p>
-            <input type="text" id="setup-username" placeholder="관리자 아이디" class="table-input" style="width:100%; margin-bottom:10px; box-sizing:border-box;">
+            <input type="text" id="setup-username" placeholder="관리자 아이디 (영문·숫자, 3~20자)" class="table-input" style="width:100%; margin-bottom:10px; box-sizing:border-box;">
             <input type="text" id="setup-displayname" placeholder="이름" class="table-input" style="width:100%; margin-bottom:10px; box-sizing:border-box;">
             <input type="password" id="setup-password" placeholder="비밀번호 (6자 이상)" class="table-input" style="width:100%; margin-bottom:15px; box-sizing:border-box;">
             <button class="save-btn" style="width:100%;" onclick="createFirstAdmin()">관리자 계정 만들기</button>
@@ -315,7 +315,7 @@
         <div class="qr-check-card" style="max-width: 480px; margin: 0 0 25px 0;">
             <h3 style="margin-top: 0;">➕ 새 계정 만들기</h3>
             <p>
-                아이디: <input type="text" id="admin-new-username" class="table-input" style="width:100%;" placeholder="영문/숫자 아이디"><br><br>
+                아이디: <input type="text" id="admin-new-username" class="table-input" style="width:100%;" placeholder="영문/숫자 아이디 (3~20자)"><br><br>
                 이름: <input type="text" id="admin-new-displayname" class="table-input" style="width:100%;" placeholder="이름"><br><br>
                 비밀번호: <input type="password" id="admin-new-password" class="table-input" style="width:100%;" placeholder="6자 이상">
             </p>
@@ -4770,6 +4770,11 @@ function usernameToEmail(username) {
     return username.trim().toLowerCase() + USERNAME_DOMAIN;
 }
 
+// 아이디는 이메일 형식으로 변환되어 Firebase Auth에 전달되므로, 영문/숫자만 허용합니다.
+function isValidUsername(username) {
+    return /^[a-zA-Z0-9]{3,20}$/.test(username);
+}
+
 function initAuthGate() {
     firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
@@ -4877,6 +4882,7 @@ async function createFirstAdmin() {
     errorEl.textContent = '';
 
     if (!username || !displayName || !password) { errorEl.textContent = '모두 입력해 주세요.'; return; }
+    if (!isValidUsername(username)) { errorEl.textContent = '아이디는 영문·숫자만 사용해 3~20자로 입력해 주세요.'; return; }
     if (password.length < 6) { errorEl.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
 
     try {
@@ -4941,6 +4947,7 @@ async function createNewUserByAdmin() {
     const resultEl = document.getElementById('admin-create-result');
 
     if (!username || !displayName || !password) { alert('아이디/이름/비밀번호를 모두 입력해 주세요.'); return; }
+    if (!isValidUsername(username)) { alert('아이디는 영문·숫자만 사용해 3~20자로 입력해 주세요.'); return; }
     if (password.length < 6) { alert('비밀번호는 6자 이상이어야 합니다.'); return; }
     if (!isAdminNew && allowedTeams.length === 0) { alert('최소 한 개 이상의 팀을 선택하거나, 관리자 권한을 부여해 주세요.'); return; }
 
