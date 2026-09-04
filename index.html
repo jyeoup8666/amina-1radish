@@ -467,7 +467,10 @@
     <!-- 사회복지 프로그램 결과보고서 -->
     <div id="page-social-report" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>📝 사회복지 프로그램 결과보고서</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📝 사회복지 프로그램 결과보고서</h2>
+            <button class="toggle-history-btn" onclick="showPage('social-report-history-page')">📜 이력 보기</button>
+        </div>
         <div id="social-report-related"></div>
 
         <div class="qr-check-card" style="max-width: 600px; margin: 15px 0;">
@@ -499,15 +502,22 @@
             <button class="save-btn" onclick="saveSocialReport()">☁️ 저장하기</button>
             <div id="sr-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
+    </div>
 
-        <h3 style="margin-top: 25px;">이력</h3>
+    <!-- 사회복지 프로그램 결과보고서 이력 -->
+    <div id="page-social-report-history-page" class="hidden">
+        <button class="back-btn" onclick="showPage('social-report')">← 작성으로</button>
+        <h2>📜 사회복지 프로그램 결과보고서 이력</h2>
         <div id="social-report-history"><p style="color:#6c757d;">불러오는 중...</p></div>
     </div>
 
     <!-- 불만 및 고충처리 결과보고서 -->
     <div id="page-complaint-result" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>📝 불만 및 고충처리 결과보고서</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📝 불만 및 고충처리 결과보고서</h2>
+            <button class="toggle-history-btn" onclick="showPage('complaint-result-history-page')">📜 이력 보기</button>
+        </div>
         <div id="complaint-result-related"></div>
 
         <div class="qr-check-card" style="max-width: 600px; margin: 15px 0;">
@@ -583,15 +593,22 @@
             <button class="save-btn" onclick="saveComplaintResult()">☁️ 저장하기</button>
             <div id="cr-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
+    </div>
 
-        <h3 style="margin-top: 25px;">이력</h3>
+    <!-- 불만 및 고충처리 결과보고서 이력 -->
+    <div id="page-complaint-result-history-page" class="hidden">
+        <button class="back-btn" onclick="showPage('complaint-result')">← 작성으로</button>
+        <h2>📜 불만 및 고충처리 결과보고서 이력</h2>
         <div id="complaint-result-history"><p style="color:#6c757d;">불러오는 중...</p></div>
     </div>
 
     <!-- CVR(Critical Value Report) 관리대장 -->
     <div id="page-cvr-ledger" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🚨 CVR(위험수치) 관리대장</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">🚨 CVR(위험수치) 관리대장</h2>
+            <button class="toggle-history-btn" onclick="showPage('cvr-history-page')">📜 이력 보기</button>
+        </div>
         <div id="cvr-related"></div>
 
         <div class="qr-check-card" style="max-width: 560px; margin: 15px 0;">
@@ -623,8 +640,12 @@
             <button class="save-btn" onclick="saveCvrEntry()">☁️ 저장하기</button>
             <div id="cvr-result-msg" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
+    </div>
 
-        <h3 style="margin-top: 25px;">이력</h3>
+    <!-- CVR 관리대장 이력 -->
+    <div id="page-cvr-history-page" class="hidden">
+        <button class="back-btn" onclick="showPage('cvr-ledger')">← 작성으로</button>
+        <h2>📜 CVR(위험수치) 관리대장 이력</h2>
         <p>
             병동 필터:
             <select id="cvr-filter-ward" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;" onchange="renderCvrHistory()">
@@ -649,7 +670,10 @@
     <!-- 취약환자 접수대장 -->
     <div id="page-vulnerable-patient" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🛡️ 취약환자 접수대장</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">🛡️ 취약환자 접수대장</h2>
+            <button class="toggle-history-btn" onclick="showPage('vulnerable-patient-history-page')">📜 이력 보기</button>
+        </div>
         <div id="vulnerable-related"></div>
 
         <div class="qr-check-card" style="max-width: 560px; margin: 15px 0;">
@@ -679,8 +703,12 @@
             <button class="save-btn" onclick="saveVulnerablePatient()">☁️ 저장하기</button>
             <div id="vp-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
+    </div>
 
-        <h3 style="margin-top: 25px;">이력</h3>
+    <!-- 취약환자 접수대장 이력 -->
+    <div id="page-vulnerable-patient-history-page" class="hidden">
+        <button class="back-btn" onclick="showPage('vulnerable-patient')">← 작성으로</button>
+        <h2>📜 취약환자 접수대장 이력</h2>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -697,7 +725,10 @@
     <!-- 학대·폭력 상담일지 -->
     <div id="page-abuse-counseling" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🛡️ 학대·폭력 상담일지</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">🛡️ 학대·폭력 상담일지</h2>
+            <button class="toggle-history-btn" onclick="showPage('abuse-counseling-history-page')">📜 이력 보기</button>
+        </div>
         <div id="abuse-related"></div>
 
         <div class="qr-check-card" style="max-width: 560px; margin: 15px 0;">
@@ -725,8 +756,12 @@
             <button class="save-btn" onclick="saveAbuseCounseling()">☁️ 저장하기</button>
             <div id="ac-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
+    </div>
 
-        <h3 style="margin-top: 25px;">이력</h3>
+    <!-- 학대·폭력 상담일지 이력 -->
+    <div id="page-abuse-counseling-history-page" class="hidden">
+        <button class="back-btn" onclick="showPage('abuse-counseling')">← 작성으로</button>
+        <h2>📜 학대·폭력 상담일지 이력</h2>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -906,7 +941,10 @@
     <!-- 불만 및 고충 처리대장 (원무팀) -->
     <div id="page-complaint-log" class="hidden">
         <button class="back-btn" onclick="showTeamWorkspace('원무팀')">← 원무팀으로</button>
-        <h2>📋 불만 및 고충 처리대장</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📋 불만 및 고충 처리대장</h2>
+            <button class="toggle-history-btn" onclick="showPage('complaint-log-history-page')">📜 이력 보기</button>
+        </div>
         <div id="complaint-log-related"></div>
         <div class="qr-check-card" style="max-width: 560px; margin: 15px 0;">
             <p>
@@ -930,7 +968,12 @@
             <button class="save-btn" onclick="saveComplaintLog()">☁️ 저장하기</button>
             <div id="cl-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
-        <h3 style="margin-top: 25px;">처리 이력</h3>
+    </div>
+
+    <!-- 불만 및 고충 처리대장 이력 -->
+    <div id="page-complaint-log-history-page" class="hidden">
+        <button class="back-btn" onclick="showPage('complaint-log')">← 작성으로</button>
+        <h2>📜 불만 및 고충 처리대장 이력</h2>
         <div style="overflow-x: auto;">
             <table>
                 <thead><tr><th>접수일자</th><th>신청인</th><th>병실</th><th>내용</th><th>접수자</th><th>상태</th><th>처리내용</th></tr></thead>
@@ -1029,7 +1072,7 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">최근 점검 실시일</div>
-                <div class="stat-value" id="stat-last-date">-</div>
+                <div class="stat-value" id="stat-last-date" style="cursor:pointer; text-decoration:underline;" onclick="goToLatestBoilerDate()">-</div>
             </div>
             <div class="stat-card warning">
                 <div class="stat-title">전월 이상 발생 횟수</div>
@@ -2011,10 +2054,15 @@
         if(pageId === 'medical-equipment') initMedicalEquipmentPage();
         if(pageId === 'admission-guide') initAdmissionGuide();
         if(pageId === 'complaint-result') initComplaintResultForm();
+        if(pageId === 'complaint-result-history-page') initComplaintResultHistoryPage();
         if(pageId === 'cvr-ledger') initCvrLedgerForm();
+        if(pageId === 'cvr-history-page') initCvrHistoryPage();
         if(pageId === 'vulnerable-patient') initVulnerablePatientForm();
+        if(pageId === 'vulnerable-patient-history-page') initVulnerablePatientHistoryPage();
         if(pageId === 'abuse-counseling') initAbuseCounselingForm();
+        if(pageId === 'abuse-counseling-history-page') initAbuseCounselingHistoryPage();
         if(pageId === 'social-report') initSocialReportForm();
+        if(pageId === 'social-report-history-page') initSocialReportHistoryPage();
         if(pageId === 'social-schedule') initSocialSchedulePage();
         if(pageId === 'medrecord-copy') initMedRecordCopyForm();
         if(pageId === 'medrecord-history') initMedRecordHistoryPage();
@@ -2022,6 +2070,7 @@
         if(pageId === 'fallprevention-report') initFallPreventionReport();
         if(pageId === 'privacy-request') initPrivacyRequestForm();
         if(pageId === 'complaint-log') initComplaintLogForm();
+        if(pageId === 'complaint-log-history-page') initComplaintLogHistoryPage();
     }
 
     function showMain() {
@@ -2157,6 +2206,19 @@
         });
     }
 
+    let latestBoilerCheckDate = null;
+
+    function goToLatestBoilerDate() {
+        if (!latestBoilerCheckDate) return;
+        showPage('boiler-form');
+        loadHistory(latestBoilerCheckDate);
+        // 날짜 드롭다운은 비동기로 채워지므로, 채워진 뒤에 선택값도 맞춰줍니다.
+        setTimeout(() => {
+            const sel = document.getElementById('history-select');
+            if (sel) sel.value = latestBoilerCheckDate;
+        }, 600);
+    }
+
     function renderHistoryTable() {
         const tbody = document.getElementById('history-table-body');
         tbody.innerHTML = '<tr><td colspan="5">데이터를 불러오는 중입니다...</td></tr>';
@@ -2168,6 +2230,7 @@
             allDocs.sort((a, b) => a.date.localeCompare(b.date));
 
             document.getElementById('stat-last-date').textContent = allDocs.length > 0 ? allDocs[allDocs.length - 1].date : '-';
+            latestBoilerCheckDate = allDocs.length > 0 ? allDocs[allDocs.length - 1].date : null;
 
             const now = new Date();
             const currYear = now.getFullYear();
@@ -5420,6 +5483,9 @@ function initComplaintResultForm() {
     document.getElementById('cr-notify-method').value = '직접설명';
     document.getElementById('cr-notify-detail').value = '';
     document.getElementById('cr-result').textContent = '';
+}
+
+function initComplaintResultHistoryPage() {
     renderComplaintResultHistory();
 }
 
@@ -5513,6 +5579,9 @@ function initCvrLedgerForm() {
     document.getElementById('cvr-action').value = '';
     document.getElementById('cvr-author').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('cvr-result-msg').textContent = '';
+}
+
+function initCvrHistoryPage() {
     document.getElementById('cvr-filter-ward').value = '전체';
     renderCvrHistory();
 }
@@ -5603,6 +5672,9 @@ function initVulnerablePatientForm() {
     document.getElementById('vp-action').value = '';
     document.getElementById('vp-staff').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('vp-result').textContent = '';
+}
+
+function initVulnerablePatientHistoryPage() {
     renderVulnerablePatientHistory();
 }
 
@@ -5685,6 +5757,9 @@ function initAbuseCounselingForm() {
     document.getElementById('ac-action').value = '';
     document.getElementById('ac-counselor').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('ac-result').textContent = '';
+}
+
+function initAbuseCounselingHistoryPage() {
     renderAbuseCounselingHistory();
 }
 
@@ -5774,6 +5849,9 @@ function initSocialReportForm() {
     document.getElementById('sr-photo2-preview').classList.add('hidden');
     document.getElementById('sr-photo2-preview').src = '';
     document.getElementById('sr-result').textContent = '';
+}
+
+function initSocialReportHistoryPage() {
     renderSocialReportHistory();
 }
 
@@ -6196,6 +6274,9 @@ function initComplaintLogForm() {
     document.getElementById('cl-resolution').value = '';
     document.getElementById('cl-result').textContent = '';
     document.getElementById('complaint-log-related').innerHTML = renderRelatedPolicyLink('5.3');
+}
+
+function initComplaintLogHistoryPage() {
     renderComplaintLogHistory();
 }
 
