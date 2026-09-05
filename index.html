@@ -126,6 +126,27 @@
 
         /* --- QR 현장 점검(스캔용) 스타일 --- */
         .qr-check-card { max-width: 480px; margin: 0 auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+        /* --- 공식 서류 양식(결재란 + 표 형태) 공용 스타일 --- */
+        .official-form-sheet { max-width: 720px; margin: 0 auto 25px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .official-form-headrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
+        .official-form-title { font-size: 24px; font-weight: bold; margin: 0; }
+        .official-approval-table { border-collapse: collapse; flex-shrink: 0; }
+        .official-approval-table th, .official-approval-table td { border: 1px solid #333; padding: 6px 14px; text-align: center; font-size: 13px; font-weight: normal; }
+        .official-approval-table .oa-label { background: #f4f6f9; }
+        .official-form-table { width: 100%; border-collapse: collapse; }
+        .official-form-table th { background: #f4f6f9; border: 1px solid #333; padding: 10px; width: 130px; font-weight: normal; font-size: 14px; white-space: nowrap; vertical-align: middle; }
+        .official-form-table td { border: 1px solid #333; padding: 10px; text-align: left; vertical-align: top; }
+        .official-form-table td input, .official-form-table td textarea { width: 100%; box-sizing: border-box; border: none; font-family: inherit; font-size: 14px; padding: 2px; }
+        .official-form-table td textarea { resize: vertical; }
+        .official-photo-row td { padding: 0; }
+        .official-photo-cell { display: flex; }
+        .official-photo-cell > div { flex: 1; min-height: 160px; padding: 10px; text-align: center; }
+        .official-photo-cell > div:first-child { border-right: 1px solid #333; }
+        @media print {
+            .official-form-sheet { box-shadow: none; break-inside: avoid; page-break-after: always; }
+            .official-form-sheet:last-child { page-break-after: auto; }
+        }
         .terms-box { max-height: 170px; overflow-y: auto; font-size: 12px; line-height: 1.6; background: #fff9e6; border: 1px solid #ffe58f; }
         .terms-box ol { margin: 8px 0 0 18px; padding: 0; }
         .terms-box ul { margin: 5px 0 0 18px; padding: 0; }
@@ -519,32 +540,47 @@
         </div>
         <div id="social-report-related"></div>
 
-        <div class="qr-check-card" style="max-width: 600px; margin: 15px 0;">
-            <p>
-                프로그램명: <input type="text" id="sr-name" class="table-input" style="width:100%;" placeholder="예: 산책 (안산 황톳길, 삼청공원, 남산 등)"><br><br>
-                일시: <input type="text" id="sr-datetime" class="table-input" style="width:100%;" placeholder="예: 2026년 상반기"><br><br>
-                장소: <input type="text" id="sr-location" class="table-input" style="width:100%;" placeholder="예: 번갈아가며 코스 진행"><br><br>
-                진행자: <input type="text" id="sr-facilitator" class="table-input" style="width:100%;" placeholder="예: 아미나 운행주임"><br><br>
-                참석자: <input type="text" id="sr-attendees" class="table-input" style="width:100%;" placeholder="예: 재원환자 중 6명 (인원 초과 시 랜덤 추첨)"><br><br>
-                프로그램 활동목표: <input type="text" id="sr-goals" class="table-input" style="width:100%;" placeholder="예: 신체 자극 및 면역 증진, 자연친화적 운동, 일상생활 회복"><br><br>
-                진행순서 및 진행과정: <textarea id="sr-process" class="table-input" style="width:100%; box-sizing:border-box; min-height:60px;" placeholder="진행 순서를 입력하세요"></textarea>
-            </p>
-            <p style="font-weight: bold; margin-bottom: 5px;">프로그램 평가</p>
-            <p>
-                1. 환자 개인 평가: <textarea id="sr-eval-patient" class="table-input" style="width:100%; box-sizing:border-box; min-height:50px;" placeholder="환자 반응 및 평가를 입력하세요"></textarea><br>
-                2. 담당자 평가: <textarea id="sr-eval-staff" class="table-input" style="width:100%; box-sizing:border-box; min-height:50px;" placeholder="담당자 평가를 입력하세요"></textarea>
-            </p>
-            <p style="font-weight: bold; margin-bottom: 5px;">프로그램 활동사진</p>
-            <p>
-                <input type="file" accept="image/*" onchange="compressImageToPreview(this, 'sr-photo1-preview')">
-                <img id="sr-photo1-preview" class="hidden" style="max-width:100%; margin-top:8px; border-radius:6px; cursor:pointer;" onclick="openImageModal(this.src)"><br><br>
-                <input type="file" accept="image/*" onchange="compressImageToPreview(this, 'sr-photo2-preview')">
-                <img id="sr-photo2-preview" class="hidden" style="max-width:100%; margin-top:8px; border-radius:6px; cursor:pointer;" onclick="openImageModal(this.src)">
-            </p>
-            <p>
-                작성자: <input type="text" id="sr-author" placeholder="이름">
-                승인자: <select id="sr-approver-uid" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;"></select>
-            </p>
+        <div class="official-form-sheet" style="margin-top: 15px;">
+            <div class="official-form-headrow">
+                <h2 class="official-form-title">사회복지 프로그램 결과보고서</h2>
+                <table class="official-approval-table">
+                    <tr><th rowspan="2" class="oa-label">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
+                    <tr>
+                        <td><input type="text" id="sr-author" placeholder="이름" style="width:70px; border:none; text-align:center; font-size:13px;"></td>
+                        <td><select id="sr-approver-uid" style="border:none; text-align:center; font-size:13px; background:transparent;"></select></td>
+                    </tr>
+                </table>
+            </div>
+            <table class="official-form-table">
+                <tr><th>프로그램명</th><td><input type="text" id="sr-name" placeholder="예: 산책 (안산 황톳길, 삼청공원, 남산 등)"></td></tr>
+                <tr><th>일 시</th><td><input type="text" id="sr-datetime" placeholder="예: 2026년 상반기"></td></tr>
+                <tr><th>장 소</th><td><input type="text" id="sr-location" placeholder="예: 번갈아가며 코스 진행"></td></tr>
+                <tr><th>진 행 자</th><td><input type="text" id="sr-facilitator" placeholder="예: 아미나 운행주임"></td></tr>
+                <tr><th>참 석 자</th><td><input type="text" id="sr-attendees" placeholder="예: 재원환자 중 6명 (인원 초과 시 랜덤 추첨)"></td></tr>
+                <tr><th>프로그램<br>활동목표</th><td><input type="text" id="sr-goals" placeholder="예: 신체 자극 및 면역 증진, 자연친화적 운동, 일상생활 회복"></td></tr>
+                <tr><th>진행순서<br>및<br>진행과정</th><td><textarea id="sr-process" style="min-height:60px;" placeholder="진행 순서를 입력하세요"></textarea></td></tr>
+                <tr><th>프로그램<br>평 가</th><td>
+                    1. 환자 개인 평가<br>
+                    <textarea id="sr-eval-patient" style="min-height:50px;" placeholder="환자 반응 및 평가를 입력하세요"></textarea>
+                    <br>2. 담당자 평가<br>
+                    <textarea id="sr-eval-staff" style="min-height:50px;" placeholder="담당자 평가를 입력하세요"></textarea>
+                </td></tr>
+                <tr class="official-photo-row"><th>프로그램<br>활동사진</th><td>
+                    <div class="official-photo-cell">
+                        <div>
+                            <input type="file" accept="image/*" onchange="compressImageToPreview(this, 'sr-photo1-preview')">
+                            <img id="sr-photo1-preview" class="hidden" style="max-width:100%; margin-top:8px; border-radius:6px; cursor:pointer;" onclick="openImageModal(this.src)">
+                        </div>
+                        <div>
+                            <input type="file" accept="image/*" onchange="compressImageToPreview(this, 'sr-photo2-preview')">
+                            <img id="sr-photo2-preview" class="hidden" style="max-width:100%; margin-top:8px; border-radius:6px; cursor:pointer;" onclick="openImageModal(this.src)">
+                        </div>
+                    </div>
+                </td></tr>
+            </table>
+        </div>
+
+        <div class="qr-check-card no-print" style="max-width: 600px; margin: 0 auto;">
             <button class="save-btn" onclick="saveSocialReport()">☁️ 저장하기</button>
             <div id="sr-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
@@ -6886,22 +6922,41 @@ async function renderSocialReportHistory() {
     }
 
     container.innerHTML = docs.map(d => `
-        <div class="qr-check-card" style="max-width:600px; margin:0 0 15px 0; text-align:left;">
-            <h4 style="margin-top:0;">${d.programName}</h4>
-            <p style="font-size:13px; color:#6c757d; margin:4px 0;">${d.dateTime || '-'} · ${d.location || '-'}</p>
-            <p style="font-size:13px; margin:4px 0;"><strong>진행자:</strong> ${d.facilitator || '-'} &nbsp; <strong>참석자:</strong> ${d.attendees || '-'}</p>
-            ${d.goals ? `<p style="font-size:13px; margin:4px 0;"><strong>활동목표:</strong> ${d.goals}</p>` : ''}
-            ${d.process ? `<p style="font-size:13px; margin:4px 0;"><strong>진행과정:</strong> ${d.process}</p>` : ''}
-            ${d.evalPatient ? `<p style="font-size:13px; margin:4px 0;"><strong>환자 개인 평가:</strong> ${d.evalPatient}</p>` : ''}
-            ${d.evalStaff ? `<p style="font-size:13px; margin:4px 0;"><strong>담당자 평가:</strong> ${d.evalStaff}</p>` : ''}
-            <div style="display:flex; gap:8px; margin-top:8px;">
-                ${d.photo1 ? `<img src="${d.photo1}" style="width:100px; height:100px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openImageModal('${d.photo1}')">` : ''}
-                ${d.photo2 ? `<img src="${d.photo2}" style="width:100px; height:100px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openImageModal('${d.photo2}')">` : ''}
+        <div class="official-form-sheet">
+            <div class="official-form-headrow">
+                <h2 class="official-form-title">사회복지 프로그램 결과보고서</h2>
+                <table class="official-approval-table">
+                    <tr><th rowspan="2" class="oa-label">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
+                    <tr>
+                        <td>${d.author || '-'}</td>
+                        <td>${d.approvalStatus === 'approved' && d.approvalSignature
+                            ? `<img src="${d.approvalSignature}" style="max-height:32px;">`
+                            : (d.approverName || '-')}</td>
+                    </tr>
+                </table>
             </div>
-            <p style="font-size:12px; color:#6c757d; margin-top:8px;">작성자: ${d.author || '-'}</p>
-            ${renderApprovalStatusBlock(d, 'social_program_reports', 'renderSocialReportHistory')}
-            <div class="no-print" style="margin-top:10px;">
-                <button class="back-btn" style="background:#dc3545; color:white; margin:0; padding:5px 10px; font-size:12px;" onclick="deleteSocialReportEntry('${d.docId}')">삭제</button>
+            <table class="official-form-table">
+                <tr><th>프로그램명</th><td>${d.programName || '-'}</td></tr>
+                <tr><th>일 시</th><td>${d.dateTime || '-'}</td></tr>
+                <tr><th>장 소</th><td>${d.location || '-'}</td></tr>
+                <tr><th>진 행 자</th><td>${d.facilitator || '-'}</td></tr>
+                <tr><th>참 석 자</th><td>${d.attendees || '-'}</td></tr>
+                <tr><th>프로그램<br>활동목표</th><td>${d.goals || '-'}</td></tr>
+                <tr><th>진행순서<br>및<br>진행과정</th><td>${(d.process || '-').replace(/\n/g, '<br>')}</td></tr>
+                <tr><th>프로그램<br>평 가</th><td>
+                    1. 환자 개인 평가<br>${(d.evalPatient || '-').replace(/\n/g, '<br>')}
+                    <br><br>2. 담당자 평가<br>${(d.evalStaff || '-').replace(/\n/g, '<br>')}
+                </td></tr>
+                <tr class="official-photo-row"><th>프로그램<br>활동사진</th><td>
+                    <div class="official-photo-cell">
+                        <div>${d.photo1 ? `<img src="${d.photo1}" style="max-width:100%; max-height:180px; cursor:pointer;" onclick="openImageModal('${d.photo1}')">` : ''}</div>
+                        <div>${d.photo2 ? `<img src="${d.photo2}" style="max-width:100%; max-height:180px; cursor:pointer;" onclick="openImageModal('${d.photo2}')">` : ''}</div>
+                    </div>
+                </td></tr>
+            </table>
+            <div class="no-print" style="margin-top:12px; text-align:right;">
+                ${renderApprovalStatusBlock(d, 'social_program_reports', 'renderSocialReportHistory')}
+                <button class="back-btn" style="background:#dc3545; color:white; margin:8px 0 0 0; padding:5px 10px; font-size:12px;" onclick="deleteSocialReportEntry('${d.docId}')">삭제</button>
             </div>
         </div>
     `).join('');
