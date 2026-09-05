@@ -501,62 +501,22 @@
     <!-- 운영위원회 조직도 -->
     <div id="page-org-chart" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🗂️ 운영위원회 조직도</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">🗂️ 운영위원회 조직도</h2>
+            <button class="toggle-history-btn no-print" id="org-chart-edit-btn" onclick="toggleOrgChartEdit()">✏️ 조직도 수정</button>
+        </div>
         <div id="org-chart-related"></div>
-        <div style="max-width: 700px; margin: 15px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-            <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
-                <!-- 연결선 -->
-                <line x1="280" y1="70" x2="280" y2="130" stroke="#333" stroke-width="2"/>
-                <line x1="280" y1="130" x2="430" y2="130" stroke="#333" stroke-width="2"/>
-                <line x1="280" y1="130" x2="280" y2="180" stroke="#333" stroke-width="2"/>
-                <line x1="80" y1="180" x2="600" y2="180" stroke="#333" stroke-width="2"/>
-                <line x1="80" y1="180" x2="80" y2="200" stroke="#333" stroke-width="2"/>
-                <line x1="253" y1="180" x2="253" y2="200" stroke="#333" stroke-width="2"/>
-                <line x1="427" y1="180" x2="427" y2="200" stroke="#333" stroke-width="2"/>
-                <line x1="600" y1="180" x2="600" y2="200" stroke="#333" stroke-width="2"/>
-
-                <!-- 위원장 / 병원장 -->
-                <g>
-                    <rect x="210" y="20" width="140" height="25" fill="#d9d9d9" stroke="#333"/>
-                    <rect x="210" y="45" width="140" height="25" fill="white" stroke="#333"/>
-                    <text x="280" y="37" text-anchor="middle" font-weight="bold" font-size="14">위원장</text>
-                    <text x="280" y="62" text-anchor="middle" font-size="14">병원장</text>
-                </g>
-
-                <!-- 간사 / 원무팀장 -->
-                <g>
-                    <rect x="360" y="130" width="140" height="25" fill="#d9d9d9" stroke="#333"/>
-                    <rect x="360" y="155" width="140" height="25" fill="white" stroke="#333"/>
-                    <text x="430" y="147" text-anchor="middle" font-weight="bold" font-size="14">간사</text>
-                    <text x="430" y="172" text-anchor="middle" font-size="14">원무팀장</text>
-                </g>
-
-                <!-- 위원 4명 -->
-                <g>
-                    <rect x="10" y="200" width="140" height="25" fill="#d9d9d9" stroke="#333"/>
-                    <rect x="10" y="225" width="140" height="25" fill="white" stroke="#333"/>
-                    <text x="80" y="217" text-anchor="middle" font-weight="bold" font-size="14">위원</text>
-                    <text x="80" y="242" text-anchor="middle" font-size="14">대표원장</text>
-                </g>
-                <g>
-                    <rect x="183" y="200" width="140" height="25" fill="#d9d9d9" stroke="#333"/>
-                    <rect x="183" y="225" width="140" height="25" fill="white" stroke="#333"/>
-                    <text x="253" y="217" text-anchor="middle" font-weight="bold" font-size="14">위원</text>
-                    <text x="253" y="242" text-anchor="middle" font-size="14">책임간호사</text>
-                </g>
-                <g>
-                    <rect x="357" y="200" width="140" height="25" fill="#d9d9d9" stroke="#333"/>
-                    <rect x="357" y="225" width="140" height="25" fill="white" stroke="#333"/>
-                    <text x="427" y="217" text-anchor="middle" font-weight="bold" font-size="14">위원</text>
-                    <text x="427" y="242" text-anchor="middle" font-size="14">시설팀장</text>
-                </g>
-                <g>
-                    <rect x="530" y="200" width="140" height="25" fill="#d9d9d9" stroke="#333"/>
-                    <rect x="530" y="225" width="140" height="25" fill="white" stroke="#333"/>
-                    <text x="600" y="217" text-anchor="middle" font-weight="bold" font-size="14">위원</text>
-                    <text x="600" y="242" text-anchor="middle" font-size="14">영양팀장</text>
-                </g>
-            </svg>
+        <div id="org-chart-view" style="max-width: 700px; margin: 15px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+            <div id="org-chart-svg-container"></div>
+        </div>
+        <div id="org-chart-edit-area" class="hidden no-print" style="max-width: 700px; margin: 15px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+            <p style="font-size: 13px; color: #6c757d;">직책과 이름(또는 직위)을 각각 입력해 주세요.</p>
+            <div id="org-chart-edit-fields"></div>
+            <div style="margin-top: 12px;">
+                <button class="back-btn" style="margin:0;" onclick="toggleOrgChartEdit()">취소</button>
+                <button class="save-btn" style="width:auto; display:inline-block; margin-left:8px;" onclick="saveOrgChartEdit()">💾 저장</button>
+            </div>
+            <div id="org-chart-edit-result" style="margin-top: 10px; font-weight: bold;"></div>
         </div>
     </div>
 
@@ -2417,7 +2377,7 @@
         if(pageId === 'med-prn') initPrnMedList();
         if(pageId === 'med-pairs') initMedPairsPage();
         if(pageId === 'medical-equipment') initMedicalEquipmentPage();
-        if(pageId === 'org-chart') document.getElementById('org-chart-related').innerHTML = renderRelatedPolicyLink('8.1');
+        if(pageId === 'org-chart') initOrgChartPage();
         if(pageId === 'temphumid-menu') initTempHumidMenu();
         if(pageId === 'temphumid-input') initTempHumidInput();
         if(pageId === 'temphumid-report') initTempHumidReportPage();
@@ -6266,6 +6226,136 @@ function openOrgChart() {
 }
 
 // =========================================================
+// 운영위원회 조직도 (관리자 수정 가능)
+// =========================================================
+
+const ORG_CHART_DEFAULT = {
+    chairman: { role: '위원장', name: '병원장' },
+    secretary: { role: '간사', name: '원무팀장' },
+    members: [
+        { role: '위원', name: '대표원장' },
+        { role: '위원', name: '책임간호사' },
+        { role: '위원', name: '시설팀장' },
+        { role: '위원', name: '영양팀장' }
+    ]
+};
+
+let orgChartOverride = null;
+
+async function loadOrgChartOverride() {
+    try {
+        const doc = await db.collection('org_chart_overrides').doc('main').get();
+        orgChartOverride = doc.exists ? doc.data() : null;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function getEffectiveOrgChartData() {
+    return (orgChartOverride && orgChartOverride.data) ? orgChartOverride.data : ORG_CHART_DEFAULT;
+}
+
+// 간사 박스 아래쪽 테두리와 위원 4명으로 갈라지는 가로선이 겹쳐서 헷갈리지 않도록,
+// 간사 박스(y=120~170)와 아래쪽 분기선(y=210) 사이에 넉넉한 간격을 둡니다.
+function renderOrgChartSvg(data) {
+    const box = (x, y, role, name) => `
+        <g>
+            <rect x="${x}" y="${y}" width="140" height="25" fill="#d9d9d9" stroke="#333"/>
+            <rect x="${x}" y="${y + 25}" width="140" height="25" fill="white" stroke="#333"/>
+            <text x="${x + 70}" y="${y + 17}" text-anchor="middle" font-weight="bold" font-size="14">${escapeAttr(role)}</text>
+            <text x="${x + 70}" y="${y + 42}" text-anchor="middle" font-size="14">${escapeAttr(name)}</text>
+        </g>
+    `;
+
+    const svg = `
+        <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+            <line x1="280" y1="70" x2="280" y2="120" stroke="#333" stroke-width="2"/>
+            <line x1="280" y1="120" x2="430" y2="120" stroke="#333" stroke-width="2"/>
+            <line x1="280" y1="120" x2="280" y2="210" stroke="#333" stroke-width="2"/>
+            <line x1="80" y1="210" x2="600" y2="210" stroke="#333" stroke-width="2"/>
+            <line x1="80" y1="210" x2="80" y2="230" stroke="#333" stroke-width="2"/>
+            <line x1="253" y1="210" x2="253" y2="230" stroke="#333" stroke-width="2"/>
+            <line x1="427" y1="210" x2="427" y2="230" stroke="#333" stroke-width="2"/>
+            <line x1="600" y1="210" x2="600" y2="230" stroke="#333" stroke-width="2"/>
+
+            ${box(210, 20, data.chairman.role, data.chairman.name)}
+            ${box(360, 120, data.secretary.role, data.secretary.name)}
+            ${box(10, 230, data.members[0].role, data.members[0].name)}
+            ${box(183, 230, data.members[1].role, data.members[1].name)}
+            ${box(357, 230, data.members[2].role, data.members[2].name)}
+            ${box(530, 230, data.members[3].role, data.members[3].name)}
+        </svg>
+    `;
+    document.getElementById('org-chart-svg-container').innerHTML = svg;
+}
+
+function initOrgChartPage() {
+    document.getElementById('org-chart-related').innerHTML = renderRelatedPolicyLink('8.1');
+    renderOrgChartSvg(getEffectiveOrgChartData());
+    document.getElementById('org-chart-edit-area').classList.add('hidden');
+    document.getElementById('org-chart-view').classList.remove('hidden');
+    document.getElementById('org-chart-edit-btn').classList.toggle('hidden', !(currentUserProfile && currentUserProfile.isAdmin));
+}
+
+function toggleOrgChartEdit() {
+    const editArea = document.getElementById('org-chart-edit-area');
+    const viewArea = document.getElementById('org-chart-view');
+    const isOpening = editArea.classList.contains('hidden');
+    editArea.classList.toggle('hidden');
+    viewArea.classList.toggle('hidden');
+    if (!isOpening) return;
+
+    const data = getEffectiveOrgChartData();
+    document.getElementById('org-chart-edit-fields').innerHTML = `
+        <p style="font-weight:bold; margin-bottom:4px;">위원장</p>
+        <input type="text" id="oc-chairman-role" class="table-input" style="width:48%; display:inline-block;" value="${escapeAttr(data.chairman.role)}" placeholder="직책">
+        <input type="text" id="oc-chairman-name" class="table-input" style="width:48%; display:inline-block;" value="${escapeAttr(data.chairman.name)}" placeholder="이름/직위">
+        <p style="font-weight:bold; margin:12px 0 4px 0;">간사</p>
+        <input type="text" id="oc-secretary-role" class="table-input" style="width:48%; display:inline-block;" value="${escapeAttr(data.secretary.role)}" placeholder="직책">
+        <input type="text" id="oc-secretary-name" class="table-input" style="width:48%; display:inline-block;" value="${escapeAttr(data.secretary.name)}" placeholder="이름/직위">
+        ${data.members.map((m, i) => `
+            <p style="font-weight:bold; margin:12px 0 4px 0;">위원 ${i + 1}</p>
+            <input type="text" id="oc-member${i}-role" class="table-input" style="width:48%; display:inline-block;" value="${escapeAttr(m.role)}" placeholder="직책">
+            <input type="text" id="oc-member${i}-name" class="table-input" style="width:48%; display:inline-block;" value="${escapeAttr(m.name)}" placeholder="이름/직위">
+        `).join('')}
+    `;
+    document.getElementById('org-chart-edit-result').textContent = '';
+}
+
+async function saveOrgChartEdit() {
+    const resultEl = document.getElementById('org-chart-edit-result');
+    const newData = {
+        chairman: { role: document.getElementById('oc-chairman-role').value.trim(), name: document.getElementById('oc-chairman-name').value.trim() },
+        secretary: { role: document.getElementById('oc-secretary-role').value.trim(), name: document.getElementById('oc-secretary-name').value.trim() },
+        members: [0, 1, 2, 3].map(i => ({
+            role: document.getElementById(`oc-member${i}-role`).value.trim(),
+            name: document.getElementById(`oc-member${i}-name`).value.trim()
+        }))
+    };
+
+    try {
+        await db.collection('org_chart_overrides').doc('main').set({
+            data: newData,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedBy: currentUserProfile.displayName || currentUserProfile.username
+        });
+        orgChartOverride = { data: newData };
+        renderOrgChartSvg(newData);
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+        setTimeout(() => {
+            if (!document.getElementById('org-chart-edit-area').classList.contains('hidden')) {
+                toggleOrgChartEdit();
+            }
+        }, 500);
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+// =========================================================
 // 온도/습도 기록지 (서버실 등, 하루 2회 점검) - 여러 장소에 재사용 가능
 // =========================================================
 
@@ -8247,6 +8337,7 @@ function applyTeamVisibility() {
     refreshApprovalBadge();
     loadCatalogOverrides();
     loadPolicyOverrides();
+    loadOrgChartOverride();
 }
 
 function startAppAfterLogin() {
