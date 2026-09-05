@@ -216,8 +216,7 @@
         @media print {
             #mrh-table { font-size: 10px; }
             #mrh-table th, #mrh-table td { padding: 3px 4px; }
-            #th-report-table { font-size: 10px; }
-            #th-report-table th, #th-report-table td { padding: 2px 4px; }
+            #th-report-table th, #th-report-table td { font-size: 9px; padding: 2px 4px; }
         }
     </style>
 </head>
@@ -607,6 +606,7 @@
         <p class="no-print">
             점검년월: <input type="month" id="th-report-month" onchange="renderTempHumidReport()">
         </p>
+        <h3 id="th-report-print-title" style="margin: 10px 0;"></h3>
         <div style="overflow-x: auto;">
             <table id="th-report-table" class="ledger-table"></table>
         </div>
@@ -6364,6 +6364,9 @@ async function renderTempHumidReport() {
     const table = document.getElementById('th-report-table');
     if (!monthStr) return;
     table.innerHTML = '<tr><td>불러오는 중...</td></tr>';
+
+    const [titleYear, titleMonth] = monthStr.split('-');
+    document.getElementById('th-report-print-title').textContent = `${titleYear}년 ${parseInt(titleMonth, 10)}월 ${loc} 온도/습도 기록`;
 
     const snapshot = await db.collection('env_temp_humidity_checks').where('location', '==', loc).get();
     const byDay = {};
