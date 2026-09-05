@@ -131,7 +131,7 @@
         .official-form-sheet { max-width: 720px; margin: 0 auto 25px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
         .official-form-headrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
         .official-form-title { font-size: 22px; font-weight: bold; margin: 0; word-break: keep-all; overflow-wrap: normal; }
-        .official-approval-table { border-collapse: collapse; flex-shrink: 0; }
+        .official-approval-table { border-collapse: collapse; flex-shrink: 0; table-layout: fixed; width: 148px; }
         .official-approval-table th, .official-approval-table td { border: 1px solid #333; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: normal; color: #333; white-space: nowrap; width: 62px; }
         .official-approval-table .oa-corner { width: 24px; }
         .official-approval-table .oa-label { background: #f4f6f9; color: #333; }
@@ -547,8 +547,9 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="sr-author" placeholder="이름" style="width:70px; border:none; text-align:center; font-size:13px;"></td>
-                        <td><select id="sr-approver-uid" style="border:none; text-align:center; font-size:13px; background:transparent;"></select></td>
+                        <td><input type="text" id="sr-author" placeholder="이름" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;"></td>
+                        <td><select id="sr-approver-uid" style="border:none; text-align:center; font-size:12px; background:transparent; width:100%; box-sizing:border-box;"></select></td>
+
                     </tr>
                 </table>
             </div>
@@ -7008,7 +7009,7 @@ async function renderSocialReportHistory() {
                     <tr>
                         <td>${d.author || '-'}</td>
                         <td>${d.approvalStatus === 'approved' && d.approvalSignature
-                            ? `<img src="${d.approvalSignature}" style="max-height:32px;">`
+                            ? `<img src="${d.approvalSignature}" style="max-height:32px; max-width:100%;">`
                             : (d.approverName || '-')}</td>
                     </tr>
                 </table>
