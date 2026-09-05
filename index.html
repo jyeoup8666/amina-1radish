@@ -5305,6 +5305,7 @@ function showPolicyDetail(docId, source) {
     document.getElementById('page-policy-detail').classList.remove('hidden');
     document.getElementById('policy-detail-title').textContent = `${doc.code} ${doc.title}`;
     document.getElementById('policy-detail-body').innerHTML = getEffectivePolicyBodyHtml(doc);
+    document.getElementById('policy-detail-body').classList.remove('hidden');
     document.getElementById('policy-edit-area').classList.add('hidden');
     document.getElementById('policy-edit-result').textContent = '';
     document.getElementById('policy-edit-btn').classList.toggle('hidden', !(currentUserProfile && currentUserProfile.isAdmin));
@@ -5358,8 +5359,12 @@ function getEffectivePolicyBodyHtml(doc) {
 
 function togglePolicyEdit() {
     const editArea = document.getElementById('policy-edit-area');
+    const viewArea = document.getElementById('policy-detail-body');
     const isOpening = editArea.classList.contains('hidden');
+
     editArea.classList.toggle('hidden');
+    viewArea.classList.toggle('hidden');
+    document.getElementById('policy-edit-btn').classList.toggle('hidden');
     if (!isOpening) return;
 
     const doc = POLICY_DOCS.find(d => d.id === currentPolicyDocId);
@@ -5426,6 +5431,11 @@ async function savePolicyEdit() {
         document.getElementById('policy-detail-body').innerHTML = newHtml;
         resultEl.style.color = '#28a745';
         resultEl.textContent = '✅ 저장되었습니다!';
+        setTimeout(() => {
+            if (!document.getElementById('policy-edit-area').classList.contains('hidden')) {
+                togglePolicyEdit();
+            }
+        }, 500);
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
@@ -5446,6 +5456,8 @@ async function resetPolicyEdit() {
         const doc = POLICY_DOCS.find(d => d.id === currentPolicyDocId);
         document.getElementById('policy-detail-body').innerHTML = doc.bodyHtml || '<p style="color:#6c757d;">내용이 없습니다.</p>';
         document.getElementById('policy-edit-area').classList.add('hidden');
+        document.getElementById('policy-detail-body').classList.remove('hidden');
+        document.getElementById('policy-edit-btn').classList.remove('hidden');
         resultEl.textContent = '';
     } catch (err) {
         console.error(err);
