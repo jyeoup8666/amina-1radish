@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; word-break: keep-all; }
         .page-layout { max-width: 1420px; margin: 0 auto; display: flex; gap: 20px; align-items: flex-start; }
         .container { flex: 1; min-width: 0; max-width: 1200px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .side-banner { width: 190px; flex-shrink: 0; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 18px 14px; position: sticky; top: 20px; }
@@ -129,8 +129,8 @@
 
         /* --- 공식 서류 양식(결재란 + 표 형태) 공용 스타일 --- */
         .official-form-sheet { max-width: 720px; margin: 0 auto 25px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-        .official-form-headrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
-        .official-form-title { font-size: 24px; font-weight: bold; margin: 0; }
+        .official-form-headrow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
+        .official-form-title { font-size: 24px; font-weight: bold; margin: 0; flex: 1 1 220px; white-space: normal; word-break: keep-all; overflow-wrap: normal; }
         .official-approval-table { border-collapse: collapse; flex-shrink: 0; }
         .official-approval-table th, .official-approval-table td { border: 1px solid #333; padding: 6px 14px; text-align: center; font-size: 13px; font-weight: normal; }
         .official-approval-table .oa-label { background: #f4f6f9; }
