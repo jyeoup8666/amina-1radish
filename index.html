@@ -1185,13 +1185,13 @@
         <div id="policy-detail-body" class="policy-detail-body"></div>
         <div id="policy-edit-area" class="hidden no-print" style="margin-top: 15px;">
             <p style="font-size: 13px; color: #6c757d;">아래 내용을 그대로 클릭해서 고치면 돼요. 표 안 글자도 클릭하면 바로 수정할 수 있어요.</p>
-            <div style="margin-bottom: 8px;">
+            <div style="position: sticky; top: 10px; z-index: 10; background: #f4f6f9; padding: 8px 0; margin-bottom: 8px; border-radius: 8px;">
                 <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="insertPolicyTable()">📊 표 추가</button>
                 <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="addPolicyTableRow()">➕ 선택한 표에 행 추가</button>
                 <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="addPolicyTableCol()">➕ 선택한 표에 열 추가</button>
                 <button class="back-btn" style="margin:0; background:#dc3545; color:white; font-size:12px; padding:5px 10px;" onclick="deleteSelectedPolicyTable()">🗑️ 선택한 표 삭제</button>
+                <p style="font-size: 12px; color: #6c757d; margin: 6px 0 0 0;">* 표를 먼저 한 번 클릭해서 선택(빨간 테두리로 표시)한 다음 위 버튼을 눌러주세요.</p>
             </div>
-            <p style="font-size: 12px; color: #6c757d;">* 표를 먼저 한 번 클릭해서 선택(빨간 테두리로 표시)한 다음 위 버튼을 눌러주세요.</p>
             <div id="policy-edit-content" class="policy-detail-body" contenteditable="true" style="border:1px solid #ccc; border-radius:6px; padding:15px; min-height:400px;"></div>
             <div style="margin-top:10px;">
                 <button class="back-btn" style="margin:0;" onclick="togglePolicyEdit()">취소</button>
