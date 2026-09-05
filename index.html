@@ -132,7 +132,8 @@
         .official-form-headrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
         .official-form-title { font-size: 22px; font-weight: bold; margin: 0; word-break: keep-all; overflow-wrap: normal; }
         .official-approval-table { border-collapse: collapse; flex-shrink: 0; }
-        .official-approval-table th, .official-approval-table td { border: 1px solid #333; padding: 4px 10px; text-align: center; font-size: 12px; font-weight: normal; color: #333; white-space: nowrap; }
+        .official-approval-table th, .official-approval-table td { border: 1px solid #333; padding: 3px 6px; text-align: center; font-size: 11px; font-weight: normal; color: #333; white-space: nowrap; width: 62px; }
+        .official-approval-table .oa-corner { width: 24px; }
         .official-approval-table .oa-label { background: #f4f6f9; color: #333; }
         .official-form-table { width: 100%; border-collapse: collapse; }
         .official-form-table th { background: #f4f6f9; color: #333; border: 1px solid #333; padding: 10px; width: 130px; font-weight: normal; font-size: 14px; white-space: nowrap; vertical-align: middle; }
@@ -544,7 +545,7 @@
             <div class="official-form-headrow">
                 <h2 class="official-form-title">사회복지 프로그램 결과보고서</h2>
                 <table class="official-approval-table">
-                    <tr><th rowspan="2" class="oa-label">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
+                    <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
                         <td><input type="text" id="sr-author" placeholder="이름" style="width:70px; border:none; text-align:center; font-size:13px;"></td>
                         <td><select id="sr-approver-uid" style="border:none; text-align:center; font-size:13px; background:transparent;"></select></td>
@@ -594,12 +595,12 @@
 
     <!-- 사회복지 프로그램 결과보고서 이력 -->
     <div id="page-social-report-history-page" class="hidden">
-        <button class="back-btn" onclick="showPage('social-report')">← 작성으로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('social-report')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📜 사회복지 프로그램 결과보고서 이력</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
-        <p>
+        <p class="no-print">
             조회할 연도: <select id="sr-history-year" onchange="renderSocialReportHistory()"></select>
             반기: <select id="sr-history-half" onchange="renderSocialReportHistory()">
                 <option value="전체">전체</option>
@@ -696,12 +697,12 @@
 
     <!-- 불만 및 고충처리 결과보고서 이력 -->
     <div id="page-complaint-result-history-page" class="hidden">
-        <button class="back-btn" onclick="showPage('complaint-result')">← 작성으로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('complaint-result')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📜 불만 및 고충처리 결과보고서 이력</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
-        <p>
+        <p class="no-print">
             조회할 월: <input type="month" id="cr-history-month" onchange="renderComplaintResultHistory()">
         </p>
         <div id="complaint-result-history"><p style="color:#6c757d;">불러오는 중...</p></div>
@@ -749,12 +750,12 @@
 
     <!-- CVR 관리대장 이력 -->
     <div id="page-cvr-history-page" class="hidden">
-        <button class="back-btn" onclick="showPage('cvr-ledger')">← 작성으로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('cvr-ledger')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📜 CVR(위험수치) 관리대장 이력</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <p>
+        <p class="no-print">
             조회할 월: <input type="month" id="cvr-history-month" onchange="renderCvrHistory()">
             &nbsp; 병동 필터:
             <select id="cvr-filter-ward" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;" onchange="renderCvrHistory()">
@@ -816,12 +817,12 @@
 
     <!-- 취약환자 접수대장 이력 -->
     <div id="page-vulnerable-patient-history-page" class="hidden">
-        <button class="back-btn" onclick="showPage('vulnerable-patient')">← 작성으로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('vulnerable-patient')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📜 취약환자 접수대장 이력</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <p>
+        <p class="no-print">
             조회할 월: <input type="month" id="vp-history-month" onchange="renderVulnerablePatientHistory()">
         </p>
         <div style="overflow-x: auto;">
@@ -875,12 +876,12 @@
 
     <!-- 학대·폭력 상담일지 이력 -->
     <div id="page-abuse-counseling-history-page" class="hidden">
-        <button class="back-btn" onclick="showPage('abuse-counseling')">← 작성으로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('abuse-counseling')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📜 학대·폭력 상담일지 이력</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <p>
+        <p class="no-print">
             조회할 월: <input type="month" id="ac-history-month" onchange="renderAbuseCounselingHistory()">
         </p>
         <div style="overflow-x: auto;">
@@ -974,14 +975,15 @@
 
     <!-- 의무기록 사본발급 대장 이력 (월별 조회) -->
     <div id="page-medrecord-history" class="hidden">
-        <button class="back-btn" onclick="showPage('medrecord-copy')">← 발급대장 작성으로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('medrecord-copy')">← 발급대장 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📜 의무기록 사본발급 대장 이력</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <p>
+        <p class="no-print">
             조회할 월: <input type="month" id="mrh-month" onchange="renderMedRecordHistoryByMonth()">
         </p>
+        <h3 id="mrh-print-title" style="margin: 10px 0;"></h3>
         <div style="overflow-x: auto;">
             <table id="mrh-table">
                 <thead>
@@ -1023,9 +1025,12 @@
     </div>
 
     <div id="page-fallprevention-report" class="hidden">
-        <button class="back-btn" onclick="showPage('fallprevention-menu')">← 이전 메뉴로</button>
-        <h2>📊 낙상예방활동 체크리스트 현황</h2>
-        <p>
+        <button class="back-btn no-print" onclick="showPage('fallprevention-menu')">← 이전 메뉴로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📊 낙상예방활동 체크리스트 현황</h2>
+            <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
+        </div>
+        <p class="no-print">
             위치: <select id="fp-report-location" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;" onchange="renderFallPreventionReport()"></select>
             점검년월: <input type="month" id="fp-report-month" onchange="renderFallPreventionReport()">
         </p>
@@ -1062,12 +1067,12 @@
     </div>
 
     <div id="page-envcheck-report" class="hidden">
-        <button class="back-btn" onclick="showPage('envcheck-menu')">← 이전 메뉴로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('envcheck-menu')">← 이전 메뉴로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📊 환경관리 체크리스트 현황</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <p>
+        <p class="no-print">
             장소: <select id="envcheck-report-location" style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc;" onchange="renderEnvcheckReport()"></select>
             점검년월: <input type="month" id="envcheck-report-month" onchange="renderEnvcheckReport()">
         </p>
@@ -1135,12 +1140,12 @@
 
     <!-- 불만 및 고충 처리대장 이력 -->
     <div id="page-complaint-log-history-page" class="hidden">
-        <button class="back-btn" onclick="showPage('complaint-log')">← 작성으로</button>
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button class="back-btn no-print" onclick="showPage('complaint-log')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📜 불만 및 고충 처리대장 이력</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <p>
+        <p class="no-print">
             조회할 월: <input type="month" id="complaint-log-history-month" onchange="renderComplaintLogHistory()">
         </p>
         <div style="overflow-x: auto;">
@@ -1232,14 +1237,14 @@
 
     <!-- 보일러 점검 이력 화면 -->
     <div id="page-boiler-history" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
             <button class="back-btn" onclick="showPage('boiler-menu')">← 이전 메뉴로</button>
             <div>
                 <button class="nav-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
                 <button class="nav-btn" onclick="showPage('boiler-form')">📝 주간 점검표 작성하러 가기</button>
             </div>
         </div>
-        <h2>📊 보일러 점검 이력 관리</h2>
+        <h2 class="no-print">📊 보일러 점검 이력 관리</h2>
         
         <div class="stats-grid">
             <div class="stat-card">
@@ -1399,14 +1404,14 @@
 
     <!-- 소방시설 점검 이력 화면 (층별) -->
     <div id="page-fire-history" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
             <button class="back-btn" onclick="showPage('fire-menu')">← 이전 메뉴로</button>
             <div>
                 <button class="nav-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
                 <button class="nav-btn" onclick="showPage('fire-form')">📝 소방시설 점검표 작성하러 가기</button>
             </div>
         </div>
-        <h2>📊 소방시설 점검 이력 관리</h2>
+        <h2 class="no-print">📊 소방시설 점검 이력 관리</h2>
 
         <!-- 1단계: 층 선택 -->
         <div id="fire-history-floor-select">
@@ -1483,11 +1488,11 @@
 
     <!-- 태블릿 대여/회수 이력 -->
     <div id="page-tablet-history" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center;">
             <button class="back-btn" onclick="showPage('tablet-menu')">← 이전 메뉴로</button>
             <button class="nav-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <h2>📊 태블릿 대여/회수 이력</h2>
+        <h2 class="no-print">📊 태블릿 대여/회수 이력</h2>
 
         <div class="stats-grid">
             <div class="stat-card warning">
@@ -1650,12 +1655,12 @@
 
     <!-- 정수기 통합 관리 현황 -->
     <div id="page-water-dashboard" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <button class="back-btn" onclick="showPage('water')">← 이전 메뉴로</button>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
         <h2>📊 정수기 및 이온수기 통합 관리 현황</h2>
-        <p style="font-size: 13px; color: #6c757d;">* 차기 예정일 30일 이전이면 [점검예정], 지나면 [교체요망]으로 자동 전환됩니다. 행을 클릭하면 해당 기기의 교체 이력을 볼 수 있습니다.</p>
+        <p class="no-print" style="font-size: 13px; color: #6c757d;">* 차기 예정일 30일 이전이면 [점검예정], 지나면 [교체요망]으로 자동 전환됩니다. 행을 클릭하면 해당 기기의 교체 이력을 볼 수 있습니다.</p>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
@@ -1716,12 +1721,12 @@
 
     <!-- 필터 교체 입력 이력 -->
     <div id="page-water-log-history" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <button class="back-btn" onclick="showPage('water-log')">← 입력으로</button>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
-        <h2>📜 필터 교체 입력 이력</h2>
-        <p>
+        <h2 class="no-print">📜 필터 교체 입력 이력</h2>
+        <p class="no-print">
             조회할 월: <input type="month" id="water-log-history-month" onchange="renderWaterRecentLogs()">
         </p>
         <div style="overflow-x: auto;">
@@ -1772,7 +1777,7 @@
 
     <!-- 관리번호별 교체 이력 -->
     <div id="page-water-history" class="hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <button class="back-btn" onclick="showPage('water-dashboard')">← 현황판으로</button>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
@@ -6968,7 +6973,7 @@ async function renderSocialReportHistory() {
             <div class="official-form-headrow">
                 <h2 class="official-form-title">사회복지 프로그램 결과보고서</h2>
                 <table class="official-approval-table">
-                    <tr><th rowspan="2" class="oa-label">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
+                    <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
                         <td>${d.author || '-'}</td>
                         <td>${d.approvalStatus === 'approved' && d.approvalSignature
@@ -7214,7 +7219,8 @@ async function renderMedRecordHistoryByMonth() {
     if (!monthStr) return;
     tbody.innerHTML = '<tr><td colspan="13">불러오는 중...</td></tr>';
 
-    const year = monthStr.split('-')[0];
+    const [year, month] = monthStr.split('-');
+    document.getElementById('mrh-print-title').textContent = `${year}년 ${parseInt(month, 10)}월 의무기록 사본발급 대장`;
 
     const snapshot = await db.collection('medrecord_copy_ledger').where('year', '==', year).get();
     const docs = [];
