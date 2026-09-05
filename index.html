@@ -360,21 +360,7 @@
         <div class="menu-grid">
             <div class="menu-btn" onclick="showPage('admin-accounts')">👤 계정 관리</div>
             <div class="menu-btn" onclick="showPage('patient-master')">🗂️ 환자 데이터 관리</div>
-            <div class="menu-btn" onclick="showPage('admin-catalog')">📑 서류 목록(팀 배정) 관리</div>
         </div>
-    </div>
-
-    <!-- 관리자 - 카탈로그(팀 배정) 관리 -->
-    <div id="page-admin-catalog" class="hidden">
-        <button class="back-btn" onclick="showPage('admin')">← 관리자 메뉴로</button>
-        <h2>📑 서류 목록(팀 배정) 관리</h2>
-        <p style="font-size: 13px; color: #6c757d;">서류가 잘못된 팀에 들어가 있으면 여기서 직접 옮길 수 있어요. 검색해서 찾은 다음, 팀 체크박스를 바꾸고 저장하세요.</p>
-
-        <p>
-            검색: <input type="text" id="admin-catalog-search" class="table-input" style="width:100%; max-width:400px;" placeholder="서류명 또는 번호로 검색 (예: 환경관리, 7.4)" oninput="renderAdminCatalogList()">
-        </p>
-        <p style="font-size: 13px; color: #6c757d;"><span id="admin-catalog-count">-</span>건 표시 중 (최대 50건)</p>
-        <div id="admin-catalog-list"></div>
     </div>
 
     <!-- 관리자 - 계정 관리 -->
@@ -2267,7 +2253,6 @@
         if(pageId === 'my-signature') initMySignaturePage();
         if(pageId === 'approval-inbox') initApprovalInboxPage();
         if(pageId === 'patient-master') initPatientMasterPage();
-        if(pageId === 'admin-catalog') initAdminCatalogPage();
         if(pageId === 'fallprevention-menu') initFallPreventionMenu();
         if(pageId === 'envcheck-menu') initEnvcheckMenu();
         if(pageId === 'envcheck-input') initEnvcheckInputForm();
@@ -5163,6 +5148,7 @@ function showTeamWorkspace(teamName) {
 
 function renderTeamCatalog(docs) {
     const container = document.getElementById('team-workspace-catalog');
+    const isAdmin = currentUserProfile && currentUserProfile.isAdmin;
 
     const sorted = [...docs].sort((a, b) => {
         const na = a.num.split('.').map(Number);
@@ -5176,18 +5162,48 @@ function renderTeamCatalog(docs) {
 
     container.innerHTML = `<div class="policy-chapter-group"><div class="policy-chapter-items" style="display:block;">` +
         sorted.map(d => {
+            let statusHtml;
             if (d.built) {
-                return `<div class="policy-chapter-item" onclick="${d.builtAction}">${d.title} <span style="color:#28a745; font-size:11px; font-weight:bold;">✅ 작성 가능</span></div>`;
+                statusHtml = `<span onclick="${d.builtAction}" style="cursor:pointer; flex:1;">${d.title} <span style="color:#28a745; font-size:11px; font-weight:bold;">✅ 작성 가능</span></span>`;
+            } else if (d.emr) {
+                statusHtml = `<span style="flex:1; color:#6c757d;">${d.title} <span style="color:#2b569a; font-size:11px; font-weight:bold;">📁 닥터스EMR에서 작성</span></span>`;
+            } else if (d.outsourced) {
+                statusHtml = `<span style="flex:1; color:#6c757d;">${d.title} <span style="color:#8a5a00; font-size:11px; font-weight:bold;">🏢 위탁관리 (${d.outsourced})</span></span>`;
+            } else {
+                statusHtml = `<span style="flex:1; color:#adb5bd;">${d.title} <span style="font-size:11px;">🔜 준비중</span></span>`;
             }
-            if (d.emr) {
-                return `<div class="policy-chapter-item" style="cursor:default; color:#6c757d;">${d.title} <span style="color:#2b569a; font-size:11px; font-weight:bold;">📁 닥터스EMR에서 작성</span></div>`;
+
+            if (!isAdmin) {
+                return `<div class="policy-chapter-item">${statusHtml}</div>`;
             }
-            if (d.outsourced) {
-                return `<div class="policy-chapter-item" style="cursor:default; color:#6c757d;">${d.title} <span style="color:#8a5a00; font-size:11px; font-weight:bold;">🏢 위탁관리 (${d.outsourced})</span></div>`;
-            }
-            return `<div class="policy-chapter-item" style="cursor:default; color:#adb5bd;">${d.title} <span style="font-size:11px;">🔜 준비중</span></div>`;
+
+            const safeNum = toDocIdSafe(d.num);
+            const teamChecks = ALL_TEAMS.map(team => `
+                <label class="admin-team-check">
+                    <input type="checkbox" class="catalog-edit-team-${safeNum}" value="${team}" ${d.teams.includes(team) ? 'checked' : ''}> ${team}
+                </label>
+            `).join('');
+
+            return `
+                <div class="policy-chapter-item" style="display:flex; align-items:center;">
+                    ${statusHtml}
+                    <span onclick="toggleCatalogEdit('${safeNum}')" style="cursor:pointer; margin-left:8px; font-size:14px;" title="팀 배정 편집 (관리자)">✏️</span>
+                </div>
+                <div id="catalog-edit-${safeNum}" class="hidden" style="padding:10px 20px; background:#f8f9fa; border-top:1px solid #f1f1f1;">
+                    <p style="font-size:12px; font-weight:bold; margin:0 0 6px 0;">${d.num} ${d.title} — 팀 배정</p>
+                    ${teamChecks}
+                    <div style="margin-top:8px;">
+                        <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="saveCatalogTeams('${d.num}', '${safeNum}')">💾 저장</button>
+                        <span id="catalog-edit-result-${safeNum}" style="margin-left:10px; font-size:12px; font-weight:bold;"></span>
+                    </div>
+                </div>
+            `;
         }).join('') +
         `</div></div>`;
+}
+
+function toggleCatalogEdit(safeNum) {
+    document.getElementById(`catalog-edit-${safeNum}`).classList.toggle('hidden');
 }
 
 // ---- 규정집 보기 (전체 문서, 장별 아코디언 + 검색) ----
@@ -7826,65 +7842,9 @@ function initPatientMasterPage() {
     loadPatientMasterData();
 }
 
-// =========================================================
-// 관리자: 서류 목록(팀 배정) 관리
-// =========================================================
-
-function initAdminCatalogPage() {
-    if (!currentUserProfile || !currentUserProfile.isAdmin) {
-        alert('관리자만 접근할 수 있습니다.');
-        showMain();
-        return;
-    }
-    document.getElementById('admin-catalog-search').value = '';
-    renderAdminCatalogList();
-}
-
-function renderAdminCatalogList() {
-    const query = (document.getElementById('admin-catalog-search').value || '').trim().toLowerCase();
-    const container = document.getElementById('admin-catalog-list');
-
-    if (!query) {
-        document.getElementById('admin-catalog-count').textContent = '0';
-        container.innerHTML = '<p style="color:#6c757d; font-size:13px;">검색어를 입력해 주세요 (서류명 또는 번호).</p>';
-        return;
-    }
-
-    const catalog = getEffectiveCatalog();
-    const matches = catalog.filter(c =>
-        c.title.toLowerCase().includes(query) || c.num.includes(query)
-    );
-
-    const MAX_ROWS = 50;
-    const shown = matches.slice(0, MAX_ROWS);
-    document.getElementById('admin-catalog-count').textContent = matches.length;
-
-    if (matches.length === 0) {
-        container.innerHTML = '<p style="color:#6c757d; font-size:13px;">일치하는 서류가 없습니다.</p>';
-        return;
-    }
-
-    container.innerHTML = shown.map(c => {
-        const safeId = toDocIdSafe(c.num);
-        const teamChecks = ALL_TEAMS.map(team => `
-            <label class="admin-team-check">
-                <input type="checkbox" class="admin-catalog-team-${safeId}" value="${team}" ${c.teams.includes(team) ? 'checked' : ''}> ${team}
-            </label>
-        `).join('');
-        return `
-            <div class="qr-check-card" style="max-width:none; margin:0 0 10px 0; text-align:left;">
-                <strong>${c.num}</strong> ${c.title}
-                <div style="margin-top:8px;">${teamChecks}</div>
-                <button class="nav-btn" style="margin:8px 0 0 0; font-size:12px; padding:5px 10px;" onclick="saveCatalogTeams('${c.num}', '${safeId}')">💾 저장</button>
-                <span id="admin-catalog-result-${safeId}" style="margin-left:10px; font-size:12px; font-weight:bold;"></span>
-            </div>
-        `;
-    }).join('') + (matches.length > MAX_ROWS ? `<p style="color:#6c757d; font-size:13px;">...외 ${matches.length - MAX_ROWS}건 더 있습니다. 검색어를 좁혀보세요.</p>` : '');
-}
-
 async function saveCatalogTeams(num, safeId) {
-    const checkedTeams = Array.from(document.querySelectorAll(`.admin-catalog-team-${safeId}:checked`)).map(cb => cb.value);
-    const resultEl = document.getElementById(`admin-catalog-result-${safeId}`);
+    const checkedTeams = Array.from(document.querySelectorAll(`.catalog-edit-team-${safeId}:checked`)).map(cb => cb.value);
+    const resultEl = document.getElementById(`catalog-edit-result-${safeId}`);
 
     if (checkedTeams.length === 0) {
         alert('최소 한 개 이상의 팀을 선택해 주세요.');
@@ -7897,12 +7857,20 @@ async function saveCatalogTeams(num, safeId) {
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         catalogOverrides[num] = { teams: checkedTeams };
-        resultEl.style.color = '#28a745';
-        resultEl.textContent = '✅ 저장됨';
+        if (resultEl) {
+            resultEl.style.color = '#28a745';
+            resultEl.textContent = '✅ 저장됨! 목록을 새로고침합니다...';
+        }
+        // 팀이 바뀌었으면 지금 보고 있는 팀 목록에서 사라질 수도 있으니, 화면을 다시 그립니다.
+        setTimeout(() => {
+            if (currentTeamName) showTeamWorkspace(currentTeamName);
+        }, 600);
     } catch (err) {
         console.error(err);
-        resultEl.style.color = '#dc3545';
-        resultEl.textContent = '❌ 실패: ' + err.message;
+        if (resultEl) {
+            resultEl.style.color = '#dc3545';
+            resultEl.textContent = '❌ 실패: ' + err.message;
+        }
     }
 }
 
