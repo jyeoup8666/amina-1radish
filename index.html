@@ -203,7 +203,8 @@
             .no-print { display: none !important; }
             .side-banner { display: none !important; }
             body { padding: 0; background: white; }
-            .container { box-shadow: none; max-width: 100%; padding: 0; }
+            .page-layout { display: block; max-width: 100%; margin: 0; }
+            .container { box-shadow: none; max-width: 100%; width: 100%; padding: 0; margin: 0; }
             .qr-print-grid { grid-template-columns: repeat(4, 1fr); }
             .qr-print-card { border: 1px dashed #999; break-inside: avoid; }
             .qr-check-card { break-inside: avoid; box-shadow: none; }
@@ -7072,6 +7073,7 @@ async function renderSocialReportHistory() {
 
     container.innerHTML = docs.map(d => `
         <div class="official-form-sheet">
+            <div id="sr-view-${d.docId}">
             <div class="official-form-headrow">
                 <h2 class="official-form-title">사회복지 프로그램 결과보고서</h2>
                 <table class="official-approval-table">
@@ -7105,10 +7107,109 @@ async function renderSocialReportHistory() {
             </table>
             <div class="no-print" style="margin-top:12px; text-align:right;">
                 ${renderApprovalStatusBlock(d, 'social_program_reports', 'renderSocialReportHistory')}
+                <button class="nav-btn" style="margin:8px 8px 0 0; padding:5px 10px; font-size:12px;" onclick="toggleSocialReportEdit('${d.docId}')">✏️ 수정</button>
                 <button class="back-btn" style="background:#dc3545; color:white; margin:8px 0 0 0; padding:5px 10px; font-size:12px;" onclick="deleteSocialReportEntry('${d.docId}')">삭제</button>
             </div>
+            </div>
+            <div id="sr-edit-${d.docId}" class="hidden no-print">${renderSocialReportEditFields(d)}</div>
         </div>
     `).join('');
+}
+
+// HTML 속성(value=" ") 안에 안전하게 넣기 위한 이스케이프
+function escapeAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function yearOptionsHtml(selectedYear) {
+    const currentYear = new Date().getFullYear();
+    let html = '';
+    for (let y = currentYear + 1; y >= currentYear - 3; y--) {
+        html += `<option value="${y}" ${String(y) === String(selectedYear) ? 'selected' : ''}>${y}</option>`;
+    }
+    return html;
+}
+
+function renderSocialReportEditFields(d) {
+    const docId = d.docId;
+    return `
+        <table class="official-form-table">
+            <tr><th>프로그램명</th><td><input type="text" id="sr-edit-name-${docId}" style="width:100%; box-sizing:border-box;" value="${escapeAttr(d.programName)}"></td></tr>
+            <tr><th>일 시</th><td>
+                <select id="sr-edit-year-${docId}">${yearOptionsHtml(d.year)}</select>년
+                <select id="sr-edit-half-${docId}">
+                    <option value="상반기" ${d.half === '상반기' ? 'selected' : ''}>상반기</option>
+                    <option value="하반기" ${d.half === '하반기' ? 'selected' : ''}>하반기</option>
+                </select>
+            </td></tr>
+            <tr><th>장 소</th><td><input type="text" id="sr-edit-location-${docId}" style="width:100%; box-sizing:border-box;" value="${escapeAttr(d.location)}"></td></tr>
+            <tr><th>진 행 자</th><td><input type="text" id="sr-edit-facilitator-${docId}" style="width:100%; box-sizing:border-box;" value="${escapeAttr(d.facilitator)}"></td></tr>
+            <tr><th>참 석 자</th><td><input type="text" id="sr-edit-attendees-${docId}" style="width:100%; box-sizing:border-box;" value="${escapeAttr(d.attendees)}"></td></tr>
+            <tr><th>프로그램<br>활동목표</th><td><input type="text" id="sr-edit-goals-${docId}" style="width:100%; box-sizing:border-box;" value="${escapeAttr(d.goals)}"></td></tr>
+            <tr><th>진행순서<br>및<br>진행과정</th><td><textarea id="sr-edit-process-${docId}" style="width:100%; box-sizing:border-box; min-height:60px;">${d.process || ''}</textarea></td></tr>
+            <tr><th>프로그램<br>평 가</th><td>
+                1. 환자 개인 평가<br>
+                <textarea id="sr-edit-evalPatient-${docId}" style="width:100%; box-sizing:border-box; min-height:50px;">${d.evalPatient || ''}</textarea>
+                <br>2. 담당자 평가<br>
+                <textarea id="sr-edit-evalStaff-${docId}" style="width:100%; box-sizing:border-box; min-height:50px;">${d.evalStaff || ''}</textarea>
+            </td></tr>
+            <tr class="official-photo-row"><th>프로그램<br>활동사진</th><td>
+                <div class="official-photo-cell">
+                    <div>
+                        <input type="file" accept="image/*" onchange="compressImageToPreview(this, 'sr-edit-photo1-preview-${docId}')">
+                        <img id="sr-edit-photo1-preview-${docId}" class="${d.photo1 ? '' : 'hidden'}" src="${d.photo1 || ''}" style="max-width:100%; margin-top:8px; border-radius:6px;">
+                    </div>
+                    <div>
+                        <input type="file" accept="image/*" onchange="compressImageToPreview(this, 'sr-edit-photo2-preview-${docId}')">
+                        <img id="sr-edit-photo2-preview-${docId}" class="${d.photo2 ? '' : 'hidden'}" src="${d.photo2 || ''}" style="max-width:100%; margin-top:8px; border-radius:6px;">
+                    </div>
+                </div>
+            </td></tr>
+        </table>
+        <div style="margin-top:10px; text-align:right;">
+            <button class="back-btn" style="margin:0;" onclick="toggleSocialReportEdit('${docId}')">취소</button>
+            <button class="save-btn" style="width:auto; display:inline-block; margin-left:8px;" onclick="saveSocialReportEdit('${docId}')">💾 저장</button>
+            <div id="sr-edit-result-${docId}" style="margin-top:8px; font-weight:bold;"></div>
+        </div>
+    `;
+}
+
+function toggleSocialReportEdit(docId) {
+    document.getElementById(`sr-view-${docId}`).classList.toggle('hidden');
+    document.getElementById(`sr-edit-${docId}`).classList.toggle('hidden');
+}
+
+async function saveSocialReportEdit(docId) {
+    const resultEl = document.getElementById(`sr-edit-result-${docId}`);
+    const photo1El = document.getElementById(`sr-edit-photo1-preview-${docId}`);
+    const photo2El = document.getElementById(`sr-edit-photo2-preview-${docId}`);
+    const year = document.getElementById(`sr-edit-year-${docId}`).value;
+    const half = document.getElementById(`sr-edit-half-${docId}`).value;
+
+    try {
+        await db.collection('social_program_reports').doc(docId).update({
+            programName: document.getElementById(`sr-edit-name-${docId}`).value.trim(),
+            year: year,
+            half: half,
+            dateTime: `${year}년 ${half}`,
+            location: document.getElementById(`sr-edit-location-${docId}`).value.trim(),
+            facilitator: document.getElementById(`sr-edit-facilitator-${docId}`).value.trim(),
+            attendees: document.getElementById(`sr-edit-attendees-${docId}`).value.trim(),
+            goals: document.getElementById(`sr-edit-goals-${docId}`).value.trim(),
+            process: document.getElementById(`sr-edit-process-${docId}`).value.trim(),
+            evalPatient: document.getElementById(`sr-edit-evalPatient-${docId}`).value.trim(),
+            evalStaff: document.getElementById(`sr-edit-evalStaff-${docId}`).value.trim(),
+            photo1: photo1El.classList.contains('hidden') ? '' : photo1El.src,
+            photo2: photo2El.classList.contains('hidden') ? '' : photo2El.src
+        });
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+        setTimeout(() => renderSocialReportHistory(), 500);
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
 }
 
 async function deleteSocialReportEntry(docId) {
