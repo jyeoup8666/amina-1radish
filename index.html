@@ -589,6 +589,15 @@
         </div>
 
         <div class="qr-check-card no-print" style="max-width: 600px; margin: 0 auto;">
+            <p style="font-size: 13px; margin: 0 0 8px 0;">
+                <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="loadAuthorSignature()">🖊️ 작성자 서명 불러오기</button>
+                <span id="sr-author-sig-preview"></span>
+            </p>
+            <p style="font-size: 13px; margin: 0 0 8px 0;">
+                <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="loadApproverSignatureDirect()">🖊️ 승인자 서명 불러오기 (대리서명)</button>
+                <span id="sr-approver-sig-preview"></span>
+            </p>
+            <p style="font-size: 12px; color: #6c757d; margin: 0 0 12px 0;">* 승인자 서명은 관리자가 허락한 경우에만 불러올 수 있어요. 불러오면 승인 대기 없이 바로 승인완료 처리돼요.</p>
             <button class="save-btn" onclick="saveSocialReport()">☁️ 저장하기</button>
             <div id="sr-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
         </div>
@@ -6876,6 +6885,9 @@ function populateYearSelect(selectId, yearsBack = 3, yearsForward = 1) {
     select.value = currentYear;
 }
 
+let srAuthorSignatureData = '';
+let srApproverSignatureData = '';
+
 function initSocialReportForm() {
     document.getElementById('social-report-related').innerHTML = renderRelatedPolicyLink('5.4');
     ['sr-name','sr-location','sr-facilitator','sr-attendees','sr-goals',
@@ -6890,6 +6902,10 @@ function initSocialReportForm() {
     document.getElementById('sr-photo2-preview').classList.add('hidden');
     document.getElementById('sr-photo2-preview').src = '';
     document.getElementById('sr-result').textContent = '';
+    srAuthorSignatureData = '';
+    srApproverSignatureData = '';
+    document.getElementById('sr-author-sig-preview').innerHTML = '';
+    document.getElementById('sr-approver-sig-preview').innerHTML = '';
     populateApproverSelect('sr-approver-uid');
 }
 
@@ -6897,6 +6913,56 @@ function initSocialReportHistoryPage() {
     populateYearSelect('sr-history-year');
     document.getElementById('sr-history-half').value = '전체';
     renderSocialReportHistory();
+}
+
+// 로그인한 사람이 불러올 수 있는 서명 목록 (본인 + 관리자가 허락한 다른 사람들)
+async function getMyAllowedSignatureUsers() {
+    const myDoc = await db.collection('portal_users').doc(currentUserProfile.uid).get();
+    const myData = myDoc.data() || {};
+    const allowedUids = [currentUserProfile.uid, ...(myData.signatureAccess || [])];
+
+    const results = [];
+    for (const uid of allowedUids) {
+        const doc = await db.collection('portal_users').doc(uid).get();
+        const data = doc.data();
+        if (data && data.signature) {
+            results.push({ uid, name: data.displayName || data.username, signature: data.signature });
+        }
+    }
+    return results;
+}
+
+async function loadAuthorSignature() {
+    const users = await getMyAllowedSignatureUsers();
+    if (users.length === 0) {
+        alert('불러올 수 있는 서명이 없습니다. "내 서명 관리"에서 서명을 먼저 등록해 주세요.');
+        return;
+    }
+    let chosen = users[0];
+    if (users.length > 1) {
+        const names = users.map((u, i) => `${i + 1}. ${u.name}`).join('\n');
+        const choice = prompt(`누구 서명을 불러올까요?\n${names}`, '1');
+        const idx = parseInt(choice, 10) - 1;
+        if (isNaN(idx) || !users[idx]) return;
+        chosen = users[idx];
+    }
+    srAuthorSignatureData = chosen.signature;
+    document.getElementById('sr-author-sig-preview').innerHTML = `<img src="${chosen.signature}" style="max-height:28px; vertical-align:middle; margin-left:8px;"> <span style="font-size:12px; color:#28a745;">${chosen.name} 서명 첨부됨</span>`;
+}
+
+async function loadApproverSignatureDirect() {
+    const approverSelect = document.getElementById('sr-approver-uid');
+    const approverUid = approverSelect.value;
+    if (!approverUid) { alert('먼저 승인자를 선택해 주세요.'); return; }
+
+    const users = await getMyAllowedSignatureUsers();
+    const match = users.find(u => u.uid === approverUid);
+    if (!match) {
+        alert('이 승인자의 서명을 대리로 불러올 권한이 없습니다. 관리자에게 권한을 요청해 주세요.');
+        return;
+    }
+    srApproverSignatureData = match.signature;
+    document.getElementById('sr-approver-sig-preview').innerHTML = `<img src="${match.signature}" style="max-height:28px; vertical-align:middle; margin-left:8px;"> <span style="font-size:12px; color:#28a745;">${match.name} 서명 첨부됨 (즉시 승인완료)</span>`;
 }
 
 async function saveSocialReport() {
@@ -6917,6 +6983,9 @@ async function saveSocialReport() {
     const photo1El = document.getElementById('sr-photo1-preview');
     const photo2El = document.getElementById('sr-photo2-preview');
 
+    // 승인자 서명을 대리로 불러왔으면(대리서명), 대기 없이 바로 승인완료로 저장합니다.
+    const useDelegatedApproval = approverUid && srApproverSignatureData;
+
     try {
         const docRef = await db.collection('social_program_reports').add({
             programName: name,
@@ -6933,14 +7002,15 @@ async function saveSocialReport() {
             photo1: photo1El.classList.contains('hidden') ? '' : photo1El.src,
             photo2: photo2El.classList.contains('hidden') ? '' : photo2El.src,
             author: author,
+            authorSignature: srAuthorSignatureData,
             approverUid: approverUid,
             approverName: approverName,
-            approvalStatus: approverUid ? 'pending' : 'none',
-            approvalSignature: '',
+            approvalStatus: useDelegatedApproval ? 'approved' : (approverUid ? 'pending' : 'none'),
+            approvalSignature: useDelegatedApproval ? srApproverSignatureData : '',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        if (approverUid) {
+        if (approverUid && !useDelegatedApproval) {
             await createApprovalRequest({
                 approverUid, approverName,
                 docType: '사회복지 프로그램 결과보고서',
@@ -7007,7 +7077,7 @@ async function renderSocialReportHistory() {
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td>${d.author || '-'}</td>
+                        <td>${d.authorSignature ? `<img src="${d.authorSignature}" style="max-height:32px; max-width:100%;">` : (d.author || '-')}</td>
                         <td>${d.approvalStatus === 'approved' && d.approvalSignature
                             ? `<img src="${d.approvalSignature}" style="max-height:32px; max-width:100%;">`
                             : (d.approverName || '-')}</td>
@@ -7761,6 +7831,13 @@ async function renderAdminUserList() {
                 <input type="checkbox" class="admin-edit-team-${u.uid}" value="${team}" ${u.allowedTeams && u.allowedTeams.includes(team) ? 'checked' : ''} ${u.isAdmin ? 'disabled' : ''}> ${team}
             </label>
         `).join('');
+        const sigAccess = u.signatureAccess || [];
+        const otherUsers = users.filter(o => o.uid !== u.uid);
+        const sigChecks = otherUsers.map(o => `
+            <label class="admin-team-check">
+                <input type="checkbox" class="admin-sigaccess-${u.uid}" value="${o.uid}" ${sigAccess.includes(o.uid) ? 'checked' : ''}> ${o.displayName || o.username}
+            </label>
+        `).join('') || '<span style="font-size:12px; color:#6c757d;">(다른 계정이 없습니다)</span>';
         return `
             <div class="admin-user-row" style="flex-direction:column; align-items:stretch;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -7770,6 +7847,8 @@ async function renderAdminUserList() {
                     </label>
                 </div>
                 <div style="margin-top:6px;" id="admin-teamwrap-${u.uid}">${teamChecks}</div>
+                <p style="font-size:12px; font-weight:bold; margin:8px 0 4px 0;">이 계정이 불러올 수 있는 서명 (본인 서명은 항상 가능)</p>
+                <div>${sigChecks}</div>
                 <div style="margin-top:8px;">
                     <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="saveUserPermissions('${u.uid}')">💾 저장</button>
                 </div>
@@ -7789,11 +7868,13 @@ function toggleAdminFlagUI(uid) {
 async function saveUserPermissions(uid) {
     const isAdminNow = document.getElementById(`admin-isadmin-${uid}`).checked;
     const checkedTeams = Array.from(document.querySelectorAll(`#admin-teamwrap-${uid} input[type="checkbox"]:checked`)).map(cb => cb.value);
+    const checkedSigAccess = Array.from(document.querySelectorAll(`.admin-sigaccess-${uid}:checked`)).map(cb => cb.value);
 
     try {
         await db.collection('portal_users').doc(uid).update({
             isAdmin: isAdminNow,
-            allowedTeams: isAdminNow ? ALL_TEAMS.slice() : checkedTeams
+            allowedTeams: isAdminNow ? ALL_TEAMS.slice() : checkedTeams,
+            signatureAccess: checkedSigAccess
         });
         alert('저장되었습니다.');
         if (uid === currentUserProfile.uid) {
