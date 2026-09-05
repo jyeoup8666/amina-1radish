@@ -360,7 +360,21 @@
         <div class="menu-grid">
             <div class="menu-btn" onclick="showPage('admin-accounts')">👤 계정 관리</div>
             <div class="menu-btn" onclick="showPage('patient-master')">🗂️ 환자 데이터 관리</div>
+            <div class="menu-btn" onclick="showPage('admin-catalog')">📑 서류 목록(팀 배정) 관리</div>
         </div>
+    </div>
+
+    <!-- 관리자 - 카탈로그(팀 배정) 관리 -->
+    <div id="page-admin-catalog" class="hidden">
+        <button class="back-btn" onclick="showPage('admin')">← 관리자 메뉴로</button>
+        <h2>📑 서류 목록(팀 배정) 관리</h2>
+        <p style="font-size: 13px; color: #6c757d;">서류가 잘못된 팀에 들어가 있으면 여기서 직접 옮길 수 있어요. 검색해서 찾은 다음, 팀 체크박스를 바꾸고 저장하세요.</p>
+
+        <p>
+            검색: <input type="text" id="admin-catalog-search" class="table-input" style="width:100%; max-width:400px;" placeholder="서류명 또는 번호로 검색 (예: 환경관리, 7.4)" oninput="renderAdminCatalogList()">
+        </p>
+        <p style="font-size: 13px; color: #6c757d;"><span id="admin-catalog-count">-</span>건 표시 중 (최대 50건)</p>
+        <div id="admin-catalog-list"></div>
     </div>
 
     <!-- 관리자 - 계정 관리 -->
@@ -2253,6 +2267,7 @@
         if(pageId === 'my-signature') initMySignaturePage();
         if(pageId === 'approval-inbox') initApprovalInboxPage();
         if(pageId === 'patient-master') initPatientMasterPage();
+        if(pageId === 'admin-catalog') initAdminCatalogPage();
         if(pageId === 'fallprevention-menu') initFallPreventionMenu();
         if(pageId === 'envcheck-menu') initEnvcheckMenu();
         if(pageId === 'envcheck-input') initEnvcheckInputForm();
@@ -5132,7 +5147,7 @@ function showTeamWorkspace(teamName) {
     document.getElementById('team-workspace-title').textContent = `${TEAM_ICONS[teamName] || '📋'} ${teamName}`;
 
     const body = document.getElementById('team-workspace-body');
-    const docs = DOCUMENT_CATALOG.filter(d => d.teams.includes(teamName));
+    const docs = getEffectiveCatalog().filter(d => d.teams.includes(teamName));
     const builtCount = docs.filter(d => d.built).length;
     const emrCount = docs.filter(d => d.emr).length;
 
@@ -7460,6 +7475,36 @@ async function deleteComplaintLogEntry(docId) {
 // =========================================================
 
 const ALL_TEAMS = ['원무팀', 'QPS실', '감염관리실', '시설팀', '진료원장', '영양팀', '간호팀', '재활치료팀', '약국'];
+
+// =========================================================
+// 카탈로그 팀 배정 관리자 수정 (Firestore에 덮어쓰기 저장)
+// =========================================================
+// DOCUMENT_CATALOG은 코드에 고정된 배열이라, 관리자가 팀 배정을 바꾸면
+// catalog_overrides 컬렉션(문서ID = 서류번호num)에 저장해두고 화면에 표시할 때 덮어씌웁니다.
+
+let catalogOverrides = {};
+
+async function loadCatalogOverrides() {
+    try {
+        const snapshot = await db.collection('catalog_overrides').get();
+        catalogOverrides = {};
+        snapshot.forEach(doc => { catalogOverrides[doc.id] = doc.data(); });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// DOCUMENT_CATALOG에 저장된 덮어쓰기 내용을 반영한 배열을 돌려줍니다. 팀 필터링 등은 항상 이 함수를 통해서 하세요.
+function getEffectiveCatalog() {
+    return DOCUMENT_CATALOG.map(c => {
+        const override = catalogOverrides[c.num];
+        if (override && override.teams) {
+            return { ...c, teams: override.teams };
+        }
+        return c;
+    });
+}
+
 const USERNAME_DOMAIN = '@amina-portal.local'; // 아이디를 Firebase Auth 이메일 형식으로 변환할 때 씁니다 (직원들이 이메일 대신 아이디로 로그인)
 
 let currentUserProfile = null; // { uid, username, displayName, allowedTeams, isAdmin }
@@ -7540,6 +7585,7 @@ function applyTeamVisibility() {
     });
     document.getElementById('admin-panel-btn').classList.toggle('hidden', !currentUserProfile.isAdmin);
     refreshApprovalBadge();
+    loadCatalogOverrides();
 }
 
 function startAppAfterLogin() {
@@ -7778,6 +7824,86 @@ function initPatientMasterPage() {
     document.getElementById('pm-search').value = '';
     parsedPatientRows = [];
     loadPatientMasterData();
+}
+
+// =========================================================
+// 관리자: 서류 목록(팀 배정) 관리
+// =========================================================
+
+function initAdminCatalogPage() {
+    if (!currentUserProfile || !currentUserProfile.isAdmin) {
+        alert('관리자만 접근할 수 있습니다.');
+        showMain();
+        return;
+    }
+    document.getElementById('admin-catalog-search').value = '';
+    renderAdminCatalogList();
+}
+
+function renderAdminCatalogList() {
+    const query = (document.getElementById('admin-catalog-search').value || '').trim().toLowerCase();
+    const container = document.getElementById('admin-catalog-list');
+
+    if (!query) {
+        document.getElementById('admin-catalog-count').textContent = '0';
+        container.innerHTML = '<p style="color:#6c757d; font-size:13px;">검색어를 입력해 주세요 (서류명 또는 번호).</p>';
+        return;
+    }
+
+    const catalog = getEffectiveCatalog();
+    const matches = catalog.filter(c =>
+        c.title.toLowerCase().includes(query) || c.num.includes(query)
+    );
+
+    const MAX_ROWS = 50;
+    const shown = matches.slice(0, MAX_ROWS);
+    document.getElementById('admin-catalog-count').textContent = matches.length;
+
+    if (matches.length === 0) {
+        container.innerHTML = '<p style="color:#6c757d; font-size:13px;">일치하는 서류가 없습니다.</p>';
+        return;
+    }
+
+    container.innerHTML = shown.map(c => {
+        const safeId = toDocIdSafe(c.num);
+        const teamChecks = ALL_TEAMS.map(team => `
+            <label class="admin-team-check">
+                <input type="checkbox" class="admin-catalog-team-${safeId}" value="${team}" ${c.teams.includes(team) ? 'checked' : ''}> ${team}
+            </label>
+        `).join('');
+        return `
+            <div class="qr-check-card" style="max-width:none; margin:0 0 10px 0; text-align:left;">
+                <strong>${c.num}</strong> ${c.title}
+                <div style="margin-top:8px;">${teamChecks}</div>
+                <button class="nav-btn" style="margin:8px 0 0 0; font-size:12px; padding:5px 10px;" onclick="saveCatalogTeams('${c.num}', '${safeId}')">💾 저장</button>
+                <span id="admin-catalog-result-${safeId}" style="margin-left:10px; font-size:12px; font-weight:bold;"></span>
+            </div>
+        `;
+    }).join('') + (matches.length > MAX_ROWS ? `<p style="color:#6c757d; font-size:13px;">...외 ${matches.length - MAX_ROWS}건 더 있습니다. 검색어를 좁혀보세요.</p>` : '');
+}
+
+async function saveCatalogTeams(num, safeId) {
+    const checkedTeams = Array.from(document.querySelectorAll(`.admin-catalog-team-${safeId}:checked`)).map(cb => cb.value);
+    const resultEl = document.getElementById(`admin-catalog-result-${safeId}`);
+
+    if (checkedTeams.length === 0) {
+        alert('최소 한 개 이상의 팀을 선택해 주세요.');
+        return;
+    }
+
+    try {
+        await db.collection('catalog_overrides').doc(num).set({
+            teams: checkedTeams,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        catalogOverrides[num] = { teams: checkedTeams };
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장됨';
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 실패: ' + err.message;
+    }
 }
 
 let patientMasterListCache = [];
