@@ -127,15 +127,15 @@
         /* --- QR 현장 점검(스캔용) 스타일 --- */
         .qr-check-card { max-width: 480px; margin: 0 auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 
-        /* --- 공식 서류 양식(결재란 + 표 형태) 공용 스타일 --- */
+        /* --- 공식 서류 양식(결재란 + 표 형태) 공용 스타일 - 앞으로 다른 서류도 이 틀을 재사용합니다 --- */
         .official-form-sheet { max-width: 720px; margin: 0 auto 25px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-        .official-form-headrow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
-        .official-form-title { font-size: 24px; font-weight: bold; margin: 0; flex: 1 1 220px; white-space: normal; word-break: keep-all; overflow-wrap: normal; }
+        .official-form-headrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
+        .official-form-title { font-size: 22px; font-weight: bold; margin: 0; word-break: keep-all; overflow-wrap: normal; }
         .official-approval-table { border-collapse: collapse; flex-shrink: 0; }
-        .official-approval-table th, .official-approval-table td { border: 1px solid #333; padding: 6px 14px; text-align: center; font-size: 13px; font-weight: normal; }
-        .official-approval-table .oa-label { background: #f4f6f9; }
+        .official-approval-table th, .official-approval-table td { border: 1px solid #333; padding: 4px 10px; text-align: center; font-size: 12px; font-weight: normal; color: #333; white-space: nowrap; }
+        .official-approval-table .oa-label { background: #f4f6f9; color: #333; }
         .official-form-table { width: 100%; border-collapse: collapse; }
-        .official-form-table th { background: #f4f6f9; border: 1px solid #333; padding: 10px; width: 130px; font-weight: normal; font-size: 14px; white-space: nowrap; vertical-align: middle; }
+        .official-form-table th { background: #f4f6f9; color: #333; border: 1px solid #333; padding: 10px; width: 130px; font-weight: normal; font-size: 14px; white-space: nowrap; vertical-align: middle; }
         .official-form-table td { border: 1px solid #333; padding: 10px; text-align: left; vertical-align: top; }
         .official-form-table td input, .official-form-table td textarea { width: 100%; box-sizing: border-box; border: none; font-family: inherit; font-size: 14px; padding: 2px; }
         .official-form-table td textarea { resize: vertical; }
@@ -553,7 +553,13 @@
             </div>
             <table class="official-form-table">
                 <tr><th>프로그램명</th><td><input type="text" id="sr-name" placeholder="예: 산책 (안산 황톳길, 삼청공원, 남산 등)"></td></tr>
-                <tr><th>일 시</th><td><input type="text" id="sr-datetime" placeholder="예: 2026년 상반기"></td></tr>
+                <tr><th>일 시</th><td>
+                    <select id="sr-year" style="width:auto; display:inline-block;"></select>년
+                    <select id="sr-half" style="width:auto; display:inline-block;">
+                        <option value="상반기">상반기</option>
+                        <option value="하반기">하반기</option>
+                    </select>
+                </td></tr>
                 <tr><th>장 소</th><td><input type="text" id="sr-location" placeholder="예: 번갈아가며 코스 진행"></td></tr>
                 <tr><th>진 행 자</th><td><input type="text" id="sr-facilitator" placeholder="예: 아미나 운행주임"></td></tr>
                 <tr><th>참 석 자</th><td><input type="text" id="sr-attendees" placeholder="예: 재원환자 중 6명 (인원 초과 시 랜덤 추첨)"></td></tr>
@@ -594,7 +600,12 @@
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
         <p>
-            조회할 월: <input type="month" id="sr-history-month" onchange="renderSocialReportHistory()">
+            조회할 연도: <select id="sr-history-year" onchange="renderSocialReportHistory()"></select>
+            반기: <select id="sr-history-half" onchange="renderSocialReportHistory()">
+                <option value="전체">전체</option>
+                <option value="상반기">상반기</option>
+                <option value="하반기">하반기</option>
+            </select>
         </p>
         <div id="social-report-history"><p style="color:#6c757d;">불러오는 중...</p></div>
     </div>
@@ -6814,12 +6825,28 @@ function openSocialSchedule() {
     showPage('social-schedule');
 }
 
+// 연도 선택창을 채우는 공용 함수 (올해 기준 몇 년 전~후까지 보여줄지 range로 지정)
+function populateYearSelect(selectId, yearsBack = 3, yearsForward = 1) {
+    const select = document.getElementById(selectId);
+    const currentYear = new Date().getFullYear();
+    select.innerHTML = '';
+    for (let y = currentYear + yearsForward; y >= currentYear - yearsBack; y--) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        select.appendChild(opt);
+    }
+    select.value = currentYear;
+}
+
 function initSocialReportForm() {
     document.getElementById('social-report-related').innerHTML = renderRelatedPolicyLink('5.4');
-    ['sr-name','sr-datetime','sr-location','sr-facilitator','sr-attendees','sr-goals',
+    ['sr-name','sr-location','sr-facilitator','sr-attendees','sr-goals',
      'sr-process','sr-eval-patient','sr-eval-staff'].forEach(id => {
         document.getElementById(id).value = '';
     });
+    populateYearSelect('sr-year');
+    document.getElementById('sr-half').value = (new Date().getMonth() < 6) ? '상반기' : '하반기';
     document.getElementById('sr-author').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('sr-photo1-preview').classList.add('hidden');
     document.getElementById('sr-photo1-preview').src = '';
@@ -6830,8 +6857,8 @@ function initSocialReportForm() {
 }
 
 function initSocialReportHistoryPage() {
-    const now = new Date();
-    document.getElementById('sr-history-month').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    populateYearSelect('sr-history-year');
+    document.getElementById('sr-history-half').value = '전체';
     renderSocialReportHistory();
 }
 
@@ -6842,6 +6869,8 @@ async function saveSocialReport() {
     const approverSelect = document.getElementById('sr-approver-uid');
     const approverUid = approverSelect.value;
     const approverName = approverUid ? approverSelect.options[approverSelect.selectedIndex].text : '';
+    const year = document.getElementById('sr-year').value;
+    const half = document.getElementById('sr-half').value;
 
     if (!name) { alert('프로그램명을 입력해 주세요.'); return; }
     if (!author) { alert('작성자를 입력해 주세요.'); return; }
@@ -6854,7 +6883,9 @@ async function saveSocialReport() {
     try {
         const docRef = await db.collection('social_program_reports').add({
             programName: name,
-            dateTime: document.getElementById('sr-datetime').value.trim(),
+            year: year,
+            half: half,
+            dateTime: `${year}년 ${half}`,
             location: document.getElementById('sr-location').value.trim(),
             facilitator: document.getElementById('sr-facilitator').value.trim(),
             attendees: document.getElementById('sr-attendees').value.trim(),
@@ -6897,19 +6928,30 @@ async function renderSocialReportHistory() {
     const container = document.getElementById('social-report-history');
     container.innerHTML = '<p style="color:#6c757d;">불러오는 중...</p>';
 
-    const monthStr = document.getElementById('sr-history-month').value; // "YYYY-MM"
+    const yearStr = document.getElementById('sr-history-year').value;
+    const halfStr = document.getElementById('sr-history-half').value;
 
     const snapshot = await db.collection('social_program_reports').get();
     let docs = [];
     snapshot.forEach(doc => docs.push({ docId: doc.id, ...doc.data() }));
-    if (monthStr) {
-        docs = docs.filter(d => {
-            if (!d.createdAt || !d.createdAt.toDate) return false;
-            const dt = d.createdAt.toDate();
-            const ym = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
-            return ym === monthStr;
-        });
-    }
+
+    docs = docs.filter(d => {
+        // year/half 필드가 없는 예전 기록은 dateTime 텍스트("2026년 상반기")에서 추출해 봅니다.
+        let docYear = d.year;
+        let docHalf = d.half;
+        if (!docYear && d.dateTime) {
+            const m = d.dateTime.match(/(\d{4})년/);
+            if (m) docYear = m[1];
+        }
+        if (!docHalf && d.dateTime) {
+            if (d.dateTime.includes('상반기')) docHalf = '상반기';
+            else if (d.dateTime.includes('하반기')) docHalf = '하반기';
+        }
+        if (String(docYear) !== String(yearStr)) return false;
+        if (halfStr !== '전체' && docHalf !== halfStr) return false;
+        return true;
+    });
+
     docs.sort((a, b) => {
         const at = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
         const bt = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
@@ -6917,7 +6959,7 @@ async function renderSocialReportHistory() {
     });
 
     if (docs.length === 0) {
-        container.innerHTML = '<p style="color:#6c757d;">해당 월에 등록된 결과보고서가 없습니다.</p>';
+        container.innerHTML = '<p style="color:#6c757d;">해당 연도·반기에 등록된 결과보고서가 없습니다.</p>';
         return;
     }
 
