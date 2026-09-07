@@ -345,6 +345,10 @@
                 </table>
             </div>
         </div>
+
+        <h3 class="policy-chapter-title" style="margin-top: 25px;">📄 시설팀 서류 목록</h3>
+        <div id="facility-team-catalog-info" class="info-box" style="margin-bottom: 20px;"></div>
+        <div id="facility-team-catalog"></div>
     </div>
 
     <!-- 팀 업무 공간 (앞으로 팀별 서류 폼이 여기 채워집니다) -->
@@ -2659,6 +2663,7 @@
         if(pageId === 'restraint-list') initRestraintListPage();
         if(pageId === 'cctv-status') initCctvStatusPage();
         if(pageId === 'tank-hygiene') initTankHygienePage();
+        if(pageId === 'facility-team') renderFacilityTeamCatalog();
         if(pageId === 'facility-annual-plan') initFacilityAnnualPlanPage();
         if(pageId === 'admission-guide') initAdmissionGuide();
         if(pageId === 'complaint-result') initComplaintResultForm();
@@ -5549,8 +5554,23 @@ function showTeamWorkspace(teamName) {
     renderTeamCatalog(docs);
 }
 
-function renderTeamCatalog(docs) {
-    const container = document.getElementById('team-workspace-catalog');
+// 시설팀 화면은 예전부터 있던 고정 버튼(보일러/소화기 등) + 실시간 요청판 구조라
+// showTeamWorkspace를 쓰지 않고 별도로 만들어져 있었어서, 서류 목록만 이 함수로 따로 붙여줍니다.
+function renderFacilityTeamCatalog() {
+    currentTeamName = '시설팀';
+    const docs = getEffectiveCatalog().filter(d => d.teams.includes('시설팀'));
+    const builtCount = docs.filter(d => d.built).length;
+    const emrCount = docs.filter(d => d.emr).length;
+
+    document.getElementById('facility-team-catalog-info').innerHTML = `
+        시설팀에서 관리하는 서류 목록이에요 (총 ${docs.length}건 · ✅ 작성가능 ${builtCount}건 · 📁 닥터스EMR에서 작성 ${emrCount}건).
+        나머지는 "🔜 준비중"이에요. 급하게 필요한 게 있으면 말씀해주세요.
+    `;
+    renderTeamCatalog(docs, 'facility-team-catalog');
+}
+
+function renderTeamCatalog(docs, containerId = 'team-workspace-catalog') {
+    const container = document.getElementById(containerId);
     const isAdmin = currentUserProfile && currentUserProfile.isAdmin;
 
     const sorted = [...docs].sort((a, b) => {
@@ -5942,7 +5962,9 @@ function openFallPreventionFor(location) {
 }
 
 function backFromSharedTool() {
-    if (sharedToolEntryTeam) {
+    if (sharedToolEntryTeam === '시설팀') {
+        showPage('facility-team');
+    } else if (sharedToolEntryTeam) {
         showTeamWorkspace(sharedToolEntryTeam);
     } else {
         showMain();
