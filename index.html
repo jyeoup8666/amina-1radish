@@ -3426,17 +3426,32 @@
 
     <!-- 입원 생활 안내문 -->
     <div id="page-admission-guide" class="hidden">
-        <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>📋 입원 생활 안내문</h2>
-        <div id="admission-guide-related"></div>
-        <div id="admission-guide-body" class="policy-detail-body"></div>
-        <div class="qr-check-card no-print" style="max-width: 480px; margin: 25px 0 0 0;">
-            <h3 style="margin-top: 0;">🖨️ 서명란 작성 후 인쇄</h3>
-            <p>
-                작성일: <input type="date" id="ag-date"><br><br>
-                담당 간호사: <input type="text" id="ag-nurse" class="table-input" style="width:100%;" placeholder="이름"><br><br>
-                환자 또는 보호자: <input type="text" id="ag-guardian" class="table-input" style="width:100%;" placeholder="이름">
-            </p>
+        <button class="back-btn no-print" onclick="backFromSharedTool()">← 이전 메뉴로</button>
+        <div id="admission-guide-related" class="no-print"></div>
+
+        <div class="official-form-sheet" style="max-width:800px;">
+            <h2 class="official-form-title" style="text-align:center; margin-bottom:12px;">입원 생활 안내문</h2>
+            <table class="official-form-table" id="admission-guide-table" style="font-size:13px;"></table>
+
+            <table class="official-form-table" style="font-size:13px; margin-top:15px; max-width:420px; margin-left:auto; margin-right:0;">
+                <tr><th style="width:80px;">작 성 일</th><td colspan="2"><input type="date" id="ag-date"></td></tr>
+                <tr>
+                    <th rowspan="2" style="width:60px;">담 당</th>
+                    <th style="width:100px;">간호사</th>
+                    <td>
+                        <input type="text" id="ag-nurse" style="width:110px;" placeholder="이름"> (인)
+                        <button class="nav-btn no-print" style="margin:4px 0 0 0; font-size:11px; padding:4px 8px; display:block;" onclick="loadAgNurseSignature()">🖊️ 서명 불러오기</button>
+                        <span id="ag-nurse-sig-preview"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>환자 또는<br>보호자</th>
+                    <td><input type="text" id="ag-guardian" style="width:110px;" placeholder="이름"> (인)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="qr-check-card no-print" style="max-width: 480px; margin: 15px auto;">
             <button class="save-btn" onclick="window.print()">🖨️ 인쇄하기</button>
         </div>
     </div>
@@ -16276,15 +16291,50 @@ const ADMISSION_GUIDE_SECTIONS = [
     ['제증명 서류', '제증명 서류(진단서, 소견서, 입퇴원확인서, 의무기록 사본 등)는 퇴원 전날 2층 원무팀으로 신청하시기 바랍니다.']
 ];
 
+// 안내문 중 안전 관련 항목들은 표에서 옅은 하늘색으로 강조해서 보여줍니다.
+const ADMISSION_GUIDE_HIGHLIGHT = ['편의 시설', '주차', '금연', '화재예방 및 대처방법', '보안 주의', '감염예방수칙'];
+
+let agNurseSignatureData = '';
+
 function initAdmissionGuide() {
     document.getElementById('admission-guide-related').innerHTML = renderRelatedPolicyLink('2.1.2');
-    document.getElementById('admission-guide-body').innerHTML = ADMISSION_GUIDE_SECTIONS.map(([title, body]) => `
-        <h4 class="policy-section-title">${title}</h4>
-        <div class="policy-section-body"><p style="margin:4px 0;">${body}</p></div>
-    `).join('');
+
+    // 맨 위 회진시간 · 면회시간은 한 행에 나란히 표시합니다.
+    let rows = `<tr>
+        <th style="width:100px;">${ADMISSION_GUIDE_SECTIONS[0][0]}</th><td style="width:30%;">${ADMISSION_GUIDE_SECTIONS[0][1]}</td>
+        <th style="width:100px;">${ADMISSION_GUIDE_SECTIONS[1][0]}</th><td>${ADMISSION_GUIDE_SECTIONS[1][1]}</td>
+    </tr>`;
+    ADMISSION_GUIDE_SECTIONS.slice(2).forEach(([title, body]) => {
+        const hl = ADMISSION_GUIDE_HIGHLIGHT.includes(title);
+        const bg = hl ? 'background:#e3f6f5;' : '';
+        rows += `<tr><th style="${bg}">${title}</th><td colspan="3" style="${bg}">${body}</td></tr>`;
+    });
+    document.getElementById('admission-guide-table').innerHTML = rows;
+
     document.getElementById('ag-date').value = todayStr();
     document.getElementById('ag-nurse').value = '';
     document.getElementById('ag-guardian').value = '';
+    agNurseSignatureData = '';
+    document.getElementById('ag-nurse-sig-preview').innerHTML = '';
+}
+
+async function loadAgNurseSignature() {
+    const users = await getMyAllowedSignatureUsers();
+    if (users.length === 0) {
+        alert('불러올 수 있는 서명이 없습니다. "내 서명 관리"에서 서명을 먼저 등록해 주세요.');
+        return;
+    }
+    let chosen = users[0];
+    if (users.length > 1) {
+        const names = users.map((u, i) => `${i + 1}. ${u.name}`).join('\n');
+        const choice = prompt(`누구 서명을 불러올까요?\n${names}`, '1');
+        const idx = parseInt(choice, 10) - 1;
+        if (isNaN(idx) || !users[idx]) return;
+        chosen = users[idx];
+    }
+    agNurseSignatureData = chosen.signature;
+    if (!document.getElementById('ag-nurse').value.trim()) document.getElementById('ag-nurse').value = chosen.name;
+    document.getElementById('ag-nurse-sig-preview').innerHTML = `<img src="${chosen.signature}" style="max-height:28px; vertical-align:middle; margin-left:6px;">`;
 }
 
 // =========================================================
