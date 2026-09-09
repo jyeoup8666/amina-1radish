@@ -2025,18 +2025,18 @@
                 <tr><th>8. 의약품<br>관리</th><td><textarea id="qbp-plan-8" class="table-input" style="width:100%; box-sizing:border-box; min-height:50px;"></textarea></td></tr>
             </table>
 
-            <h3 class="policy-chapter-title" style="margin-top:15px;">9. QPS 계획서 (세부) - QPS 활동 연간계획서</h3>
+            <h3 class="policy-chapter-title" style="margin-top:15px;">Ⅳ. QPS 계획서 (세부) - QPS 활동 연간계획서</h3>
             <div style="overflow-x:auto;">
-                <table class="official-form-table" style="font-size:11px;" id="qbp-detail-table"></table>
+                <table class="official-form-table" style="font-size:11px; table-layout:fixed;" id="qbp-detail-table"></table>
             </div>
             <div class="no-print" style="margin:8px 0;"><button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="addQbpDetailRow()">➕ 항목 추가</button></div>
 
-            <h3 class="policy-chapter-title" style="margin-top:15px;">10. 예산</h3>
+            <h3 class="policy-chapter-title" style="margin-top:15px;">Ⅴ. 예산</h3>
             <div style="overflow-x:auto;">
                 <table class="official-form-table" style="font-size:12px;" id="qbp-budget-table"></table>
             </div>
 
-            <h3 class="policy-chapter-title" style="margin-top:15px;">11. 감염성 질환 관리 (감염관리담당자 협의)</h3>
+            <h3 class="policy-chapter-title" style="margin-top:15px;">Ⅵ. 감염성 질환 관리 (감염관리담당자 협의)</h3>
             <p style="font-size:12px; color:#495057;">월간 및 주간 점검표를 작성하여 감염확산 방지 점검 실시 (감염관리담당자 점검일지 작성)</p>
             <div style="overflow-x:auto;">
                 <table class="official-form-table" style="font-size:11px;" id="qbp-infectsched"></table>
@@ -13480,7 +13480,7 @@ function toggleQbpDetailMonth(id, c) {
 function renderQbpDetailTable() {
     const table = document.getElementById('qbp-detail-table');
     if (!table) return;
-    let html = '<tr><th style="width:180px;">내용</th><th style="width:90px;">주기</th>' + MONTHS_12.map(m => `<th>${m}</th>`).join('') + '<th style="width:90px;">예산(원)</th><th class="no-print" style="width:50px;"></th></tr>';
+    let html = '<tr><th style="width:170px;">내용</th><th style="width:55px;">주기</th>' + MONTHS_12.map(m => `<th style="width:38px;">${m}</th>`).join('') + '<th style="width:85px;">예산(원)</th><th class="no-print" style="width:40px;"></th></tr>';
     qbpDetailRows.forEach(r => {
         html += `<tr>
             <td><input type="text" value="${escapeAttr(r.content)}" style="width:100%; box-sizing:border-box;" oninput="updateQbpDetailField(${r.id}, 'content', this.value)"></td>
@@ -13553,11 +13553,11 @@ function qbpBudgetReadonlyHtml(budget) {
 }
 
 function qbpDetailReadonlyHtml(rows) {
-    let html = '<table class="official-form-table" style="font-size:11px;"><tr><th style="width:180px;">내용</th><th style="width:90px;">주기</th>' + MONTHS_12.map(m => `<th>${m}</th>`).join('') + '<th style="width:90px;">예산(원)</th></tr>';
+    let html = '<div style="overflow-x:auto;"><table class="official-form-table" style="font-size:11px; table-layout:fixed;"><tr><th style="width:170px;">내용</th><th style="width:55px;">주기</th>' + MONTHS_12.map(m => `<th style="width:38px;">${m}</th>`).join('') + '<th style="width:85px;">예산(원)</th></tr>';
     (rows || []).forEach(r => {
         html += `<tr><td>${r.content || '-'}</td><td style="text-align:center;">${r.cycle || '-'}</td>` + MONTHS_12.map((m, c) => `<td style="text-align:center;">${(r.months && r.months[c]) ? '✅' : ''}</td>`).join('') + `<td style="text-align:right;">${r.budget || '-'}</td></tr>`;
     });
-    html += '</table>';
+    html += '</table></div>';
     return html;
 }
 
@@ -13660,11 +13660,11 @@ async function renderQbpHistory() {
                 <tr><th>7. 불만고충처리 관리</th><td style="white-space:pre-line;">${d.plan7 || '-'}</td></tr>
                 <tr><th>8. 의약품 관리</th><td style="white-space:pre-line;">${d.plan8 || '-'}</td></tr>
             </table>
-            <h3 class="policy-chapter-title" style="margin-top:12px;">9. QPS 계획서 (세부) - QPS 활동 연간계획서</h3>
+            <h3 class="policy-chapter-title" style="margin-top:12px;">Ⅳ. QPS 계획서 (세부) - QPS 활동 연간계획서</h3>
             ${qbpDetailReadonlyHtml(d.detailRows)}
-            <h3 class="policy-chapter-title" style="margin-top:12px;">10. 예산</h3>
+            <h3 class="policy-chapter-title" style="margin-top:12px;">Ⅴ. 예산</h3>
             ${qbpBudgetReadonlyHtml(d.budget)}
-            <h3 class="policy-chapter-title" style="margin-top:12px;">11. 감염성 질환 관리</h3>
+            <h3 class="policy-chapter-title" style="margin-top:12px;">Ⅵ. 감염성 질환 관리</h3>
             ${monthGridReadonlyHtml(QBP_INFECTSCHED_ROWS, d.infectSched)}
             <div class="no-print" style="margin-top:12px; text-align:right;">
                 <button class="back-btn" style="background:#dc3545; color:white; margin:0; padding:5px 10px; font-size:12px;" onclick="deleteQbpEntry('${d.docId}')">삭제</button>
