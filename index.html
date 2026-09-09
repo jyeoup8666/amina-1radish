@@ -2818,6 +2818,17 @@
         <div id="dds-history-list"></div>
     </div>
 
+    <!-- 서류 카탈로그 상태 안내 (아직 포털 기능이 아닌 서류를 눌렀을 때) -->
+    <div id="page-catalog-status" class="hidden">
+        <button class="back-btn" onclick="backFromCatalogStatus()">← 이전 화면으로</button>
+        <h2 id="catalog-status-title" style="margin-top:10px;"></h2>
+
+        <div class="official-form-sheet" style="text-align:left;">
+            <p id="catalog-status-message" style="font-size:15px; line-height:1.7; color:#333; margin-top:0;"></p>
+            <div id="catalog-status-policy-link"></div>
+        </div>
+    </div>
+
     <!-- 고충 상담 신청서 (직원) -->
     <div id="page-grievance-app-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
@@ -8180,7 +8191,12 @@ function renderTeamCatalog(docs, containerId = 'team-workspace-catalog') {
     const container = document.getElementById(containerId);
     const isAdmin = currentUserProfile && currentUserProfile.isAdmin;
 
+    // 닥터스EMR에서 작성하는 서류와 아직 종이 서류로 진행중인 서류는 목록 아래쪽으로 모아서 보여줍니다.
+    const catalogSortGroup = (d) => (d.emr || d.paperStatus) ? 1 : 0;
+
     const sorted = [...docs].sort((a, b) => {
+        const groupDiff = catalogSortGroup(a) - catalogSortGroup(b);
+        if (groupDiff !== 0) return groupDiff;
         const na = a.num.split('.').map(Number);
         const nb = b.num.split('.').map(Number);
         for (let i = 0; i < Math.max(na.length, nb.length); i++) {
@@ -8196,13 +8212,13 @@ function renderTeamCatalog(docs, containerId = 'team-workspace-catalog') {
             if (d.built) {
                 statusHtml = `<span onclick="${d.builtAction}" style="cursor:pointer; flex:1;">${d.title} <span style="color:#28a745; font-size:11px; font-weight:bold;">✅ 작성 가능</span></span>`;
             } else if (d.emr) {
-                statusHtml = `<span style="flex:1; color:#6c757d;">${d.title} <span style="color:#2b569a; font-size:11px; font-weight:bold;">📁 닥터스EMR에서 작성</span></span>`;
+                statusHtml = `<span onclick="showCatalogStatus('${d.num}')" style="cursor:pointer; flex:1; color:#6c757d;">${d.title} <span style="color:#2b569a; font-size:11px; font-weight:bold;">📁 닥터스EMR에서 작성</span></span>`;
             } else if (d.outsourced) {
-                statusHtml = `<span style="flex:1; color:#6c757d;">${d.title} <span style="color:#8a5a00; font-size:11px; font-weight:bold;">🏢 위탁관리 (${d.outsourced})</span></span>`;
+                statusHtml = `<span onclick="showCatalogStatus('${d.num}')" style="cursor:pointer; flex:1; color:#6c757d;">${d.title} <span style="color:#8a5a00; font-size:11px; font-weight:bold;">🏢 위탁관리 (${d.outsourced})</span></span>`;
             } else if (d.paperStatus) {
-                statusHtml = `<span style="flex:1; color:#6c757d;">${d.title} <span style="color:#795548; font-size:11px; font-weight:bold;">📄 ${d.paperStatus}</span></span>`;
+                statusHtml = `<span onclick="showCatalogStatus('${d.num}')" style="cursor:pointer; flex:1; color:#6c757d;">${d.title} <span style="color:#795548; font-size:11px; font-weight:bold;">📄 ${d.paperStatus}</span></span>`;
             } else {
-                statusHtml = `<span style="flex:1; color:#adb5bd;">${d.title} <span style="font-size:11px;">🔜 준비중</span></span>`;
+                statusHtml = `<span onclick="showCatalogStatus('${d.num}')" style="cursor:pointer; flex:1; color:#adb5bd;">${d.title} <span style="font-size:11px;">🔜 준비중</span></span>`;
             }
 
             if (!isAdmin) {
@@ -15148,6 +15164,69 @@ async function deleteDdsEntry(docId) {
     } catch (err) {
         alert('삭제 실패: ' + err.message);
     }
+}
+
+// =========================================================
+// 서류 카탈로그 상태 안내 (아직 포털 기능이 아닌 서류를 눌렀을 때)
+// =========================================================
+
+let catalogStatusPreviousPageId = null;
+
+function showCatalogStatus(num) {
+    const doc = getEffectiveCatalog().find(d => d.num === num);
+    if (!doc) return;
+
+    const currentVisible = document.querySelector('.container > div:not(.hidden)');
+    catalogStatusPreviousPageId = currentVisible ? currentVisible.id : null;
+
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+    document.getElementById('page-catalog-status').classList.remove('hidden');
+    document.getElementById('catalog-status-title').textContent = `${doc.num} ${doc.title}`;
+    document.getElementById('catalog-status-message').innerHTML = catalogStatusMessage(doc);
+    document.getElementById('catalog-status-policy-link').innerHTML = renderRelatedPolicyLinkForNum(doc.num, 'catalog-status');
+}
+
+function backFromCatalogStatus() {
+    if (catalogStatusPreviousPageId) {
+        const pageId = catalogStatusPreviousPageId;
+        catalogStatusPreviousPageId = null;
+        const target = document.getElementById(pageId);
+        if (target) {
+            document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+            target.classList.remove('hidden');
+            return;
+        }
+    }
+    showMain();
+}
+
+function catalogStatusMessage(doc) {
+    if (doc.emr) {
+        return '이 서류는 업무포털이 아닌 <strong>닥터스 EMR</strong>에서 작성하고 있어요. 닥터스 EMR 프로그램에서 확인해 주세요.';
+    }
+    if (doc.outsourced) {
+        return `이 업무는 <strong>${doc.outsourced}</strong>에 위탁하여 관리하고 있어요.`;
+    }
+    if (doc.paperStatus === '서류로 진행중') {
+        return '이 서류는 아직 <strong>종이 서류</strong>로 작성하고 처리하고 있어요. 업무포털 기능으로 만들어드릴 수 있으니, 필요하시면 말씀해 주세요.';
+    }
+    if (doc.paperStatus) {
+        return `이 서류는 현재 <strong>${doc.paperStatus}</strong>인 자료예요.`;
+    }
+    return '아직 업무포털 기능으로 만들어지지 않은 서류예요. 필요하시면 말씀해 주세요, 바로 만들어 드릴게요.';
+}
+
+// num(예: "9.2.6.1")과 정확히 일치하는 규정이 없으면, 앞자리를 하나씩 줄여가며(9.2.6 → 9.2 → 9) 가장 가까운 상위 규정을 찾아 링크로 보여줍니다.
+function renderRelatedPolicyLinkForNum(num, source) {
+    const parts = String(num).split('.');
+    for (let i = parts.length; i >= 1; i--) {
+        const code = parts.slice(0, i).join('.');
+        const doc = POLICY_DOCS.find(d => d.code === code);
+        if (doc) {
+            return `<span class="policy-related-link" onclick="showPolicyDetail('${doc.id}', '${source || 'library'}')">📖 관련 규정 보기 (${doc.code} ${doc.title})</span>`;
+        }
+    }
+    return '<p style="color:#adb5bd; font-size:13px; margin-top:10px;">관련된 규정을 찾을 수 없습니다.</p>';
 }
 
 // =========================================================
