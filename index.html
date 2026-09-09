@@ -138,7 +138,8 @@
         .official-form-table { width: 100%; border-collapse: collapse; }
         .official-form-table th { background: #f4f6f9; color: #333; border: 1px solid #333; padding: 10px; width: 130px; font-weight: normal; font-size: 14px; white-space: nowrap; vertical-align: middle; }
         .official-form-table td { border: 1px solid #333; padding: 10px; text-align: left; vertical-align: top; }
-        .official-form-table td input, .official-form-table td textarea { width: 100%; box-sizing: border-box; border: none; font-family: inherit; font-size: 14px; padding: 2px; }
+        .official-form-table td input:not([type="checkbox"]):not([type="radio"]), .official-form-table td textarea { width: 100%; box-sizing: border-box; border: none; font-family: inherit; font-size: 14px; padding: 2px; }
+        .official-form-table td input[type="checkbox"], .official-form-table td input[type="radio"] { width: auto; box-sizing: border-box; vertical-align: middle; }
         .official-form-table td textarea { resize: vertical; }
         .official-photo-row td { padding: 0; }
         .official-photo-cell { display: flex; }
