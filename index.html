@@ -4393,6 +4393,193 @@
         <div id="nap-history-list"></div>
     </div>
 
+    <!-- 낙상 시설·환경 관리 점검표 -->
+    <div id="page-ffe-input" class="hidden">
+        <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📝 낙상 시설·환경 관리 점검표</h2>
+            <button class="toggle-history-btn" onclick="showPage('ffe-history')">📜 이력 보기</button>
+        </div>
+
+        <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
+            <table class="official-form-table">
+                <tr><th style="width:100px;">점검부서</th><td><input type="text" id="ffe-dept" style="width:100%; box-sizing:border-box;"></td>
+                    <th style="width:100px;">연도</th><td><input type="number" id="ffe-year" style="width:100%; box-sizing:border-box;"></td>
+                    <th style="width:100px;">부서장 서명</th><td><input type="text" id="ffe-deptmanager-name" style="width:100%; box-sizing:border-box;"></td></tr>
+            </table>
+
+            <p style="font-size:12px; color:#6c757d; margin:8px 0;">점검기준: 양호(O) / 불량(X) - 칸을 클릭하면 순서대로 바뀌어요. (매월 1회, 마지막주 금요일 점검)</p>
+            <div style="overflow-x:auto;">
+                <table class="official-form-table" style="table-layout:fixed;" id="ffe-table"></table>
+            </div>
+
+            <p style="font-size:11px; color:#6c757d; margin:8px 0;">※ 환자가 이동하는 통로에 불필요한 물건이 나와 있지 않도록 매월 1회 정기적으로 원내 환경위험 요소를 제거한다.</p>
+
+            <table class="official-form-table" style="margin-top:12px;">
+                <tr><th style="width:130px;">특이사항 및<br>조치사항</th><td><textarea id="ffe-note" class="table-input" style="width:100%; box-sizing:border-box; min-height:80px;"></textarea></td></tr>
+            </table>
+        </div>
+
+        <div class="qr-check-card no-print" style="max-width: 600px; margin: 15px auto;">
+            <button class="save-btn" onclick="saveFallFacilityEnvCheck()">☁️ 저장하기</button>
+            <div id="ffe-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <!-- 낙상 시설·환경 관리 점검표 이력 -->
+    <div id="page-ffe-history" class="hidden">
+        <button class="back-btn no-print" onclick="showPage('ffe-input')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📜 낙상 시설·환경 관리 점검표 이력</h2>
+            <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
+        </div>
+        <div id="ffe-history-list"></div>
+    </div>
+
+    <!-- 시설물(건축물) 일일점검일지 -->
+    <div id="page-fdi-input" class="hidden">
+        <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📝 시설물(건축물) 일일점검일지</h2>
+            <button class="toggle-history-btn" onclick="showPage('fdi-history')">📜 이력 보기</button>
+        </div>
+
+        <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
+            <table class="official-form-table">
+                <tr><th style="width:100px;">점검기간</th><td><input type="month" id="fdi-month"></td>
+                    <th style="width:100px;">부서장 서명</th><td><select id="fdi-manager-uid" style="width:100%;"></select></td></tr>
+            </table>
+
+            <p style="font-size:12px; color:#6c757d; margin:8px 0;">범례: 양호(O) / 불량(X) - 칸을 클릭하면 순서대로 바뀌어요.</p>
+            <div style="overflow-x:auto;">
+                <table class="official-form-table" style="table-layout:fixed;" id="fdi-table"></table>
+            </div>
+
+            <table class="official-form-table" style="margin-top:12px;">
+                <tr><th style="width:130px;">조치사항</th><td><textarea id="fdi-note" class="table-input" style="width:100%; box-sizing:border-box; min-height:80px;"></textarea></td></tr>
+            </table>
+        </div>
+
+        <div class="qr-check-card no-print" style="max-width: 600px; margin: 15px auto;">
+            <button class="save-btn" onclick="saveFdi()">☁️ 저장하기</button>
+            <div id="fdi-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <!-- 시설물(건축물) 일일점검일지 이력 -->
+    <div id="page-fdi-history" class="hidden">
+        <button class="back-btn no-print" onclick="showPage('fdi-input')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📜 시설물(건축물) 일일점검일지 이력</h2>
+            <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
+        </div>
+        <div id="fdi-history-list"></div>
+    </div>
+
+    <!-- 시설물(건축물) 정기점검 일지(분기별) -->
+    <div id="page-fqi-input" class="hidden">
+        <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📝 시설물(건축물) 정기점검 일지(분기별)</h2>
+            <button class="toggle-history-btn" onclick="showPage('fqi-history')">📜 이력 보기</button>
+        </div>
+
+        <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
+            <div class="official-form-headrow">
+                <h2 class="official-form-title">시설물(건축물) 정기점검 일지<br><span style="font-size:13px; font-weight:normal; color:#6c757d;">(분기별)</span></h2>
+                <table class="official-approval-table" style="width:160px;">
+                    <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
+                    <tr>
+                        <td><input type="text" id="fqi-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td><select id="fqi-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
+                    </tr>
+                </table>
+            </div>
+
+            <table class="official-form-table">
+                <tr><th style="width:110px;">작성일자</th><td><input type="date" id="fqi-date"></td></tr>
+            </table>
+            <p style="font-size:12px; color:#6c757d; margin:8px 0;">범례: 양호(O) / 불량(X) / 미해당(-) - 칸을 클릭하면 순서대로 바뀌어요.</p>
+
+            <div style="overflow-x:auto;">
+                <table class="official-form-table" id="fqi-general-table"></table>
+            </div>
+            <div style="overflow-x:auto; margin-top:12px;">
+                <table class="official-form-table" id="fqi-special-table"></table>
+            </div>
+
+            <table class="official-form-table" style="margin-top:12px;">
+                <tr><th style="width:130px;">특이사항 및<br>조치사항</th><td><textarea id="fqi-note" class="table-input" style="width:100%; box-sizing:border-box; min-height:80px;"></textarea></td></tr>
+            </table>
+        </div>
+
+        <div class="qr-check-card no-print" style="max-width: 600px; margin: 15px auto;">
+            <button class="save-btn" onclick="saveFacilityQuarterlyInspection()">☁️ 저장하기</button>
+            <div id="fqi-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <!-- 시설물(건축물) 정기점검 일지 이력 -->
+    <div id="page-fqi-history" class="hidden">
+        <button class="back-btn no-print" onclick="showPage('fqi-input')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📜 시설물(건축물) 정기점검 일지 이력</h2>
+            <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
+        </div>
+        <div id="fqi-history-list"></div>
+    </div>
+
+    <!-- 시설 안전사고 발생 경위서 -->
+    <div id="page-fac-input" class="hidden">
+        <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📝 시설 안전사고 발생 경위서</h2>
+            <button class="toggle-history-btn" onclick="showPage('fac-history')">📜 이력 보기</button>
+        </div>
+
+        <div class="official-form-sheet" style="margin-top: 15px;">
+            <div class="official-form-headrow">
+                <h2 class="official-form-title">시설 안전사고 발생 경위서</h2>
+                <table class="official-approval-table" style="width:160px;">
+                    <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
+                    <tr>
+                        <td><input type="text" id="fac-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td><select id="fac-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
+                    </tr>
+                </table>
+            </div>
+
+            <table class="official-form-table">
+                <tr><th style="width:110px;">작성일자</th><td><input type="date" id="fac-date"></td>
+                    <th style="width:110px;">발생일시</th><td><input type="text" id="fac-datetime" placeholder="예: 2026-07-13 14:00경" style="width:100%; box-sizing:border-box;"></td></tr>
+                <tr><th>발생장소</th><td colspan="3"><input type="text" id="fac-location" style="width:100%; box-sizing:border-box;"></td></tr>
+                <tr><th>목격자1</th><td><input type="text" id="fac-witness1-name" placeholder="성명" style="width:60%; box-sizing:border-box; display:inline-block;"> <input type="text" id="fac-witness1-phone" placeholder="연락처" style="width:35%; box-sizing:border-box; display:inline-block;"></td>
+                    <th>목격자2</th><td><input type="text" id="fac-witness2-name" placeholder="성명" style="width:60%; box-sizing:border-box; display:inline-block;"> <input type="text" id="fac-witness2-phone" placeholder="연락처" style="width:35%; box-sizing:border-box; display:inline-block;"></td></tr>
+                <tr><th>사고명</th><td colspan="3"><input type="text" id="fac-incident-name" style="width:100%; box-sizing:border-box;"></td></tr>
+                <tr><th>사고발생경위<br>(구체적으로<br>작성)</th><td colspan="3"><textarea id="fac-detail" class="table-input" style="width:100%; box-sizing:border-box; min-height:70px;"></textarea></td></tr>
+                <tr><th>사고후<br>현장수습과정</th><td colspan="3"><textarea id="fac-followup" class="table-input" style="width:100%; box-sizing:border-box; min-height:60px;"></textarea></td></tr>
+                <tr><th>피해상황</th><td colspan="3"><textarea id="fac-damage" class="table-input" style="width:100%; box-sizing:border-box; min-height:60px;"></textarea></td></tr>
+                <tr><th>처리결과</th><td colspan="3"><textarea id="fac-result-note" class="table-input" style="width:100%; box-sizing:border-box; min-height:60px;"></textarea></td></tr>
+                <tr><th>사고현장약도</th><td colspan="3"><textarea id="fac-sketch" class="table-input" style="width:100%; box-sizing:border-box; min-height:60px;" placeholder="약도를 그리는 대신 위치와 상황을 글로 설명해주세요."></textarea></td></tr>
+            </table>
+        </div>
+
+        <div class="qr-check-card no-print" style="max-width: 600px; margin: 15px auto;">
+            <button class="save-btn" onclick="saveFacilityAccidentReport()">☁️ 저장하기</button>
+            <div id="fac-result" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <!-- 시설 안전사고 발생 경위서 이력 -->
+    <div id="page-fac-history" class="hidden">
+        <button class="back-btn no-print" onclick="showPage('fac-input')">← 작성으로</button>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0;">📜 시설 안전사고 발생 경위서 이력</h2>
+            <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
+        </div>
+        <div id="fac-history-list"></div>
+    </div>
+
     <!-- 고충 상담 신청서 (직원) -->
     <div id="page-grievance-app-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
@@ -6861,6 +7048,14 @@
         if(pageId === 'fmr-history') initFmrHistoryPage();
         if(pageId === 'nap-input') initNapInput();
         if(pageId === 'nap-history') initNapHistoryPage();
+        if(pageId === 'ffe-input') initFfeInput();
+        if(pageId === 'ffe-history') initFfeHistoryPage();
+        if(pageId === 'fdi-input') initFdiInput();
+        if(pageId === 'fdi-history') initFdiHistoryPage();
+        if(pageId === 'fqi-input') initFqiInput();
+        if(pageId === 'fqi-history') initFqiHistoryPage();
+        if(pageId === 'fac-input') initFacInput();
+        if(pageId === 'fac-history') initFacHistoryPage();
         if(pageId === 'spc-input') initSpcInput();
         if(pageId === 'spc-history') initSpcHistoryPage();
         if(pageId === 'ccp-input') initCcpInput();
@@ -9784,7 +9979,7 @@ const POLICY_DOCS = [{"id": "1_1", "chapter": "제1장 환자안전보장 활동
 // 12. 팀별 규정/정책 열람 (4주기 인증 규정집 기반)
 // =========================================================
 
-const DOCUMENT_CATALOG = [{"num": "1.1.1", "title": "구두(전화) 처방 기록지", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.1.2", "title": "필요시(PRN) 처방 목록", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showPage('med-prn')", "emr": false}, {"num": "1.1.3", "title": "유사발음 의약품 목록 (업로드)", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showMedPairs('soundalike')", "emr": false}, {"num": "1.1.4", "title": "유사모양 의약품 목록 (업로드)", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showMedPairs('lookalike')", "emr": false}, {"num": "1.1.5", "title": "용량주의 의약품 목록 (업로드)", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showMedPairs('dosecaution')", "emr": false}, {"num": "1.1.7", "title": "PRN 수정신청서", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.2.3", "title": "낙상 시설 환경 관리 점검표", "teams": ["시설팀"], "fileCount": "8", "built": false, "builtAction": null, "emr": false}, {"num": "1.2.4.1", "title": "낙상예방활동 체크리스트(병동)", "teams": ["간호팀"], "fileCount": "52", "built": true, "builtAction": "openFallPreventionFor('병동')", "emr": false}, {"num": "1.2.4.2", "title": "낙상예방활동 체크리스트(외래)", "teams": ["간호팀"], "fileCount": "0", "built": true, "builtAction": "openFallPreventionFor('외래')", "emr": false}, {"num": "1.2.4.3", "title": "낙상예방활동 체크리스트(원무)", "teams": ["원무팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('원무')", "emr": false}, {"num": "1.2.4.4", "title": "낙상예방활동 체크리스트(임상병리실)", "teams": ["진료원장"], "fileCount": "0", "built": true, "builtAction": "openFallPreventionFor('임상병리실')", "emr": false}, {"num": "1.2.4.6", "title": "낙상예방활동 체크리스트(고주파치료실)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('고주파치료실')", "emr": false}, {"num": "1.2.4.7", "title": "낙상예방활동 체크리스트(재활치료실)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('재활치료실')", "emr": false}, {"num": "1.2.4.8", "title": "낙상예방활동 체크리스트(물리치료실1)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('물리치료실1')", "emr": false}, {"num": "1.2.4.9", "title": "낙상예방활동 체크리스트(물리치료실2)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('물리치료실2')", "emr": false}, {"num": "1.2.4.11", "title": "낙상예방활동 체크리스트(한방치료실)", "teams": ["진료원장"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('한방치료실')", "emr": false}, {"num": "1.2.5", "title": "낙상 재평가 의약품 목록 (병동)", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.2.6", "title": "환자 및 보호자용 낙상예방 안내문(업로드)", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.3.3", "title": "손위생 자원 사용량", "teams": ["간호팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "1.3.4", "title": "KONIS 손위생 수행도 관찰 기록지 (20명)", "teams": ["간호팀"], "fileCount": "11", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.1", "title": "외래환자 등록 절차", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.2.1", "title": "입원 생활 안내문", "teams": ["진료원장", "간호팀", "원무팀"], "fileCount": "1", "built": true, "builtAction": "showPage('admission-guide')", "emr": false}, {"num": "2.1.2.2", "title": "입원 지연환자 관리대장(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.3", "title": "환자진료의 일관성 및 연속성 유지", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.4.4", "title": "의뢰대상 의료기관 평가, 선정자료", "teams": ["진료원장", "간호팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "2.2.1", "title": "환자 초기평가 (EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "2.2.2", "title": "입원환자 초기평가/재평가", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.1.0", "title": "검체접수대장-통합(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.3.0", "title": "CVR(Critical Value Report) 관리대장 (통합)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openCvrLedger()", "emr": false}, {"num": "2.3.1.3.4", "title": "CVR(Critical Value Report) 관리대장 (3, 4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openCvrLedger()", "emr": false}, {"num": "2.3.1.3.6", "title": "CVR(Critical Value Report) 관리대장 (5, 6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openCvrLedger()", "emr": false}, {"num": "2.3.1.6.4", "title": "TAT 관리대장 (위탁) - 3, 4병동", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "한국필"}, {"num": "2.3.1.6.6", "title": "TAT 관리대장 (위탁) - 5, 6병동", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "한국필"}, {"num": "2.3.1.7", "title": "검체TAT 초과사유 관리대장", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.9.3", "title": "내부정도관리 결과 (전해질분석기)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "종이서류로 보관중"}, {"num": "2.3.1.9.4", "title": "혈당 측정기 내부 정도 점검표(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "10", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.10", "title": "외부정도관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.12", "title": "혈액 냉장고 관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.13.2", "title": "검체 냉장고 온도관리표", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.13.4", "title": "검체 냉장고 관리 점검표", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.14", "title": "시약 냉장고 관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.16.6", "title": "장비 점검표 (EKG)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.1", "title": "영상검사 TAT 관리대장 ( 위탁 )", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "한국필"}, {"num": "2.3.2.5.1", "title": "장비 점검표(X-ray)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.2", "title": "장비 점검표 (Portable X-ray)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.3", "title": "장비 점검표(CR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.4", "title": "장비 점검표(DR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.5", "title": "장비 점검표(현상기 및 카세트 점검표)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.6", "title": "장비 점검표(PACS)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.3.1", "title": "방사선 보호구 일일점검일지", "teams": ["진료원장"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.1", "title": "입원환자 치료계획 (EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.2", "title": "협의진료체계 (EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.3", "title": "통증관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.1", "title": "치료식 식사 안내문-당뇨식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.2", "title": "치료식 식사 안내문-저염식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.3", "title": "치료식 식사 안내문-저요오드식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.4", "title": "치료식 식사 안내문-저지방식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.5", "title": "치료식 식사 안내문-저잔사식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.6", "title": "치료식 식사 안내문-위절제후식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.5", "title": "영양초기평가", "teams": ["영양팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.4.6.3", "title": "영양관리위원회 구성표", "teams": ["영양팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.6.5", "title": "영양관리위원회-연간활동계획표", "teams": ["영양팀"], "fileCount": "0", "built": true, "builtAction": "openNutritionCommitteeAnnualPlan()", "emr": false}, {"num": "3.1.5.2.4", "title": "욕창고위험군 관리대장 (3, 4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.2.6", "title": "욕창고위험군 관리대장 (5, 6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.3.4", "title": "욕창환자 발생현황 (3, 4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.3.6", "title": "욕창환자 발생현황 (5, 6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.4", "title": "욕창 체위 변경표(EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.5.5", "title": "욕창예방활동 및 관리 점검표", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.6.1", "title": "생애말기환자 상담일지(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "3", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.6.2", "title": "생애말기환자 상담 접수대장", "teams": ["진료원장", "간호팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.7", "title": "결핵 예방 및 관리 (게시물 부착)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.8.1", "title": "발침계수 확인서 (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "99+", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.2", "title": "응급키트 점검대장 (일일) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.3", "title": "봉인 라벨지 기록표", "teams": ["진료원장", "간호팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.4", "title": "제세동기 장비 점검표(AED)", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.5", "title": "응급키트 봉인 일일점검", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.6.0", "title": "수혈 관리 대장 (통합) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.6.4", "title": "수혈 관리 대장 (4병동) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.6.6", "title": "수혈 관리 대장 (6병동) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.7.4", "title": "수혈 직전 혈액외관 확인표 (4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.7.6", "title": "수혈 직전 혈액외관 확인표 (6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.3.1", "title": "신체보호대 사용환자 관리대장", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openRestraintLedger()", "emr": false}, {"num": "3.2.3.3", "title": "신체보호대 감소활동", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.3.4", "title": "신체보호대 대안적 중재방안 기록지 (병동용)(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.1.1", "title": "신규의약품 신청서 (신규, 긴급, 대체)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "8", "built": false, "builtAction": null, "emr": false}, {"num": "4.1.2", "title": "신약정보자료", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "8", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.8", "title": "약국 및 수액실 비치의약품 보관상태 점검기록부(라운딩)", "teams": ["진료원장", "약국"], "fileCount": "4", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.9", "title": "유효기간 임박약품 점검 기록부(약제실)(라운딩)", "teams": ["진료원장", "약국"], "fileCount": "4", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.10", "title": "비치의약품 점검대장(일일) (라운딩)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "26", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.13", "title": "의료용 마약류 저장시설 점검부", "teams": ["시설팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.14", "title": "마약류 저장시설 점검부", "teams": ["시설팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.15.4", "title": "병동 비치 마약류 사용대장 (4병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.15.6", "title": "병동 비치 마약류 사용대장 (6병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.21", "title": "폐기의약품 관리대장 (약국)(라운딩)", "teams": ["진료원장", "약국"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.22", "title": "약제실 온도 습도 기록지", "teams": ["진료원장", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.23", "title": "수액창고 온도 습도 기록지", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.24", "title": "의약품 냉장고 온도 기록지", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.25", "title": "의약품 냉장고 온도 기록지 (병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "26", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.27", "title": "회수의약품 관리대장", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.28", "title": "회수의약품 보고서", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.30", "title": "의약품 냉장고 관리 점검표", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "39", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.32", "title": "마약류 관리 보조자 지정서", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.33", "title": "유효기간 임박약품 점검 기록부(병동)(라운딩)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.34", "title": "의약품 냉장고 온도 기록지 (병동-3회)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.36", "title": "의약품 냉장고 온도 기록지 (2대)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.37.1", "title": "비치의약품 보관상태 점검기록부(4병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "5", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.37.2", "title": "비치의약품 보관상태 점검기록부(6병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "5", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.39", "title": "향정신성의약품 냉장고 온도 기록지", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.40", "title": "향정신성의약품 냉장고 관리 점검표", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.41.4", "title": "지참 마약 관리대장(3, 4병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "16", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.41.6", "title": "지참 마약 관리대장(5, 6병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "9", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.3", "title": "조제실 청결 점검표", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "15", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.1", "title": "장비 점검표 (ATC)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.2", "title": "장비 점검표 (산제기)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.3", "title": "장비 점검표 (수동약포장기)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.4", "title": "장비 점검표 (자동 타정기)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.5", "title": "약사 부재시 출입대장", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.6", "title": "약물 Allergy 환자 리스트", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.7", "title": "병용금기 의약품 목록", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.8", "title": "처방전 감사대장", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.1", "title": "복약설명 안내문", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.2", "title": "의약품 부작용 발생 보고서(내부)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.3", "title": "의약품 이상반응보고서(외부보고용)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.4", "title": "지참약 식별 의뢰,확인서 (부서별)(라운딩)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "14", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.6", "title": "의약품 부작용 평가 보고서", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "5.1.1", "title": "사생활 보호 신청서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "5.2.1", "title": "취약환자 접수대장", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openVulnerablePatient()", "emr": false}, {"num": "5.2.2", "title": "학대 · 폭력 상담일지", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openAbuseCounseling()", "emr": false}, {"num": "5.2.4.3", "title": "폭력예방 일일점검 (3병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.2.4.4", "title": "학대·폭력예방 일일점검(4병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.2.4.5", "title": "폭력예방 일일점검 (5병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.2.4.6", "title": "학대·폭력예방 일일점검(6병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.3.1", "title": "불만 및 고충 처리대장", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "showPage('complaint-log')", "emr": false}, {"num": "5.3.3", "title": "불만 및 고충처리 결과보고서", "teams": ["원무팀"], "fileCount": "3", "built": true, "builtAction": "openComplaintResult()", "emr": false}, {"num": "5.4.7", "title": "사회복지 프로그램 일정표", "teams": ["원무팀"], "fileCount": "11", "built": true, "builtAction": "openSocialSchedule()", "emr": false}, {"num": "5.4.8", "title": "사회복지 프로그램 결과보고서", "teams": ["원무팀"], "fileCount": "4", "built": true, "builtAction": "openSocialReport()", "emr": false}, {"num": "5.6", "title": "편의 및 안전시설", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "6.1.1.1.1", "title": "QPS활동 사업계획서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQbp()", "emr": false}, {"num": "6.1.1.1.3", "title": "QPS활동 중간보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsMidReport()", "emr": false}, {"num": "6.1.1.1.4", "title": "QPS활동 최종보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsFinalReport()", "emr": false}, {"num": "6.1.1.2", "title": "QPS 중간활동 평가 보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsMidEval()", "emr": false}, {"num": "6.1.1.3", "title": "QPS 최종활동 평가 보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsFinalEval()", "emr": false}, {"num": "6.1.2.1", "title": "직무기술서 (QPS)", "teams": ["QPS실"], "fileCount": "2", "built": true, "builtAction": "showPolicyDetail('qps_job_desc', 'team')", "emr": false}, {"num": "6.1.2.2", "title": "업무분장표 (QPS실)", "teams": ["QPS실"], "fileCount": "2", "built": true, "builtAction": "showPolicyDetail('qps_duty_assignment', 'team')", "emr": false}, {"num": "6.1.2.4", "title": "환자안전 라운딩 일지", "teams": ["QPS실"], "fileCount": "13", "built": true, "builtAction": "openQpsRounding()", "emr": false}, {"num": "6.1.3.1", "title": "QPS위원회 내규", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openCommitteeBylaws('qps_committee')", "emr": false}, {"num": "6.1.3.2", "title": "QPS위원회 조직도", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openOrgChart('qps_committee')", "emr": false}, {"num": "6.1.3.4", "title": "QPS위원회 회의록", "teams": ["QPS실"], "fileCount": "3", "built": true, "builtAction": "openQpsMinutes()", "emr": false}, {"num": "6.2.1", "title": "환자 안전사고 보고서(낙상)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openPsiFall()", "emr": false}, {"num": "6.2.2", "title": "환자 안전사고 보고서(욕창)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openPsiPressureSore()", "emr": false}, {"num": "6.2.3", "title": "환자 안전사고 보고서(투약)", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openPsiMedication()", "emr": false}, {"num": "6.2.4", "title": "환자 안전사고 보고서(기타)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openPsiOther()", "emr": false}, {"num": "6.2.5", "title": "환자안전사고 분석 보고서(분기)", "teams": ["QPS실"], "fileCount": "4", "built": true, "builtAction": "openPsiAnalysis()", "emr": false}, {"num": "6.2.6.2", "title": "RCA 회의록", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.6.3", "title": "RCA 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.6.4", "title": "RCA 개선활동 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.7.2", "title": "FMEA 회의록", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.7.3", "title": "FMEA(고장유형 및 영향요인)분석 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.3.2", "title": "QI 회의록", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openQiMinutes()", "emr": false}, {"num": "6.3.3", "title": "QI활동 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.3.5", "title": "QI 활동 주제 제출서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.3.6.5", "title": "QI 활동 계획서 (환자만족도)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openQiPlan()", "emr": false}, {"num": "7.1.1.1", "title": "감염관리활동 연간계획서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionAnnualPlan()", "emr": false}, {"num": "7.1.1.2", "title": "감염관리 중간활동 평가 보고서", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openInfectionMidEval()", "emr": false}, {"num": "7.1.1.3", "title": "감염관리 최종활동 평가 보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionFinalEval()", "emr": false}, {"num": "7.1.1.4", "title": "감염관리 연간 사업 평가지표에 대한 배점 기준(연간계획서 별첨)", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openInfectionScoreCriteria()", "emr": false}, {"num": "7.1.2.4", "title": "감염관리 활동 중간보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionActReport('중간')", "emr": false}, {"num": "7.1.2.5", "title": "감염관리 활동 최종보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionActReport('최종')", "emr": false}, {"num": "7.1.3.7", "title": "흉부 X-ray", "teams": ["진료원장", "감염관리실"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "7.1.3.8", "title": "KONIS 혈류감염 기록지 (혈류감염, BSI)", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openKonisBsiForm()", "emr": false}, {"num": "7.1.4.1", "title": "직무기술서(감염관리)", "teams": ["감염관리실"], "fileCount": "3", "built": true, "builtAction": "openJobDescInfection()", "emr": false}, {"num": "7.1.4.2", "title": "업무분장표 (감염관리실)", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "showPolicyDetail('infection_duty_assignment', 'team')", "emr": false}, {"num": "7.1.4.4", "title": "감염 예방 라운딩 주간 점검표", "teams": ["감염관리실"], "fileCount": "54", "built": true, "builtAction": "openInfectionRounding()", "emr": false}, {"num": "7.1.4.6", "title": "감염관리실 조직도", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openInfectionDeptOrgChart()", "emr": false}, {"num": "7.1.4.8", "title": "직무기술서(의사)", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openJobDescDoctor()", "emr": false}, {"num": "7.1.5.1", "title": "감염관리위원회 내규", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openCommitteeBylaws('infection_committee')", "emr": false}, {"num": "7.1.5.2", "title": "감염관리위원회 조직도", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openOrgChart('infection_committee')", "emr": false}, {"num": "7.3.10.1", "title": "세탁물 수집장소 청소 및 소독관리 점검표", "teams": ["감염관리실"], "fileCount": "26", "built": true, "builtAction": "openLaundryCollectionCheck()", "emr": false}, {"num": "7.3.10.2", "title": "세탁물 보관장소 청소 및 소독관리 점검표", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openLaundryStorageCheck()", "emr": false}, {"num": "7.3.10.3", "title": "린넨 관리 점검표", "teams": ["감염관리실"], "fileCount": "26", "built": true, "builtAction": "openLinenCheck()", "emr": false}, {"num": "7.3.10.4", "title": "커튼 위생 관리대장(라운딩)", "teams": ["감염관리실"], "fileCount": "5", "built": true, "builtAction": "openCurtainHygiene('전체')", "emr": false}, {"num": "7.3.10.5", "title": "세탁물 처리", "teams": ["감염관리실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "해승크린"}, {"num": "7.3.10.6.1", "title": "커튼 위생 관리대장-재활(라운딩)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "1", "built": true, "builtAction": "openCurtainHygiene('재활치료실')", "emr": false}, {"num": "7.3.10.6.2", "title": "커튼 위생 관리대장-물리(라운딩)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "1", "built": true, "builtAction": "openCurtainHygiene('물리치료실')", "emr": false}, {"num": "7.3.10.7", "title": "소파 세탁 관리대장", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openSofaLaundryLedger()", "emr": false}, {"num": "7.4.1", "title": "환경관리 체크리스트 (간호사실)", "teams": ["감염관리실"], "fileCount": "26", "built": true, "builtAction": "openEnvcheckFor('간호사실')", "emr": false}, {"num": "7.4.2", "title": "환경관리 체크리스트 (병실)", "teams": ["감염관리실"], "fileCount": "52", "built": true, "builtAction": "openEnvcheckFor('병실')", "emr": false}, {"num": "7.4.3", "title": "환경관리 체크리스트 (원무, 사무실)", "teams": ["원무팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('원무')", "emr": false}, {"num": "7.4.4", "title": "환경관리 체크리스트 (재활치료실)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('재활치료실')", "emr": false}, {"num": "7.4.5.1", "title": "환경관리 체크리스트 (물리치료실1)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('물리치료실1')", "emr": false}, {"num": "7.4.5.2", "title": "환경관리 체크리스트 (물리치료실2)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('물리치료실2')", "emr": false}, {"num": "7.4.6", "title": "환경관리 체크리스트 (고주파치료실)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('고주파치료실')", "emr": false}, {"num": "7.4.10", "title": "환경관리 체크리스트 (한방치료실)", "teams": ["진료원장", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('한방치료실')", "emr": false}, {"num": "7.4.11", "title": "환경관리 체크리스트 (격리병실)", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('격리병실')", "emr": false}, {"num": "7.4.12.1", "title": "여자 화장실 청소 점검표 (2층~7층)", "teams": ["감염관리실"], "fileCount": "79", "built": true, "builtAction": "openWomenToiletCheck()", "emr": false}, {"num": "7.4.13.1", "title": "남자 화장실 청소 점검표", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openMenToiletCheck()", "emr": false}, {"num": "7.4.16", "title": "샤워실 청소 점검표", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openShowerRoomCheck()", "emr": false}, {"num": "7.4.17", "title": "환경관리 체크리스트 (약제_약국)", "teams": ["진료원장", "감염관리실"], "fileCount": "0", "built": true, "builtAction": "openEnvcheckFor('약국')", "emr": false}, {"num": "7.6.2.1", "title": "식자재 창고 온습도 점검일지 (2회)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFoodStorageTempHumidity()", "emr": false}, {"num": "7.6.2.3", "title": "조리실 온습도 점검일지 (2회)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openKitchenTempHumidity()", "emr": false}, {"num": "7.6.5", "title": "식기세척기 관리일지", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openDishwasherLog()", "emr": false}, {"num": "7.6.6.4", "title": "냉장고 온도 점검일지 (영양팀)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFridgeTempCheck()", "emr": false}, {"num": "7.6.7.3", "title": "냉동고 온도 점검일지 (영양팀)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFreezerTempCheck()", "emr": false}, {"num": "7.6.9", "title": "음식물 처리 관리", "teams": ["영양팀", "감염관리실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "정성환경"}, {"num": "7.6.12", "title": "식중독 예방 일일 점검표", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFoodPoisonCheck()", "emr": false}, {"num": "7.6.13", "title": "유증상 관리일지", "teams": ["영양팀", "감염관리실"], "fileCount": "0", "built": true, "builtAction": "openSymptomLog()", "emr": false}, {"num": "7.6.14", "title": "건강검진 결과표", "teams": ["영양팀", "감염관리실"], "fileCount": "2", "built": true, "builtAction": "openHealthCheckup()", "emr": false}, {"num": "7.6.16", "title": "안전 점검 일지", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openSafetyCheckLog()", "emr": false}, {"num": "7.6.17", "title": "위생관리 점검표", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openHygieneCheck()", "emr": false}, {"num": "7.6.19", "title": "영양(급식) 청소계획표", "teams": ["영양팀", "감염관리실"], "fileCount": "2", "built": true, "builtAction": "openNutritionCleaningPlan()", "emr": false}, {"num": "7.6.20", "title": "조리장 청소 점검표", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openKitchenCleaningCheck()", "emr": false}, {"num": "7.6.21", "title": "폐식용유 관리대장", "teams": ["영양팀", "감염관리실"], "fileCount": "2", "built": true, "builtAction": "openWasteOilLedger()", "emr": false}, {"num": "7.7.1", "title": "감염성 질환 발생보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectiousDiseaseReport()", "emr": false}, {"num": "8.1.1", "title": "규정 관리대장", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openRegLedger()", "emr": false}, {"num": "8.1.2", "title": "규정 입안서", "teams": ["원무팀"], "fileCount": "20", "built": true, "builtAction": "openRegProposal()", "emr": false}, {"num": "8.1.3", "title": "규정 관련 개정 요청서", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openRegAmendment()", "emr": false}, {"num": "8.1.4", "title": "위탁업체 모니터링 대장", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openVendorEvalHistory()", "emr": false}, {"num": "8.1.5.1", "title": "운영위원회 내규", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openCommitteeBylaws('steering_committee')", "emr": false}, {"num": "8.1.5.2", "title": "운영위원회 조직도", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openOrgChart('steering_committee')", "emr": false}, {"num": "8.1.5.3", "title": "운영위원회 구성표", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "openOrgRoster()", "emr": false}, {"num": "8.1.5.4", "title": "운영위원회 회의록", "teams": ["원무팀"], "fileCount": "7", "built": true, "builtAction": "openOrgMinutes()", "emr": false}, {"num": "8.1.5.5", "title": "운영위원회 연간계획서", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "openOrgAnnualPlan()", "emr": false}, {"num": "8.1.6", "title": "위탁서비스 업체평가 (모니터링)", "teams": ["원무팀"], "fileCount": "11", "built": true, "builtAction": "openVendorEval()", "emr": false}, {"num": "8.2.1", "title": "미션 이행 활동 결과 보고 및 평가", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openMissionReport()", "emr": false}, {"num": "8.3.1", "title": "윤리위원회 조직도", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openOrgChart('ethics_committee')", "emr": false}, {"num": "8.3.2", "title": "고충 상담 신청서 (직원)", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openGrievanceApp()", "emr": false}, {"num": "8.3.3", "title": "사건·사고 발생 보고서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openIncidentAccidentReport()", "emr": false}, {"num": "8.3.4", "title": "폭력 발생 시 대응 매뉴얼 (환자와 직원 간)", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openViolenceManualPatient()", "emr": false}, {"num": "8.3.5", "title": "폭력 발생 시 대응 매뉴얼 (직원과 직원 간)", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openViolenceManualStaff()", "emr": false}, {"num": "8.3.6", "title": "윤리위원회 심의신청서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openEthicsApp()", "emr": false}, {"num": "8.3.7", "title": "의료기관 내 폭력 및 윤리적 갈등 조치절차", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openConflictProcedure()", "emr": false}, {"num": "9.1.5", "title": "면허 및 자격검증 관리대장", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "종이서류로 보관중"}, {"num": "9.1.11", "title": "임명장 (양식)", "teams": ["원무팀"], "fileCount": "4", "built": true, "builtAction": "openAppointCert()", "emr": false}, {"num": "9.2.4", "title": "교육 결과 보고서 (원무)", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.5", "title": "교육 결과 보고서 (간호)", "teams": ["간호팀"], "fileCount": "3", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.6.1", "title": "교육 결과 보고서 (약국)", "teams": ["진료원장"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.6.3", "title": "교육 결과 보고서 (QPS)", "teams": ["원무팀", "QPS실"], "fileCount": "0", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.6.4", "title": "교육 결과 보고서 (감염)", "teams": ["간호팀"], "fileCount": "0", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.4.6", "title": "유해물질 안전관리 연간계획서", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "openHazmat()", "emr": false}, {"num": "9.4.8.1", "title": "건강증진 프로그램 교육 보고서(금주, 절주)", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.4.8.2", "title": "건강증진 프로그램 교육 보고서(영양)", "teams": ["영양팀"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.4.9.1", "title": "직원감염노출사고 보고서", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "9.4.9.2", "title": "직원안전사고 발생보고서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openEsaReport()", "emr": false}, {"num": "9.4.9.4", "title": "공상 승인 신청서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openGongsang()", "emr": false}, {"num": "9.4.9.5", "title": "직원안전(감염)사고 원인분석 재발방지 보고서", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.1", "title": "시설 및 환경안전관리 연간계획서", "teams": ["시설팀"], "fileCount": "2", "built": true, "builtAction": "openFacilityAnnualPlan()", "emr": false}, {"num": "10.1.2", "title": "시설물(건축물) 일일점검일지", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.3", "title": "시설물(건축물) 정기점검 일지(라운딩)", "teams": ["시설팀"], "fileCount": "4", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.4", "title": "시설물(건축물) 반기 점검일지(라운딩)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.5", "title": "시설 안전사고 발생 경위서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.6.1.4", "title": "시설물 수리요구서 (4병동)", "teams": ["시설팀"], "fileCount": "7", "built": true, "builtAction": "openFacilityRepairRequest('4병동')", "emr": false}, {"num": "10.1.6.1.6", "title": "시설물 수리요구서 (6병동)", "teams": ["시설팀"], "fileCount": "8", "built": true, "builtAction": "openFacilityRepairRequest('6병동')", "emr": false}, {"num": "10.1.6.2", "title": "시설물 수리요구서 (영양)", "teams": ["영양팀"], "fileCount": "7", "built": true, "builtAction": "openFacilityRepairRequest('영양팀')", "emr": false}, {"num": "10.1.6.3", "title": "시설물 수리요구서 (기타)", "teams": ["시설팀"], "fileCount": "7", "built": true, "builtAction": "openFacilityRepairRequest('기타')", "emr": false}, {"num": "10.1.7", "title": "승강기 일일점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.8", "title": "시설안전 직무기술서", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.9", "title": "작업안전수칙", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.10", "title": "시설환경 개선활동 보고서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.1", "title": "전기실 및 발전기실 안전관리 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.2", "title": "비상발전기 점검 기록지(라운딩)", "teams": ["시설팀"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.3", "title": "무정전 전원장치(UPS) 점검일지", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.4", "title": "저수조 위생관리상태 점검일지(라운딩)", "teams": ["시설팀"], "fileCount": "12", "built": true, "builtAction": "openTankHygiene()", "emr": false}, {"num": "10.2.5", "title": "정수기 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.1", "title": "의료가스 진공설비 점검일지 (산소발생기, 산소, 진공설비)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.2", "title": "의료가스(기체) 점검일지 (기체산소)", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.3", "title": "진공탱크 및 진공펌프 점검일지", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.4", "title": "의료가스 일상 점검일지(이동형)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.7", "title": "환기시설 운영 및 유지·관리 매뉴얼", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.8", "title": "환기시설물 체크리스트", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.9", "title": "환기시설 점검 및 필터관리(청소.교체)대장", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.10", "title": "기계실(환기설비) 안전 점검표 (공조기O)", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.11", "title": "필터 점검·청소 및 교체일지", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.12", "title": "공기조화기 설치현황", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.13", "title": "온수보일러 점검일지", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.14", "title": "냉·난방 필터 청소 점검일지", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.15", "title": "환기시설 운영일지 (공조기X)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.16", "title": "정화조 점검일지", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.17", "title": "정수기 설치현황", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.18", "title": "환기시설 운영일지 (공조기O)", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.1.1", "title": "유해화학물질 목록", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.1.2", "title": "유해화학물질 목록 (부서별 목록)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.2.1.4", "title": "유해물질 취급부서 안전점검일지(월) (4병동)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.2.1.6", "title": "유해물질 취급부서 안전점검일지(월) (6병동)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.2.6", "title": "유해물질 취급부서 안전점검일지(월) (소독실)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.3", "title": "유해물질 취급관리대장(라운딩)", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.6", "title": "의료 폐기물 취급부서 안전점검일지(월)", "teams": ["시설팀"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.7", "title": "의료폐기물 수집장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.8", "title": "의료폐기물 보관장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.9", "title": "액상 폐기물 보관 냉장고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.10", "title": "액상 폐기물 보관 냉동고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.11", "title": "일반폐기물 수집장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.12", "title": "일반폐기물 보관장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.13", "title": "spill kit 점검표", "teams": ["시설팀"], "fileCount": "8", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.14", "title": "조직 물류 냉동고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.15", "title": "액상 폐기물 보관 냉장·냉동고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.2", "title": "보안 안전사고 보고서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.1", "title": "통제구역 출입 관리대장 (통제구역별)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.2", "title": "통제구역 출입 관리대장 (저수조)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.3", "title": "통제구역 출입 관리대장 (전기실)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.4", "title": "통제구역 출입 관리대장 (비상발전기)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.5", "title": "통제구역 출입 관리대장 (의무기록실)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.6", "title": "통제구역 출입 관리대장 (서버실)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.7", "title": "통제구역 출입 관리대장 (산소보관장)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.8", "title": "통제구역 출입 관리대장 (약제과)", "teams": ["진료원장"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.9", "title": "통제구역 출입 관리대장 (수액보관실)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.4", "title": "CCTV 설치현황", "teams": ["시설팀"], "fileCount": "1", "built": true, "builtAction": "openCctvStatus()", "emr": false}, {"num": "10.4.5", "title": "CCTV 점검표(월별)", "teams": ["시설팀"], "fileCount": "2", "built": true, "builtAction": "openCctvCheck()", "emr": false}, {"num": "10.4.6", "title": "CCTV 열람 요청서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.7", "title": "입원환자 병문안객 기록지(업로드)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.8", "title": "보안관리 연간계획서", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.5.1", "title": "의료기기 목록 (병원전체)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.5.2", "title": "의료기기 목록(부서별)", "teams": ["진료원장", "시설팀", "재활치료팀", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openMedicalEquipmentList()", "emr": false}, {"num": "10.6.1", "title": "화재 안전관리 활동 연간계획서", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.2", "title": "소방시설 일일점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.4", "title": "소방점검 개선활동 보고서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.5", "title": "소화전 관리대장", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.6", "title": "소화기 관리대장", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.7", "title": "소방안전관리자 직무기술서", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.9", "title": "자위소방대 편성표", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.11", "title": "소방훈련교육 실시 결과 기록부", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.12", "title": "소방시설 월점검표", "teams": ["시설팀"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "11.1.22", "title": "서버실(의무기록실) 온도 습도 기록지", "teams": ["원무팀"], "fileCount": "13", "built": true, "builtAction": "openTempHumidLog('서버실(의무기록실)')", "emr": false}, {"num": "12.1.1", "title": "지표정의서 (낙상)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.2", "title": "지표정의서 (손위생)", "teams": [], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.3", "title": "지표정의서 (욕창)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.4", "title": "지표정의서 (환자만족도)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.5", "title": "지표정의서 (직원안전사고(유해화학물질노출포함))", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.6", "title": "지표정의서 (직원감염노출사고)", "teams": ["간호팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.7", "title": "지표정의서 (신체보호대)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.8", "title": "지표정의서 (불만고충처리율)", "teams": [], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.9", "title": "지표정의서 (학대 · 폭력 발생률)", "teams": [], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.10", "title": "지표정의서 (영상검사)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.11", "title": "지표정의서 (검체검사)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.1", "title": "지표관리 보고서 (낙상발생보고율)", "teams": [], "fileCount": "6", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.2", "title": "지표관리 보고서 (손위생수행률)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.3", "title": "지표관리 보고서 (욕창발생보고율)", "teams": [], "fileCount": "6", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.4", "title": "지표관리 보고서 (환자 만족도)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.5", "title": "지표관리 보고서 (직원안전사고-유해화학물질사고 발생률)", "teams": [], "fileCount": "3", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.6", "title": "지표관리 보고서 (직원감염노출사고 발생률)", "teams": ["간호팀"], "fileCount": "3", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.7", "title": "지표관리 보고서 (신체보호대 사용률)", "teams": [], "fileCount": "6", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.8", "title": "지표관리 보고서 (불만고충처리율)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.9", "title": "지표관리 보고서 (학대 · 폭력 발생률)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.10", "title": "지표관리 보고서 (영상검사 TAT충족률)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.11", "title": "지표관리 보고서 (검체검사 TAT충족률)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.1", "title": "환자 만족도조사 설문지(입원환자용)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.2", "title": "환자 만족도 조사 계획서", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.3", "title": "환자 만족도 조사 안내문", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.5", "title": "환자 만족도 개선활동 보고서", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "13.2", "title": "근태처리원", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.3", "title": "기안서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.4", "title": "사직원", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.5", "title": "지출결의서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.6", "title": "구매품의서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.7.1", "title": "당직의 근무표", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openDds()", "emr": false}, {"num": "5.5.1", "title": "입원약정서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "5.5.2", "title": "개인정보 수집 및 이용 동의서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "5.5.3", "title": "응급시 환자 이송 동의서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "5.5.4", "title": "비급여신청 동의서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "11.4", "title": "의무기록 사본발급신청서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "11.5", "title": "의무기록 사본발급 대장", "teams": ["원무팀"], "fileCount": "", "built": true, "builtAction": "openMedRecordCopy()", "emr": false}, {"num": "5.5.5", "title": "신체보호대 동의서", "teams": ["간호팀"], "built": false}, {"num": "5.5.6", "title": "DNR(심폐소생술 거부) 동의서", "teams": ["간호팀"], "built": false}, {"num": "8.3.0", "title": "윤리위원회 내규", "teams": ["원무팀"], "built": true, "builtAction": "openCommitteeBylaws('ethics_committee')"}];
+const DOCUMENT_CATALOG = [{"num": "1.1.1", "title": "구두(전화) 처방 기록지", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.1.2", "title": "필요시(PRN) 처방 목록", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showPage('med-prn')", "emr": false}, {"num": "1.1.3", "title": "유사발음 의약품 목록 (업로드)", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showMedPairs('soundalike')", "emr": false}, {"num": "1.1.4", "title": "유사모양 의약품 목록 (업로드)", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showMedPairs('lookalike')", "emr": false}, {"num": "1.1.5", "title": "용량주의 의약품 목록 (업로드)", "teams": ["약국"], "fileCount": "1", "built": true, "builtAction": "showMedPairs('dosecaution')", "emr": false}, {"num": "1.1.7", "title": "PRN 수정신청서", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.2.3.1", "title": "낙상 시설 환경 관리 점검표 (3,4 병동)", "teams": ["시설팀"], "fileCount": "8", "built": true, "builtAction": "openFallFacilityEnvCheck('3,4병동')", "emr": false}, {"num": "1.2.3.2", "title": "낙상 시설 환경 관리 점검표 (5,6 병동)", "teams": ["시설팀"], "fileCount": "8", "built": true, "builtAction": "openFallFacilityEnvCheck('5,6병동')", "emr": false}, {"num": "1.2.4.1", "title": "낙상예방활동 체크리스트(병동)", "teams": ["간호팀"], "fileCount": "52", "built": true, "builtAction": "openFallPreventionFor('병동')", "emr": false}, {"num": "1.2.4.2", "title": "낙상예방활동 체크리스트(외래)", "teams": ["간호팀"], "fileCount": "0", "built": true, "builtAction": "openFallPreventionFor('외래')", "emr": false}, {"num": "1.2.4.3", "title": "낙상예방활동 체크리스트(원무)", "teams": ["원무팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('원무')", "emr": false}, {"num": "1.2.4.4", "title": "낙상예방활동 체크리스트(임상병리실)", "teams": ["진료원장"], "fileCount": "0", "built": true, "builtAction": "openFallPreventionFor('임상병리실')", "emr": false}, {"num": "1.2.4.6", "title": "낙상예방활동 체크리스트(고주파치료실)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('고주파치료실')", "emr": false}, {"num": "1.2.4.7", "title": "낙상예방활동 체크리스트(재활치료실)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('재활치료실')", "emr": false}, {"num": "1.2.4.8", "title": "낙상예방활동 체크리스트(물리치료실1)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('물리치료실1')", "emr": false}, {"num": "1.2.4.9", "title": "낙상예방활동 체크리스트(물리치료실2)", "teams": ["재활치료팀"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('물리치료실2')", "emr": false}, {"num": "1.2.4.11", "title": "낙상예방활동 체크리스트(한방치료실)", "teams": ["진료원장"], "fileCount": "13", "built": true, "builtAction": "openFallPreventionFor('한방치료실')", "emr": false}, {"num": "1.2.5", "title": "낙상 재평가 의약품 목록 (병동)", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.2.6", "title": "환자 및 보호자용 낙상예방 안내문(업로드)", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "1.3.3", "title": "손위생 자원 사용량", "teams": ["간호팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "1.3.4", "title": "KONIS 손위생 수행도 관찰 기록지 (20명)", "teams": ["간호팀"], "fileCount": "11", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.1", "title": "외래환자 등록 절차", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.2.1", "title": "입원 생활 안내문", "teams": ["진료원장", "간호팀", "원무팀"], "fileCount": "1", "built": true, "builtAction": "showPage('admission-guide')", "emr": false}, {"num": "2.1.2.2", "title": "입원 지연환자 관리대장(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.3", "title": "환자진료의 일관성 및 연속성 유지", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.1.4.4", "title": "의뢰대상 의료기관 평가, 선정자료", "teams": ["진료원장", "간호팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "2.2.1", "title": "환자 초기평가 (EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "2.2.2", "title": "입원환자 초기평가/재평가", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.1.0", "title": "검체접수대장-통합(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.3.0", "title": "CVR(Critical Value Report) 관리대장 (통합)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openCvrLedger()", "emr": false}, {"num": "2.3.1.3.4", "title": "CVR(Critical Value Report) 관리대장 (3, 4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openCvrLedger()", "emr": false}, {"num": "2.3.1.3.6", "title": "CVR(Critical Value Report) 관리대장 (5, 6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openCvrLedger()", "emr": false}, {"num": "2.3.1.6.4", "title": "TAT 관리대장 (위탁) - 3, 4병동", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "한국필"}, {"num": "2.3.1.6.6", "title": "TAT 관리대장 (위탁) - 5, 6병동", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "한국필"}, {"num": "2.3.1.7", "title": "검체TAT 초과사유 관리대장", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.9.3", "title": "내부정도관리 결과 (전해질분석기)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "종이서류로 보관중"}, {"num": "2.3.1.9.4", "title": "혈당 측정기 내부 정도 점검표(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "10", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.10", "title": "외부정도관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.12", "title": "혈액 냉장고 관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.13.2", "title": "검체 냉장고 온도관리표", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.13.4", "title": "검체 냉장고 관리 점검표", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.14", "title": "시약 냉장고 관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.1.16.6", "title": "장비 점검표 (EKG)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.1", "title": "영상검사 TAT 관리대장 ( 위탁 )", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "한국필"}, {"num": "2.3.2.5.1", "title": "장비 점검표(X-ray)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.2", "title": "장비 점검표 (Portable X-ray)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.3", "title": "장비 점검표(CR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.4", "title": "장비 점검표(DR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.5", "title": "장비 점검표(현상기 및 카세트 점검표)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.2.5.6", "title": "장비 점검표(PACS)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "2.3.3.1", "title": "방사선 보호구 일일점검일지", "teams": ["진료원장"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.1", "title": "입원환자 치료계획 (EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.2", "title": "협의진료체계 (EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.3", "title": "통증관리", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.1", "title": "치료식 식사 안내문-당뇨식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.2", "title": "치료식 식사 안내문-저염식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.3", "title": "치료식 식사 안내문-저요오드식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.4", "title": "치료식 식사 안내문-저지방식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.5", "title": "치료식 식사 안내문-저잔사식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.2.6", "title": "치료식 식사 안내문-위절제후식", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.5", "title": "영양초기평가", "teams": ["영양팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.4.6.3", "title": "영양관리위원회 구성표", "teams": ["영양팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.4.6.5", "title": "영양관리위원회-연간활동계획표", "teams": ["영양팀"], "fileCount": "0", "built": true, "builtAction": "openNutritionCommitteeAnnualPlan()", "emr": false}, {"num": "3.1.5.2.4", "title": "욕창고위험군 관리대장 (3, 4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.2.6", "title": "욕창고위험군 관리대장 (5, 6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.3.4", "title": "욕창환자 발생현황 (3, 4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.3.6", "title": "욕창환자 발생현황 (5, 6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.5.4", "title": "욕창 체위 변경표(EMR)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "3.1.5.5", "title": "욕창예방활동 및 관리 점검표", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.6.1", "title": "생애말기환자 상담일지(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "3", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.6.2", "title": "생애말기환자 상담 접수대장", "teams": ["진료원장", "간호팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.7", "title": "결핵 예방 및 관리 (게시물 부착)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.1.8.1", "title": "발침계수 확인서 (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "99+", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.2", "title": "응급키트 점검대장 (일일) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.3", "title": "봉인 라벨지 기록표", "teams": ["진료원장", "간호팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.4", "title": "제세동기 장비 점검표(AED)", "teams": ["진료원장", "간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.1.5", "title": "응급키트 봉인 일일점검", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.6.0", "title": "수혈 관리 대장 (통합) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.6.4", "title": "수혈 관리 대장 (4병동) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.6.6", "title": "수혈 관리 대장 (6병동) (라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.7.4", "title": "수혈 직전 혈액외관 확인표 (4병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.2.7.6", "title": "수혈 직전 혈액외관 확인표 (6병동)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.3.1", "title": "신체보호대 사용환자 관리대장", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openRestraintLedger()", "emr": false}, {"num": "3.2.3.3", "title": "신체보호대 감소활동", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "3.2.3.4", "title": "신체보호대 대안적 중재방안 기록지 (병동용)(라운딩)", "teams": ["진료원장", "간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.1.1", "title": "신규의약품 신청서 (신규, 긴급, 대체)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "8", "built": false, "builtAction": null, "emr": false}, {"num": "4.1.2", "title": "신약정보자료", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "8", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.8", "title": "약국 및 수액실 비치의약품 보관상태 점검기록부(라운딩)", "teams": ["진료원장", "약국"], "fileCount": "4", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.9", "title": "유효기간 임박약품 점검 기록부(약제실)(라운딩)", "teams": ["진료원장", "약국"], "fileCount": "4", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.10", "title": "비치의약품 점검대장(일일) (라운딩)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "26", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.13", "title": "의료용 마약류 저장시설 점검부", "teams": ["시설팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.15.4", "title": "병동 비치 마약류 사용대장 (4병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.15.6", "title": "병동 비치 마약류 사용대장 (6병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.21", "title": "폐기의약품 관리대장 (약국)(라운딩)", "teams": ["진료원장", "약국"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.22", "title": "약제실 온도 습도 기록지", "teams": ["진료원장", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.23", "title": "수액창고 온도 습도 기록지", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.24", "title": "의약품 냉장고 온도 기록지", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.25", "title": "의약품 냉장고 온도 기록지 (병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "26", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.27", "title": "회수의약품 관리대장", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.28", "title": "회수의약품 보고서", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.30", "title": "의약품 냉장고 관리 점검표", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "39", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.32", "title": "마약류 관리 보조자 지정서", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.33", "title": "유효기간 임박약품 점검 기록부(병동)(라운딩)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.34", "title": "의약품 냉장고 온도 기록지 (병동-3회)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.36", "title": "의약품 냉장고 온도 기록지 (2대)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.37.1", "title": "비치의약품 보관상태 점검기록부(4병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "5", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.37.2", "title": "비치의약품 보관상태 점검기록부(6병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "5", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.39", "title": "향정신성의약품 냉장고 온도 기록지", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.40", "title": "향정신성의약품 냉장고 관리 점검표", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.41.4", "title": "지참 마약 관리대장(3, 4병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "16", "built": false, "builtAction": null, "emr": false}, {"num": "4.2.41.6", "title": "지참 마약 관리대장(5, 6병동)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "9", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.3", "title": "조제실 청결 점검표", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "15", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.1", "title": "장비 점검표 (ATC)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.2", "title": "장비 점검표 (산제기)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.3", "title": "장비 점검표 (수동약포장기)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.4.4", "title": "장비 점검표 (자동 타정기)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.5", "title": "약사 부재시 출입대장", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.6", "title": "약물 Allergy 환자 리스트", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.7", "title": "병용금기 의약품 목록", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.3.8", "title": "처방전 감사대장", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.1", "title": "복약설명 안내문", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.2", "title": "의약품 부작용 발생 보고서(내부)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.3", "title": "의약품 이상반응보고서(외부보고용)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.4", "title": "지참약 식별 의뢰,확인서 (부서별)(라운딩)", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "14", "built": false, "builtAction": null, "emr": false}, {"num": "4.4.6", "title": "의약품 부작용 평가 보고서", "teams": ["진료원장", "간호팀", "약국"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "5.1.1", "title": "사생활 보호 신청서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "5.2.1", "title": "취약환자 접수대장", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openVulnerablePatient()", "emr": false}, {"num": "5.2.2", "title": "학대 · 폭력 상담일지", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openAbuseCounseling()", "emr": false}, {"num": "5.2.4.3", "title": "폭력예방 일일점검 (3병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.2.4.4", "title": "학대·폭력예방 일일점검(4병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.2.4.5", "title": "폭력예방 일일점검 (5병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.2.4.6", "title": "학대·폭력예방 일일점검(6병동)", "teams": ["간호팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "5.3.1", "title": "불만 및 고충 처리대장", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "showPage('complaint-log')", "emr": false}, {"num": "5.3.3", "title": "불만 및 고충처리 결과보고서", "teams": ["원무팀"], "fileCount": "3", "built": true, "builtAction": "openComplaintResult()", "emr": false}, {"num": "5.4.7", "title": "사회복지 프로그램 일정표", "teams": ["원무팀"], "fileCount": "11", "built": true, "builtAction": "openSocialSchedule()", "emr": false}, {"num": "5.4.8", "title": "사회복지 프로그램 결과보고서", "teams": ["원무팀"], "fileCount": "4", "built": true, "builtAction": "openSocialReport()", "emr": false}, {"num": "6.1.1.1.1", "title": "QPS활동 사업계획서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQbp()", "emr": false}, {"num": "6.1.1.1.3", "title": "QPS활동 중간보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsMidReport()", "emr": false}, {"num": "6.1.1.1.4", "title": "QPS활동 최종보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsFinalReport()", "emr": false}, {"num": "6.1.1.2", "title": "QPS 중간활동 평가 보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsMidEval()", "emr": false}, {"num": "6.1.1.3", "title": "QPS 최종활동 평가 보고서", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openQpsFinalEval()", "emr": false}, {"num": "6.1.2.1", "title": "직무기술서 (QPS)", "teams": ["QPS실"], "fileCount": "2", "built": true, "builtAction": "showPolicyDetail('qps_job_desc', 'team')", "emr": false}, {"num": "6.1.2.2", "title": "업무분장표 (QPS실)", "teams": ["QPS실"], "fileCount": "2", "built": true, "builtAction": "showPolicyDetail('qps_duty_assignment', 'team')", "emr": false}, {"num": "6.1.2.4", "title": "환자안전 라운딩 일지", "teams": ["QPS실"], "fileCount": "13", "built": true, "builtAction": "openQpsRounding()", "emr": false}, {"num": "6.1.3.1", "title": "QPS위원회 내규", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openCommitteeBylaws('qps_committee')", "emr": false}, {"num": "6.1.3.2", "title": "QPS위원회 조직도", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openOrgChart('qps_committee')", "emr": false}, {"num": "6.1.3.4", "title": "QPS위원회 회의록", "teams": ["QPS실"], "fileCount": "3", "built": true, "builtAction": "openQpsMinutes()", "emr": false}, {"num": "6.2.1", "title": "환자 안전사고 보고서(낙상)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openPsiFall()", "emr": false}, {"num": "6.2.2", "title": "환자 안전사고 보고서(욕창)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openPsiPressureSore()", "emr": false}, {"num": "6.2.3", "title": "환자 안전사고 보고서(투약)", "teams": ["QPS실"], "fileCount": "1", "built": true, "builtAction": "openPsiMedication()", "emr": false}, {"num": "6.2.4", "title": "환자 안전사고 보고서(기타)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openPsiOther()", "emr": false}, {"num": "6.2.5", "title": "환자안전사고 분석 보고서(분기)", "teams": ["QPS실"], "fileCount": "4", "built": true, "builtAction": "openPsiAnalysis()", "emr": false}, {"num": "6.2.6.2", "title": "RCA 회의록", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.6.3", "title": "RCA 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.6.4", "title": "RCA 개선활동 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.7.2", "title": "FMEA 회의록", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.2.7.3", "title": "FMEA(고장유형 및 영향요인)분석 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.3.2", "title": "QI 회의록", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openQiMinutes()", "emr": false}, {"num": "6.3.3", "title": "QI활동 보고서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.3.5", "title": "QI 활동 주제 제출서", "teams": ["QPS실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "6.3.6.5", "title": "QI 활동 계획서 (환자만족도)", "teams": ["QPS실"], "fileCount": "0", "built": true, "builtAction": "openQiPlan()", "emr": false}, {"num": "7.1.1.1", "title": "감염관리활동 연간계획서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionAnnualPlan()", "emr": false}, {"num": "7.1.1.2", "title": "감염관리 중간활동 평가 보고서", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openInfectionMidEval()", "emr": false}, {"num": "7.1.1.3", "title": "감염관리 최종활동 평가 보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionFinalEval()", "emr": false}, {"num": "7.1.1.4", "title": "감염관리 연간 사업 평가지표에 대한 배점 기준(연간계획서 별첨)", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openInfectionScoreCriteria()", "emr": false}, {"num": "7.1.2.4", "title": "감염관리 활동 중간보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionActReport('중간')", "emr": false}, {"num": "7.1.2.5", "title": "감염관리 활동 최종보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectionActReport('최종')", "emr": false}, {"num": "7.1.3.7", "title": "흉부 X-ray", "teams": ["진료원장", "감염관리실"], "fileCount": "0", "built": false, "builtAction": null, "emr": true}, {"num": "7.1.3.8", "title": "KONIS 혈류감염 기록지 (혈류감염, BSI)", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openKonisBsiForm()", "emr": false}, {"num": "7.1.4.1", "title": "직무기술서(감염관리)", "teams": ["감염관리실"], "fileCount": "3", "built": true, "builtAction": "openJobDescInfection()", "emr": false}, {"num": "7.1.4.2", "title": "업무분장표 (감염관리실)", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "showPolicyDetail('infection_duty_assignment', 'team')", "emr": false}, {"num": "7.1.4.4", "title": "감염 예방 라운딩 주간 점검표", "teams": ["감염관리실"], "fileCount": "54", "built": true, "builtAction": "openInfectionRounding()", "emr": false}, {"num": "7.1.4.6", "title": "감염관리실 조직도", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openInfectionDeptOrgChart()", "emr": false}, {"num": "7.1.4.8", "title": "직무기술서(의사)", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openJobDescDoctor()", "emr": false}, {"num": "7.1.5.1", "title": "감염관리위원회 내규", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openCommitteeBylaws('infection_committee')", "emr": false}, {"num": "7.1.5.2", "title": "감염관리위원회 조직도", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openOrgChart('infection_committee')", "emr": false}, {"num": "7.3.10.1", "title": "세탁물 수집장소 청소 및 소독관리 점검표", "teams": ["감염관리실"], "fileCount": "26", "built": true, "builtAction": "openLaundryCollectionCheck()", "emr": false}, {"num": "7.3.10.2", "title": "세탁물 보관장소 청소 및 소독관리 점검표", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openLaundryStorageCheck()", "emr": false}, {"num": "7.3.10.3", "title": "린넨 관리 점검표", "teams": ["감염관리실"], "fileCount": "26", "built": true, "builtAction": "openLinenCheck()", "emr": false}, {"num": "7.3.10.4", "title": "커튼 위생 관리대장(라운딩)", "teams": ["감염관리실"], "fileCount": "5", "built": true, "builtAction": "openCurtainHygiene('전체')", "emr": false}, {"num": "7.3.10.5", "title": "세탁물 처리", "teams": ["감염관리실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "해승크린"}, {"num": "7.3.10.6.1", "title": "커튼 위생 관리대장-재활(라운딩)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "1", "built": true, "builtAction": "openCurtainHygiene('재활치료실')", "emr": false}, {"num": "7.3.10.6.2", "title": "커튼 위생 관리대장-물리(라운딩)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "1", "built": true, "builtAction": "openCurtainHygiene('물리치료실')", "emr": false}, {"num": "7.3.10.7", "title": "소파 세탁 관리대장", "teams": ["감염관리실"], "fileCount": "1", "built": true, "builtAction": "openSofaLaundryLedger()", "emr": false}, {"num": "7.4.1", "title": "환경관리 체크리스트 (간호사실)", "teams": ["감염관리실"], "fileCount": "26", "built": true, "builtAction": "openEnvcheckFor('간호사실')", "emr": false}, {"num": "7.4.2", "title": "환경관리 체크리스트 (병실)", "teams": ["감염관리실"], "fileCount": "52", "built": true, "builtAction": "openEnvcheckFor('병실')", "emr": false}, {"num": "7.4.3", "title": "환경관리 체크리스트 (원무, 사무실)", "teams": ["원무팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('원무')", "emr": false}, {"num": "7.4.4", "title": "환경관리 체크리스트 (재활치료실)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('재활치료실')", "emr": false}, {"num": "7.4.5.1", "title": "환경관리 체크리스트 (물리치료실1)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('물리치료실1')", "emr": false}, {"num": "7.4.5.2", "title": "환경관리 체크리스트 (물리치료실2)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('물리치료실2')", "emr": false}, {"num": "7.4.6", "title": "환경관리 체크리스트 (고주파치료실)", "teams": ["재활치료팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('고주파치료실')", "emr": false}, {"num": "7.4.10", "title": "환경관리 체크리스트 (한방치료실)", "teams": ["진료원장", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('한방치료실')", "emr": false}, {"num": "7.4.11", "title": "환경관리 체크리스트 (격리병실)", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openEnvcheckFor('격리병실')", "emr": false}, {"num": "7.4.12.1", "title": "여자 화장실 청소 점검표 (2층~7층)", "teams": ["감염관리실"], "fileCount": "79", "built": true, "builtAction": "openWomenToiletCheck()", "emr": false}, {"num": "7.4.13.1", "title": "남자 화장실 청소 점검표", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openMenToiletCheck()", "emr": false}, {"num": "7.4.16", "title": "샤워실 청소 점검표", "teams": ["감염관리실"], "fileCount": "13", "built": true, "builtAction": "openShowerRoomCheck()", "emr": false}, {"num": "7.4.17", "title": "환경관리 체크리스트 (약제_약국)", "teams": ["진료원장", "감염관리실"], "fileCount": "0", "built": true, "builtAction": "openEnvcheckFor('약국')", "emr": false}, {"num": "7.6.2.1", "title": "식자재 창고 온습도 점검일지 (2회)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFoodStorageTempHumidity()", "emr": false}, {"num": "7.6.2.3", "title": "조리실 온습도 점검일지 (2회)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openKitchenTempHumidity()", "emr": false}, {"num": "7.6.5", "title": "식기세척기 관리일지", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openDishwasherLog()", "emr": false}, {"num": "7.6.6.4", "title": "냉장고 온도 점검일지 (영양팀)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFridgeTempCheck()", "emr": false}, {"num": "7.6.7.3", "title": "냉동고 온도 점검일지 (영양팀)", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFreezerTempCheck()", "emr": false}, {"num": "7.6.9", "title": "음식물 처리 관리", "teams": ["영양팀", "감염관리실"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "outsourced": "정성환경"}, {"num": "7.6.12", "title": "식중독 예방 일일 점검표", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openFoodPoisonCheck()", "emr": false}, {"num": "7.6.13", "title": "유증상 관리일지", "teams": ["영양팀", "감염관리실"], "fileCount": "0", "built": true, "builtAction": "openSymptomLog()", "emr": false}, {"num": "7.6.14", "title": "건강검진 결과표", "teams": ["영양팀", "감염관리실"], "fileCount": "2", "built": true, "builtAction": "openHealthCheckup()", "emr": false}, {"num": "7.6.16", "title": "안전 점검 일지", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openSafetyCheckLog()", "emr": false}, {"num": "7.6.17", "title": "위생관리 점검표", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openHygieneCheck()", "emr": false}, {"num": "7.6.19", "title": "영양(급식) 청소계획표", "teams": ["영양팀", "감염관리실"], "fileCount": "2", "built": true, "builtAction": "openNutritionCleaningPlan()", "emr": false}, {"num": "7.6.20", "title": "조리장 청소 점검표", "teams": ["영양팀", "감염관리실"], "fileCount": "13", "built": true, "builtAction": "openKitchenCleaningCheck()", "emr": false}, {"num": "7.6.21", "title": "폐식용유 관리대장", "teams": ["영양팀", "감염관리실"], "fileCount": "2", "built": true, "builtAction": "openWasteOilLedger()", "emr": false}, {"num": "7.7.1", "title": "감염성 질환 발생보고서", "teams": ["감염관리실"], "fileCount": "0", "built": true, "builtAction": "openInfectiousDiseaseReport()", "emr": false}, {"num": "8.1.1", "title": "규정 관리대장", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openRegLedger()", "emr": false}, {"num": "8.1.2", "title": "규정 입안서", "teams": ["원무팀"], "fileCount": "20", "built": true, "builtAction": "openRegProposal()", "emr": false}, {"num": "8.1.3", "title": "규정 관련 개정 요청서", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openRegAmendment()", "emr": false}, {"num": "8.1.4", "title": "위탁업체 모니터링 대장", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openVendorEvalHistory()", "emr": false}, {"num": "8.1.5.1", "title": "운영위원회 내규", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openCommitteeBylaws('steering_committee')", "emr": false}, {"num": "8.1.5.2", "title": "운영위원회 조직도", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openOrgChart('steering_committee')", "emr": false}, {"num": "8.1.5.3", "title": "운영위원회 구성표", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "openOrgRoster()", "emr": false}, {"num": "8.1.5.4", "title": "운영위원회 회의록", "teams": ["원무팀"], "fileCount": "7", "built": true, "builtAction": "openOrgMinutes()", "emr": false}, {"num": "8.1.5.5", "title": "운영위원회 연간계획서", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "openOrgAnnualPlan()", "emr": false}, {"num": "8.1.6", "title": "위탁서비스 업체평가 (모니터링)", "teams": ["원무팀"], "fileCount": "11", "built": true, "builtAction": "openVendorEval()", "emr": false}, {"num": "8.2.1", "title": "미션 이행 활동 결과 보고 및 평가", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openMissionReport()", "emr": false}, {"num": "8.3.1", "title": "윤리위원회 조직도", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openOrgChart('ethics_committee')", "emr": false}, {"num": "8.3.2", "title": "고충 상담 신청서 (직원)", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openGrievanceApp()", "emr": false}, {"num": "8.3.3", "title": "사건·사고 발생 보고서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openIncidentAccidentReport()", "emr": false}, {"num": "8.3.4", "title": "폭력 발생 시 대응 매뉴얼 (환자와 직원 간)", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openViolenceManualPatient()", "emr": false}, {"num": "8.3.5", "title": "폭력 발생 시 대응 매뉴얼 (직원과 직원 간)", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openViolenceManualStaff()", "emr": false}, {"num": "8.3.6", "title": "윤리위원회 심의신청서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openEthicsApp()", "emr": false}, {"num": "8.3.7", "title": "의료기관 내 폭력 및 윤리적 갈등 조치절차", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openConflictProcedure()", "emr": false}, {"num": "9.1.5", "title": "면허 및 자격검증 관리대장", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "종이서류로 보관중"}, {"num": "9.1.11", "title": "임명장 (양식)", "teams": ["원무팀"], "fileCount": "4", "built": true, "builtAction": "openAppointCert()", "emr": false}, {"num": "9.2.4", "title": "교육 결과 보고서 (원무)", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.5", "title": "교육 결과 보고서 (간호)", "teams": ["간호팀"], "fileCount": "3", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.6.1", "title": "교육 결과 보고서 (약국)", "teams": ["진료원장"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.6.3", "title": "교육 결과 보고서 (QPS)", "teams": ["원무팀", "QPS실"], "fileCount": "0", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.2.6.4", "title": "교육 결과 보고서 (감염)", "teams": ["간호팀"], "fileCount": "0", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.4.6", "title": "유해물질 안전관리 연간계획서", "teams": ["원무팀"], "fileCount": "2", "built": true, "builtAction": "openHazmat()", "emr": false}, {"num": "9.4.8.1", "title": "건강증진 프로그램 교육 보고서(금주, 절주)", "teams": ["원무팀"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.4.8.2", "title": "건강증진 프로그램 교육 보고서(영양)", "teams": ["영양팀"], "fileCount": "1", "built": true, "builtAction": "openQpsEduReport()", "emr": false}, {"num": "9.4.9.1", "title": "직원감염노출사고 보고서", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "9.4.9.2", "title": "직원안전사고 발생보고서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openEsaReport()", "emr": false}, {"num": "9.4.9.4", "title": "공상 승인 신청서", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openGongsang()", "emr": false}, {"num": "9.4.9.5", "title": "직원안전(감염)사고 원인분석 재발방지 보고서", "teams": ["간호팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.1", "title": "시설 및 환경안전관리 연간계획서", "teams": ["시설팀"], "fileCount": "2", "built": true, "builtAction": "openFacilityAnnualPlan()", "emr": false}, {"num": "10.1.2", "title": "시설물(건축물) 일일점검일지", "teams": ["시설팀"], "fileCount": "13", "built": true, "builtAction": "openFacilityDailyInspection()", "emr": false}, {"num": "10.1.3", "title": "시설물(건축물) 정기점검 일지(라운딩)", "teams": ["시설팀"], "fileCount": "4", "built": true, "builtAction": "openFacilityQuarterlyInspection()", "emr": false}, {"num": "10.1.5", "title": "시설 안전사고 발생 경위서", "teams": ["시설팀"], "fileCount": "0", "built": true, "builtAction": "openFacilityAccidentReport()", "emr": false}, {"num": "10.1.6.1.4", "title": "시설물 수리요구서 (4병동)", "teams": ["시설팀"], "fileCount": "7", "built": true, "builtAction": "openFacilityRepairRequest('4병동')", "emr": false}, {"num": "10.1.6.1.6", "title": "시설물 수리요구서 (6병동)", "teams": ["시설팀"], "fileCount": "8", "built": true, "builtAction": "openFacilityRepairRequest('6병동')", "emr": false}, {"num": "10.1.6.2", "title": "시설물 수리요구서 (영양)", "teams": ["영양팀"], "fileCount": "7", "built": true, "builtAction": "openFacilityRepairRequest('영양팀')", "emr": false}, {"num": "10.1.6.3", "title": "시설물 수리요구서 (기타)", "teams": ["시설팀"], "fileCount": "7", "built": true, "builtAction": "openFacilityRepairRequest('기타')", "emr": false}, {"num": "10.1.7", "title": "승강기 일일점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.8", "title": "시설안전 직무기술서", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.9", "title": "작업안전수칙", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.1.10", "title": "시설환경 개선활동 보고서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.1", "title": "전기실 및 발전기실 안전관리 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.2", "title": "비상발전기 점검 기록지(라운딩)", "teams": ["시설팀"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.3", "title": "무정전 전원장치(UPS) 점검일지", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.4", "title": "저수조 위생관리상태 점검일지(라운딩)", "teams": ["시설팀"], "fileCount": "12", "built": true, "builtAction": "openTankHygiene()", "emr": false}, {"num": "10.2.5", "title": "정수기 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.1", "title": "의료가스 진공설비 점검일지 (산소발생기, 산소, 진공설비)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.2", "title": "의료가스(기체) 점검일지 (기체산소)", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.3", "title": "진공탱크 및 진공펌프 점검일지", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.6.4", "title": "의료가스 일상 점검일지(이동형)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.7", "title": "환기시설 운영 및 유지·관리 매뉴얼", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.8", "title": "환기시설물 체크리스트", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.9", "title": "환기시설 점검 및 필터관리(청소.교체)대장", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.10", "title": "기계실(환기설비) 안전 점검표 (공조기O)", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.11", "title": "필터 점검·청소 및 교체일지", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.12", "title": "공기조화기 설치현황", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.13", "title": "온수보일러 점검일지", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.14", "title": "냉·난방 필터 청소 점검일지", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.15", "title": "환기시설 운영일지 (공조기X)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.16", "title": "정화조 점검일지", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.17", "title": "정수기 설치현황", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.2.18", "title": "환기시설 운영일지 (공조기O)", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.1.1", "title": "유해화학물질 목록", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.1.2", "title": "유해화학물질 목록 (부서별 목록)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.2.1.4", "title": "유해물질 취급부서 안전점검일지(월) (4병동)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.2.1.6", "title": "유해물질 취급부서 안전점검일지(월) (6병동)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.2.6", "title": "유해물질 취급부서 안전점검일지(월) (소독실)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.3", "title": "유해물질 취급관리대장(라운딩)", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.6", "title": "의료 폐기물 취급부서 안전점검일지(월)", "teams": ["시설팀"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.7", "title": "의료폐기물 수집장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.8", "title": "의료폐기물 보관장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.9", "title": "액상 폐기물 보관 냉장고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.10", "title": "액상 폐기물 보관 냉동고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.11", "title": "일반폐기물 수집장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.12", "title": "일반폐기물 보관장소 청소 및 소독관리 점검표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.13", "title": "spill kit 점검표", "teams": ["시설팀"], "fileCount": "8", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.14", "title": "조직 물류 냉동고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.3.15", "title": "액상 폐기물 보관 냉장·냉동고 온도관리표", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.2", "title": "보안 안전사고 보고서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.1", "title": "통제구역 출입 관리대장 (통제구역별)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.2", "title": "통제구역 출입 관리대장 (저수조)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.3", "title": "통제구역 출입 관리대장 (전기실)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.4", "title": "통제구역 출입 관리대장 (비상발전기)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.5", "title": "통제구역 출입 관리대장 (의무기록실)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.6", "title": "통제구역 출입 관리대장 (서버실)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.7", "title": "통제구역 출입 관리대장 (산소보관장)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.8", "title": "통제구역 출입 관리대장 (약제과)", "teams": ["진료원장"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.3.9", "title": "통제구역 출입 관리대장 (수액보관실)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.4", "title": "CCTV 설치현황", "teams": ["시설팀"], "fileCount": "1", "built": true, "builtAction": "openCctvStatus()", "emr": false}, {"num": "10.4.5", "title": "CCTV 점검표(월별)", "teams": ["시설팀"], "fileCount": "2", "built": true, "builtAction": "openCctvCheck()", "emr": false}, {"num": "10.4.6", "title": "CCTV 열람 요청서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.7", "title": "입원환자 병문안객 기록지(업로드)", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.4.8", "title": "보안관리 연간계획서", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.5.1", "title": "의료기기 목록 (병원전체)", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.5.2", "title": "의료기기 목록(부서별)", "teams": ["진료원장", "시설팀", "재활치료팀", "간호팀"], "fileCount": "0", "built": true, "builtAction": "openMedicalEquipmentList()", "emr": false}, {"num": "10.6.1", "title": "화재 안전관리 활동 연간계획서", "teams": ["시설팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.2", "title": "소방시설 일일점검표", "teams": ["시설팀"], "fileCount": "13", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.4", "title": "소방점검 개선활동 보고서", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.5", "title": "소화전 관리대장", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.6", "title": "소화기 관리대장", "teams": ["시설팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.7", "title": "소방안전관리자 직무기술서", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.9", "title": "자위소방대 편성표", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.11", "title": "소방훈련교육 실시 결과 기록부", "teams": ["시설팀"], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "10.6.12", "title": "소방시설 월점검표", "teams": ["시설팀"], "fileCount": "12", "built": false, "builtAction": null, "emr": false}, {"num": "11.1.22", "title": "서버실(의무기록실) 온도 습도 기록지", "teams": ["원무팀"], "fileCount": "13", "built": true, "builtAction": "openTempHumidLog('서버실(의무기록실)')", "emr": false}, {"num": "12.1.1", "title": "지표정의서 (낙상)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.2", "title": "지표정의서 (손위생)", "teams": [], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.3", "title": "지표정의서 (욕창)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.4", "title": "지표정의서 (환자만족도)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.5", "title": "지표정의서 (직원안전사고(유해화학물질노출포함))", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.6", "title": "지표정의서 (직원감염노출사고)", "teams": ["간호팀"], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.7", "title": "지표정의서 (신체보호대)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.8", "title": "지표정의서 (불만고충처리율)", "teams": [], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.9", "title": "지표정의서 (학대 · 폭력 발생률)", "teams": [], "fileCount": "1", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.10", "title": "지표정의서 (영상검사)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.1.11", "title": "지표정의서 (검체검사)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.1", "title": "지표관리 보고서 (낙상발생보고율)", "teams": [], "fileCount": "6", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.2", "title": "지표관리 보고서 (손위생수행률)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.3", "title": "지표관리 보고서 (욕창발생보고율)", "teams": [], "fileCount": "6", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.4", "title": "지표관리 보고서 (환자 만족도)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.5", "title": "지표관리 보고서 (직원안전사고-유해화학물질사고 발생률)", "teams": [], "fileCount": "3", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.6", "title": "지표관리 보고서 (직원감염노출사고 발생률)", "teams": ["간호팀"], "fileCount": "3", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.7", "title": "지표관리 보고서 (신체보호대 사용률)", "teams": [], "fileCount": "6", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.8", "title": "지표관리 보고서 (불만고충처리율)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.9", "title": "지표관리 보고서 (학대 · 폭력 발생률)", "teams": [], "fileCount": "2", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.10", "title": "지표관리 보고서 (영상검사 TAT충족률)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.2.11", "title": "지표관리 보고서 (검체검사 TAT충족률)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.1", "title": "환자 만족도조사 설문지(입원환자용)", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.2", "title": "환자 만족도 조사 계획서", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.3", "title": "환자 만족도 조사 안내문", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "12.3.5", "title": "환자 만족도 개선활동 보고서", "teams": [], "fileCount": "0", "built": false, "builtAction": null, "emr": false}, {"num": "13.2", "title": "근태처리원", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.3", "title": "기안서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.4", "title": "사직원", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.5", "title": "지출결의서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.6", "title": "구매품의서", "teams": ["원무팀"], "fileCount": "0", "built": false, "builtAction": null, "emr": false, "paperStatus": "서류로 진행중"}, {"num": "13.7.1", "title": "당직의 근무표", "teams": ["원무팀"], "fileCount": "0", "built": true, "builtAction": "openDds()", "emr": false}, {"num": "5.5.1", "title": "입원약정서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "5.5.2", "title": "개인정보 수집 및 이용 동의서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "5.5.3", "title": "응급시 환자 이송 동의서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "5.5.4", "title": "비급여신청 동의서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "11.4", "title": "의무기록 사본발급신청서", "teams": ["원무팀"], "fileCount": "", "built": false, "builtAction": null, "emr": true}, {"num": "11.5", "title": "의무기록 사본발급 대장", "teams": ["원무팀"], "fileCount": "", "built": true, "builtAction": "openMedRecordCopy()", "emr": false}, {"num": "5.5.5", "title": "신체보호대 동의서", "teams": ["간호팀"], "built": false}, {"num": "5.5.6", "title": "DNR(심폐소생술 거부) 동의서", "teams": ["간호팀"], "built": false}, {"num": "8.3.0", "title": "윤리위원회 내규", "teams": ["원무팀"], "built": true, "builtAction": "openCommitteeBylaws('ethics_committee')"}];
 
 let currentTeamName = '';
 let policyDetailSource = 'library'; // 'library' 또는 'team' - 상세보기에서 뒤로가기 시 어디로 돌아갈지
@@ -20576,6 +20771,562 @@ async function deleteNapEntry(docId) {
     try {
         await db.collection('nutrition_committee_annual_plans').doc(docId).delete();
         renderNapHistory();
+    } catch (err) {
+        alert('삭제 실패: ' + err.message);
+    }
+}
+
+// ---------------------------------------------------------------
+// 낙상 시설 · 환경 관리 점검표 (병동별 - 연간, 월별 O/X)
+// ---------------------------------------------------------------
+const FFE_ITEMS = [
+    { category: '시설 점검', groupSpan: 7, indicator: '휠체어 바퀴 확인' },
+    { category: '시설 점검', groupSpan: 'cont', indicator: '보행기 바퀴 확인' },
+    { category: '시설 점검', groupSpan: 'cont', indicator: '위험 요소 제거' },
+    { category: '시설 점검', groupSpan: 'cont', indicator: '호출벨 부착/작동여부 확인' },
+    { category: '시설 점검', groupSpan: 'cont', indicator: '환자경로 바닥턱 확인' },
+    { category: '시설 점검', groupSpan: 'cont', indicator: '미끄럼 방지 타일 부착 여부 확인' },
+    { category: '시설 점검', groupSpan: 'cont', indicator: '낙상주의 표지판 부착 여부 확인' },
+    { category: '환경관리 점검', groupSpan: 3, indicator: '통행에 지장을 주는 위험요소, 물건 제거' },
+    { category: '환경관리 점검', groupSpan: 'cont', indicator: '바닥 물기, 미끄러운 용액 있는지 확인' },
+    { category: '환경관리 점검', groupSpan: 'cont', indicator: '조명밝기확인 (낮:밝게/야간:어둡지않게)' }
+];
+
+let ffePendingDept = '';
+let ffeData = [];
+let ffeNurseSigners = [];
+let ffeFacilitySigners = [];
+
+function openFallFacilityEnvCheck(dept) {
+    sharedToolEntryTeam = currentTeamName;
+    ffePendingDept = dept || '';
+    showPage('ffe-input');
+}
+
+function initFfeInput() {
+    document.getElementById('ffe-year').value = new Date().getFullYear();
+    document.getElementById('ffe-dept').value = ffePendingDept || '';
+    document.getElementById('ffe-deptmanager-name').value = '';
+    document.getElementById('ffe-note').value = '';
+    document.getElementById('ffe-result').textContent = '';
+    ffeData = FFE_ITEMS.map(() => MONTHS_12.map(() => ''));
+    ffeNurseSigners = MONTHS_12.map(() => '');
+    ffeFacilitySigners = MONTHS_12.map(() => '');
+    renderFfeTable();
+}
+
+function toggleFfeCell(itemIdx, monthIdx) {
+    const cur = ffeData[itemIdx][monthIdx];
+    ffeData[itemIdx][monthIdx] = cur === '' ? 'O' : (cur === 'O' ? 'X' : '');
+    renderFfeTable();
+}
+
+function updateFfeSigner(kind, monthIdx, value) {
+    (kind === 'nurse' ? ffeNurseSigners : ffeFacilitySigners)[monthIdx] = value;
+}
+
+function ffeTableHtml(items, data, nurseSigners, facilitySigners, editable) {
+    let html = '<tr><th style="width:150px;">구분</th>' + MONTHS_12.map(m => `<th style="width:34px; font-size:10px;">${m}</th>`).join('') + '</tr>';
+    items.forEach((item, idx) => {
+        html += '<tr>';
+        if (item.groupSpan !== 'cont') {
+            html += `<th rowspan="${item.groupSpan}" style="font-size:10px;">${item.category}</th>`;
+        }
+        html += MONTHS_12.map((m, c) => {
+            const v = (data[idx] && data[idx][c]) || '';
+            const bg = v === 'O' ? '#e7f1fb' : (v === 'X' ? '#fdecea' : '');
+            if (editable) {
+                return `<td style="text-align:center; cursor:pointer; background:${bg}; font-size:11px; padding:4px 2px;" onclick="toggleFfeCell(${idx},${c})">${v}</td>`;
+            }
+            return `<td style="text-align:center; background:${bg}; font-size:11px; padding:4px 2px;">${v}</td>`;
+        }).join('');
+        html += '</tr>';
+    });
+    html += `<tr><th style="font-size:10px;">담당자 서명(간호)</th>` + MONTHS_12.map((m, c) => {
+        const v = (nurseSigners && nurseSigners[c]) || '';
+        if (editable) return `<td style="padding:0;"><input type="text" value="${escapeAttr(v)}" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:9px;" oninput="updateFfeSigner('nurse', ${c}, this.value)"></td>`;
+        return `<td style="text-align:center; font-size:10px;">${v}</td>`;
+    }).join('') + '</tr>';
+    html += `<tr><th style="font-size:10px;">담당자 서명(원무/시설)</th>` + MONTHS_12.map((m, c) => {
+        const v = (facilitySigners && facilitySigners[c]) || '';
+        if (editable) return `<td style="padding:0;"><input type="text" value="${escapeAttr(v)}" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:9px;" oninput="updateFfeSigner('facility', ${c}, this.value)"></td>`;
+        return `<td style="text-align:center; font-size:10px;">${v}</td>`;
+    }).join('') + '</tr>';
+    return html;
+}
+
+function renderFfeTable() {
+    const table = document.getElementById('ffe-table');
+    if (!table) return;
+    table.innerHTML = ffeTableHtml(FFE_ITEMS, ffeData, ffeNurseSigners, ffeFacilitySigners, true);
+}
+
+async function saveFallFacilityEnvCheck() {
+    const resultEl = document.getElementById('ffe-result');
+    const data = {
+        year: document.getElementById('ffe-year').value,
+        dept: document.getElementById('ffe-dept').value.trim(),
+        deptManagerName: document.getElementById('ffe-deptmanager-name').value.trim(),
+        note: document.getElementById('ffe-note').value.trim(),
+        data: ffeData,
+        nurseSigners: ffeNurseSigners,
+        facilitySigners: ffeFacilitySigners,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try {
+        await db.collection('fall_facility_env_checks').add(data);
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+        initFfeInput();
+    } catch (err) {
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+function initFfeHistoryPage() {
+    renderFfeHistory();
+}
+
+async function renderFfeHistory() {
+    const container = document.getElementById('ffe-history-list');
+    container.innerHTML = '<p style="color:#6c757d;">불러오는 중...</p>';
+    const snapshot = await db.collection('fall_facility_env_checks').get();
+    const docs = [];
+    snapshot.forEach(doc => docs.push({ docId: doc.id, ...doc.data() }));
+    docs.sort((a, b) => (b.year || '').toString().localeCompare((a.year || '').toString()));
+    if (docs.length === 0) {
+        container.innerHTML = '<p style="color:#6c757d;">등록된 이력이 없습니다.</p>';
+        return;
+    }
+    container.innerHTML = docs.map(d => `
+        <div class="official-form-sheet" style="max-width:100%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">${d.year || ''}년 낙상 시설·환경 관리 점검표 (${d.dept || '-'})</h3>
+                <button class="back-btn no-print" style="background:#dc3545; color:white; margin:0; padding:5px 10px; font-size:12px;" onclick="deleteFfeEntry('${d.docId}')">삭제</button>
+            </div>
+            <p style="font-size:13px; color:#495057;">부서장: ${d.deptManagerName || '-'}</p>
+            <div style="overflow-x:auto;"><table class="official-form-table" style="font-size:11px;">${ffeTableHtml(FFE_ITEMS, d.data, d.nurseSigners, d.facilitySigners, false)}</table></div>
+            <p style="margin-top:8px;"><b>특이사항 및 조치사항</b><br>${(d.note || '-').replace(/\n/g, '<br>')}</p>
+        </div>
+    `).join('');
+}
+
+async function deleteFfeEntry(docId) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    try {
+        await db.collection('fall_facility_env_checks').doc(docId).delete();
+        renderFfeHistory();
+    } catch (err) {
+        alert('삭제 실패: ' + err.message);
+    }
+}
+
+// ---------------------------------------------------------------
+// 시설물(건축물) 일일점검일지 (날짜가 행, 항목이 열)
+// ---------------------------------------------------------------
+const FDI_ITEMS = ['외부환경', '주차장', '화장실', '각 실별 벽 천장', '복도 및 계단', '창문/창틀', '기타'];
+
+let fdiData = [];
+let fdiSigners = [];
+
+function openFacilityDailyInspection() {
+    sharedToolEntryTeam = currentTeamName;
+    showPage('fdi-input');
+}
+
+function initFdiInput() {
+    document.getElementById('fdi-month').value = todayStr().slice(0, 7);
+    document.getElementById('fdi-note').value = '';
+    document.getElementById('fdi-result').textContent = '';
+    populateApproverSelect('fdi-manager-uid');
+    fdiData = DAYS_31.map(() => FDI_ITEMS.map(() => ''));
+    fdiSigners = DAYS_31.map(() => '');
+    renderFdiTable();
+}
+
+function toggleFdiCell(dayIdx, itemIdx) {
+    const cur = fdiData[dayIdx][itemIdx];
+    fdiData[dayIdx][itemIdx] = cur === '' ? 'O' : (cur === 'O' ? 'X' : '');
+    renderFdiTable();
+}
+
+function updateFdiSigner(dayIdx, value) {
+    fdiSigners[dayIdx] = value;
+}
+
+function fdiTableHtml(data, signers, editable) {
+    let html = '<tr><th style="width:50px;">날짜</th>' + FDI_ITEMS.map(it => `<th style="font-size:10px;">${it}</th>`).join('') + '<th style="width:80px;">점검자</th></tr>';
+    DAYS_31.forEach((d, dayIdx) => {
+        html += `<tr><th style="font-size:11px;">${d}</th>`;
+        FDI_ITEMS.forEach((it, itemIdx) => {
+            const v = (data[dayIdx] && data[dayIdx][itemIdx]) || '';
+            const bg = v === 'O' ? '#e7f1fb' : (v === 'X' ? '#fdecea' : '');
+            if (editable) {
+                html += `<td style="text-align:center; cursor:pointer; background:${bg}; font-size:11px; padding:3px;" onclick="toggleFdiCell(${dayIdx},${itemIdx})">${v}</td>`;
+            } else {
+                html += `<td style="text-align:center; background:${bg}; font-size:11px; padding:3px;">${v}</td>`;
+            }
+        });
+        const sv = (signers && signers[dayIdx]) || '';
+        if (editable) {
+            html += `<td style="padding:0;"><input type="text" value="${escapeAttr(sv)}" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:10px;" oninput="updateFdiSigner(${dayIdx}, this.value)"></td>`;
+        } else {
+            html += `<td style="text-align:center; font-size:10px;">${sv}</td>`;
+        }
+        html += '</tr>';
+    });
+    return html;
+}
+
+function renderFdiTable() {
+    const table = document.getElementById('fdi-table');
+    if (!table) return;
+    table.innerHTML = fdiTableHtml(fdiData, fdiSigners, true);
+}
+
+async function saveFdi() {
+    const resultEl = document.getElementById('fdi-result');
+    const managerSelect = document.getElementById('fdi-manager-uid');
+    const data = {
+        month: document.getElementById('fdi-month').value,
+        managerUid: managerSelect.value,
+        managerName: managerSelect.value ? managerSelect.options[managerSelect.selectedIndex].text : '',
+        note: document.getElementById('fdi-note').value.trim(),
+        data: fdiData,
+        signers: fdiSigners,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try {
+        await db.collection('facility_daily_inspections').add(data);
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+        initFdiInput();
+    } catch (err) {
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+function initFdiHistoryPage() {
+    renderFdiHistory();
+}
+
+async function renderFdiHistory() {
+    const container = document.getElementById('fdi-history-list');
+    container.innerHTML = '<p style="color:#6c757d;">불러오는 중...</p>';
+    const snapshot = await db.collection('facility_daily_inspections').get();
+    const docs = [];
+    snapshot.forEach(doc => docs.push({ docId: doc.id, ...doc.data() }));
+    docs.sort((a, b) => (b.month || '').localeCompare(a.month || ''));
+    if (docs.length === 0) {
+        container.innerHTML = '<p style="color:#6c757d;">등록된 이력이 없습니다.</p>';
+        return;
+    }
+    container.innerHTML = docs.map(d => `
+        <div class="official-form-sheet" style="max-width:100%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">${d.month || ''} 시설물(건축물) 일일점검일지</h3>
+                <button class="back-btn no-print" style="background:#dc3545; color:white; margin:0; padding:5px 10px; font-size:12px;" onclick="deleteFdiEntry('${d.docId}')">삭제</button>
+            </div>
+            <p style="font-size:13px; color:#495057;">부서장: ${d.managerName || '-'}</p>
+            <div style="overflow-x:auto;"><table class="official-form-table" style="table-layout:fixed;">${fdiTableHtml(d.data, d.signers, false)}</table></div>
+            <p style="margin-top:8px;"><b>조치사항</b><br>${(d.note || '-').replace(/\n/g, '<br>')}</p>
+        </div>
+    `).join('');
+}
+
+async function deleteFdiEntry(docId) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    try {
+        await db.collection('facility_daily_inspections').doc(docId).delete();
+        renderFdiHistory();
+    } catch (err) {
+        alert('삭제 실패: ' + err.message);
+    }
+}
+
+// ---------------------------------------------------------------
+// 시설물(건축물) 정기점검 일지(분기별)
+// ---------------------------------------------------------------
+const FQI_GENERAL_ITEMS = [
+    '병원내벽, 외벽 크랙여부/ 방수상태 확인',
+    '병원외부, 간판 파손여부/ 등 교체시기 확인',
+    '건물 천장재 및 벽채 파손 여부',
+    '건물 출입문 관리',
+    '비상계단, 외곽계단 파손여부 확인',
+    '화장실 수압, 수전, 문, 배수트랩의 파손여부',
+    '창문, 문틀 파손여부/빗장걸이 상태점검',
+    '특수부서 관리 (조제실, 식당, 중앙공급실)'
+];
+
+const FQI_SPECIAL_ITEMS = [
+    { dept: '약제실', groupSpan: 4, indicator: '창문, 문틀 파손부분의 여부' },
+    { dept: '약제실', groupSpan: 'cont', indicator: '시건장치의 작동, 파손 여부' },
+    { dept: '약제실', groupSpan: 'cont', indicator: '내벽의 크랙, 파손여부 확인' },
+    { dept: '약제실', groupSpan: 'cont', indicator: '환기, 통풍여부/기타시설안전' },
+    { dept: '조리장', groupSpan: 4, indicator: '가스누설경보장치의 작동여부' },
+    { dept: '조리장', groupSpan: 'cont', indicator: '닥트(시로코펜) 정상작동 여부' },
+    { dept: '조리장', groupSpan: 'cont', indicator: '타일 크랙, 파손여부 확인' },
+    { dept: '조리장', groupSpan: 'cont', indicator: '등기구, 청결, 진동, 부식여부' },
+    { dept: '소독실', groupSpan: 3, indicator: '바닥 타일, 누수, 균열여부 확인' },
+    { dept: '소독실', groupSpan: 'cont', indicator: '온습도 상태 및 곰팡이 상태 확인' },
+    { dept: '소독실', groupSpan: 'cont', indicator: '시건장치 작동, 파손여부 확인' }
+];
+
+let fqiGeneralData = [];
+let fqiSpecialData = [];
+
+function openFacilityQuarterlyInspection() {
+    sharedToolEntryTeam = currentTeamName;
+    showPage('fqi-input');
+}
+
+function initFqiInput() {
+    document.getElementById('fqi-date').value = todayStr();
+    document.getElementById('fqi-author').value = '';
+    document.getElementById('fqi-note').value = '';
+    document.getElementById('fqi-result').textContent = '';
+    populateApproverSelect('fqi-approver-uid');
+    fqiGeneralData = FQI_GENERAL_ITEMS.map(() => ({ status: '', action: '' }));
+    fqiSpecialData = FQI_SPECIAL_ITEMS.map(() => ({ status: '', action: '' }));
+    renderFqiTables();
+}
+
+function toggleFqiStatus(kind, idx) {
+    const arr = kind === 'general' ? fqiGeneralData : fqiSpecialData;
+    const states = ['', 'O', 'X', '-'];
+    const cur = arr[idx].status;
+    arr[idx].status = states[(states.indexOf(cur) + 1) % states.length];
+    renderFqiTables();
+}
+
+function updateFqiAction(kind, idx, value) {
+    const arr = kind === 'general' ? fqiGeneralData : fqiSpecialData;
+    arr[idx].action = value;
+}
+
+function fqiGeneralTableHtml(items, data, editable) {
+    let html = '<tr><th>일반점검사항(건물 & 시설물)</th><th style="width:60px;">상태</th><th style="width:160px;">조치사항</th></tr>';
+    items.forEach((label, idx) => {
+        const d = data[idx] || { status: '', action: '' };
+        html += `<tr><td style="text-align:left;">${idx + 1}. ${label}</td>`;
+        if (editable) {
+            html += `<td style="text-align:center; cursor:pointer;" onclick="toggleFqiStatus('general', ${idx})">${d.status || '-'}</td>`;
+            html += `<td><input type="text" value="${escapeAttr(d.action)}" style="width:100%; box-sizing:border-box; border:none;" oninput="updateFqiAction('general', ${idx}, this.value)"></td>`;
+        } else {
+            html += `<td style="text-align:center;">${d.status || '-'}</td><td>${d.action || '-'}</td>`;
+        }
+        html += '</tr>';
+    });
+    return html;
+}
+
+function fqiSpecialTableHtml(items, data, editable) {
+    let html = '<tr><th style="width:80px;">구분</th><th>특수부서 점검사항(약국조제실, 조리장, 소독실)</th><th style="width:60px;">상태</th><th style="width:160px;">조치사항</th></tr>';
+    let counter = 0;
+    items.forEach((item, idx) => {
+        if (item.groupSpan !== 'cont') counter = 0;
+        counter++;
+        const d = data[idx] || { status: '', action: '' };
+        html += '<tr>';
+        if (item.groupSpan !== 'cont') {
+            html += `<th rowspan="${item.groupSpan}">${item.dept}</th>`;
+        }
+        html += `<td style="text-align:left;">${counter}. ${item.indicator}</td>`;
+        if (editable) {
+            html += `<td style="text-align:center; cursor:pointer;" onclick="toggleFqiStatus('special', ${idx})">${d.status || '-'}</td>`;
+            html += `<td><input type="text" value="${escapeAttr(d.action)}" style="width:100%; box-sizing:border-box; border:none;" oninput="updateFqiAction('special', ${idx}, this.value)"></td>`;
+        } else {
+            html += `<td style="text-align:center;">${d.status || '-'}</td><td>${d.action || '-'}</td>`;
+        }
+        html += '</tr>';
+    });
+    return html;
+}
+
+function renderFqiTables() {
+    const gt = document.getElementById('fqi-general-table');
+    const st = document.getElementById('fqi-special-table');
+    if (gt) gt.innerHTML = fqiGeneralTableHtml(FQI_GENERAL_ITEMS, fqiGeneralData, true);
+    if (st) st.innerHTML = fqiSpecialTableHtml(FQI_SPECIAL_ITEMS, fqiSpecialData, true);
+}
+
+async function saveFacilityQuarterlyInspection() {
+    const resultEl = document.getElementById('fqi-result');
+    const author = document.getElementById('fqi-author').value.trim();
+    if (!author) { resultEl.style.color = '#dc3545'; resultEl.textContent = '❌ 작성자를 입력해주세요.'; return; }
+    const approverSelect = document.getElementById('fqi-approver-uid');
+    const data = {
+        date: document.getElementById('fqi-date').value,
+        author: author,
+        note: document.getElementById('fqi-note').value.trim(),
+        generalData: fqiGeneralData,
+        specialData: fqiSpecialData,
+        approverUid: approverSelect.value,
+        approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try {
+        await db.collection('facility_quarterly_inspections').add(data);
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+        initFqiInput();
+    } catch (err) {
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+function initFqiHistoryPage() {
+    renderFqiHistory();
+}
+
+async function renderFqiHistory() {
+    const container = document.getElementById('fqi-history-list');
+    container.innerHTML = '<p style="color:#6c757d;">불러오는 중...</p>';
+    const snapshot = await db.collection('facility_quarterly_inspections').get();
+    const docs = [];
+    snapshot.forEach(doc => docs.push({ docId: doc.id, ...doc.data() }));
+    docs.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    if (docs.length === 0) {
+        container.innerHTML = '<p style="color:#6c757d;">등록된 이력이 없습니다.</p>';
+        return;
+    }
+    container.innerHTML = docs.map(d => `
+        <div class="official-form-sheet" style="max-width:100%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">${d.date || ''} 시설물(건축물) 정기점검일지</h3>
+                <button class="back-btn no-print" style="background:#dc3545; color:white; margin:0; padding:5px 10px; font-size:12px;" onclick="deleteFqiEntry('${d.docId}')">삭제</button>
+            </div>
+            <p style="font-size:13px; color:#495057;">작성자: ${d.author || '-'} / 승인자: ${d.approverName || '-'}</p>
+            <table class="official-form-table" style="font-size:12px;">${fqiGeneralTableHtml(FQI_GENERAL_ITEMS, d.generalData, false)}</table>
+            <table class="official-form-table" style="font-size:12px; margin-top:8px;">${fqiSpecialTableHtml(FQI_SPECIAL_ITEMS, d.specialData, false)}</table>
+            <p style="margin-top:8px;"><b>특이사항 및 조치사항</b><br>${(d.note || '-').replace(/\n/g, '<br>')}</p>
+        </div>
+    `).join('');
+}
+
+async function deleteFqiEntry(docId) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    try {
+        await db.collection('facility_quarterly_inspections').doc(docId).delete();
+        renderFqiHistory();
+    } catch (err) {
+        alert('삭제 실패: ' + err.message);
+    }
+}
+
+// ---------------------------------------------------------------
+// 시설 안전사고 발생 경위서
+// ---------------------------------------------------------------
+function openFacilityAccidentReport() {
+    sharedToolEntryTeam = currentTeamName;
+    showPage('fac-input');
+}
+
+function initFacInput() {
+    document.getElementById('fac-date').value = todayStr();
+    document.getElementById('fac-author').value = '';
+    document.getElementById('fac-datetime').value = '';
+    document.getElementById('fac-location').value = '';
+    document.getElementById('fac-witness1-name').value = '';
+    document.getElementById('fac-witness1-phone').value = '';
+    document.getElementById('fac-witness2-name').value = '';
+    document.getElementById('fac-witness2-phone').value = '';
+    document.getElementById('fac-incident-name').value = '';
+    document.getElementById('fac-detail').value = '';
+    document.getElementById('fac-followup').value = '';
+    document.getElementById('fac-damage').value = '';
+    document.getElementById('fac-result-note').value = '';
+    document.getElementById('fac-sketch').value = '';
+    document.getElementById('fac-result').textContent = '';
+    populateApproverSelect('fac-approver-uid');
+}
+
+async function saveFacilityAccidentReport() {
+    const resultEl = document.getElementById('fac-result');
+    const author = document.getElementById('fac-author').value.trim();
+    if (!author) { resultEl.style.color = '#dc3545'; resultEl.textContent = '❌ 작성자를 입력해주세요.'; return; }
+    const approverSelect = document.getElementById('fac-approver-uid');
+    const data = {
+        date: document.getElementById('fac-date').value,
+        author: author,
+        datetime: document.getElementById('fac-datetime').value,
+        location: document.getElementById('fac-location').value.trim(),
+        witness1Name: document.getElementById('fac-witness1-name').value.trim(),
+        witness1Phone: document.getElementById('fac-witness1-phone').value.trim(),
+        witness2Name: document.getElementById('fac-witness2-name').value.trim(),
+        witness2Phone: document.getElementById('fac-witness2-phone').value.trim(),
+        incidentName: document.getElementById('fac-incident-name').value.trim(),
+        detail: document.getElementById('fac-detail').value.trim(),
+        followup: document.getElementById('fac-followup').value.trim(),
+        damage: document.getElementById('fac-damage').value.trim(),
+        resultNote: document.getElementById('fac-result-note').value.trim(),
+        sketch: document.getElementById('fac-sketch').value.trim(),
+        approverUid: approverSelect.value,
+        approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try {
+        await db.collection('facility_accident_reports').add(data);
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+        initFacInput();
+    } catch (err) {
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+function facReadonlyHtml(d) {
+    return `
+        <table class="official-form-table" style="font-size:12px;">
+            <tr><th style="width:100px;">작성일자</th><td>${d.date || '-'}</td><th style="width:100px;">발생일시</th><td>${d.datetime || '-'}</td></tr>
+            <tr><th>발생장소</th><td colspan="3">${d.location || '-'}</td></tr>
+            <tr><th>목격자1</th><td>${d.witness1Name || '-'} / ${d.witness1Phone || '-'}</td><th>목격자2</th><td>${d.witness2Name || '-'} / ${d.witness2Phone || '-'}</td></tr>
+            <tr><th>사고명</th><td colspan="3">${d.incidentName || '-'}</td></tr>
+            <tr><th>사고발생경위</th><td colspan="3" style="white-space:pre-line;">${d.detail || '-'}</td></tr>
+            <tr><th>사고후 현장수습과정</th><td colspan="3" style="white-space:pre-line;">${d.followup || '-'}</td></tr>
+            <tr><th>피해상황</th><td colspan="3" style="white-space:pre-line;">${d.damage || '-'}</td></tr>
+            <tr><th>처리결과</th><td colspan="3" style="white-space:pre-line;">${d.resultNote || '-'}</td></tr>
+            <tr><th>사고현장약도</th><td colspan="3" style="white-space:pre-line;">${d.sketch || '-'}</td></tr>
+        </table>
+    `;
+}
+
+function initFacHistoryPage() {
+    renderFacHistory();
+}
+
+async function renderFacHistory() {
+    const container = document.getElementById('fac-history-list');
+    container.innerHTML = '<p style="color:#6c757d;">불러오는 중...</p>';
+    const snapshot = await db.collection('facility_accident_reports').get();
+    const docs = [];
+    snapshot.forEach(doc => docs.push({ docId: doc.id, ...doc.data() }));
+    docs.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    if (docs.length === 0) {
+        container.innerHTML = '<p style="color:#6c757d;">등록된 이력이 없습니다.</p>';
+        return;
+    }
+    container.innerHTML = docs.map(d => `
+        <div class="official-form-sheet" style="max-width:100%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;">${d.date || ''} 시설 안전사고 발생 경위서 (${d.incidentName || '-'})</h3>
+                <button class="back-btn no-print" style="background:#dc3545; color:white; margin:0; padding:5px 10px; font-size:12px;" onclick="deleteFacEntry('${d.docId}')">삭제</button>
+            </div>
+            <p style="font-size:13px; color:#495057;">작성자: ${d.author || '-'} / 승인자: ${d.approverName || '-'}</p>
+            ${facReadonlyHtml(d)}
+        </div>
+    `).join('');
+}
+
+async function deleteFacEntry(docId) {
+    if (!confirm('삭제하시겠습니까?')) return;
+    try {
+        await db.collection('facility_accident_reports').doc(docId).delete();
+        renderFacHistory();
     } catch (err) {
         alert('삭제 실패: ' + err.message);
     }
