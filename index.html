@@ -6192,9 +6192,10 @@
 
     <!-- 봉인 라벨지 기록표 -->
     <div id="page-seal-input" class="hidden">
-        <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
+        <button class="back-btn no-print" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;">📝 봉인 라벨지 기록표</h2>
+            <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
         </div>
         <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
             <table class="official-form-table">
@@ -21202,7 +21203,7 @@ let sealPharmCounter = 1;
 function sealDefaultMonths(year) {
     return MONTHS_12.map((m, idx) => ({
         date: `${year}-${String(idx + 1).padStart(2, '0')}-01`,
-        regular: false, cpr: false, expiring: false, otherFlag: false, otherText: '', staff: ''
+        regular: false, cpr: false, expiring: false, otherFlag: false, otherText: '', staff: '', photo: ''
     }));
 }
 
@@ -21257,11 +21258,50 @@ function toggleSealMonthCheck(idx, field) {
     renderSealMonths();
 }
 
+function handleSealMonthPhoto(input, idx) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const max_size = 800;
+            if (width > height) {
+                if (width > max_size) { height *= max_size / width; width = max_size; }
+            } else {
+                if (height > max_size) { width *= max_size / height; height = max_size; }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            sealMonths[idx].photo = canvas.toDataURL('image/jpeg', 0.7);
+            renderSealMonths();
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeSealMonthPhoto(idx) {
+    sealMonths[idx].photo = '';
+    renderSealMonths();
+}
+
 function sealMonthRowHtml(m, idx) {
+    const photo = m.photo || '';
     return `
         <tr>
             <td style="text-align:center; font-weight:bold;">${MONTHS_12[idx]}</td>
             <td><input type="date" value="${escapeAttr(m.date)}" style="width:100%; box-sizing:border-box; border:none;" oninput="updateSealMonthField(${idx}, 'date', this.value)"></td>
+            <td style="text-align:center;">
+                ${photo ? `<img src="${photo}" style="max-width:70px; max-height:70px; display:block; margin:0 auto 4px; border-radius:4px; cursor:pointer;" onclick="openImageModal('${photo}')">` : ''}
+                <input type="file" accept="image/*" class="no-print" style="width:70px; font-size:9px;" onchange="handleSealMonthPhoto(this, ${idx})">
+                ${photo ? `<button class="back-btn no-print" style="background:#dc3545; color:white; margin:2px 0 0 0; padding:2px 6px; font-size:9px;" onclick="removeSealMonthPhoto(${idx})">삭제</button>` : ''}
+            </td>
             <td style="text-align:center; cursor:pointer;" onclick="toggleSealMonthCheck(${idx}, 'regular')">${m.regular ? '✅' : '⬜'}</td>
             <td style="text-align:center; cursor:pointer;" onclick="toggleSealMonthCheck(${idx}, 'cpr')">${m.cpr ? '✅' : '⬜'}</td>
             <td style="text-align:center; cursor:pointer;" onclick="toggleSealMonthCheck(${idx}, 'expiring')">${m.expiring ? '✅' : '⬜'}</td>
@@ -21274,7 +21314,7 @@ function sealMonthRowHtml(m, idx) {
 function renderSealMonths() {
     const table = document.getElementById('seal-months-table');
     if (!table) return;
-    table.innerHTML = `<tr><th style="width:50px;">월</th><th style="width:130px;">날짜</th><th style="width:60px;">정규<br>재봉인</th><th style="width:60px;">CPR후<br>재확인</th><th style="width:60px;">유효기간<br>임박</th><th style="width:50px;">기타</th><th>기타 사유</th><th style="width:90px;">담당자</th></tr>`
+    table.innerHTML = `<tr><th style="width:50px;">월</th><th style="width:130px;">날짜</th><th style="width:90px;">봉인라벨지<br>사진</th><th style="width:60px;">정규<br>재봉인</th><th style="width:60px;">CPR후<br>재확인</th><th style="width:60px;">유효기간<br>임박</th><th style="width:50px;">기타</th><th>기타 사유</th><th style="width:90px;">담당자</th></tr>`
         + sealMonths.map((m, idx) => sealMonthRowHtml(m, idx)).join('');
 }
 
