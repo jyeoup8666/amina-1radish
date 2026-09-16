@@ -27796,7 +27796,7 @@ function nlcRowHtml(r, idx, editable) {
             <td><input type="text" value="${escapeAttr(r.date)}" placeholder="MM.DD" data-nlc-id="${r.id}" data-nlc-field="date" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'date', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.room)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'room', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.regNo)}" data-nlc-id="${r.id}" data-nlc-field="regNo" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'regNo', this.value)"></td>
-            <td><input type="text" value="${escapeAttr(r.patientName)}" data-nlc-id="${r.id}" data-nlc-field="patientName" style="width:100%; box-sizing:border-box; border:none;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.patientName)}" data-nlc-id="${r.id}" data-nlc-field="patientName" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.insertCount)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'insertCount', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.removeCount)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'removeCount', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.confirmer)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'confirmer', this.value)"></td>
@@ -27805,7 +27805,7 @@ function nlcRowHtml(r, idx, editable) {
     }
     return `<tr>
         <td style="text-align:center;">${idx + 1}</td><td style="text-align:center;">${r.date || '-'}</td><td style="text-align:center;">${r.room || '-'}</td>
-        <td style="text-align:center;">${r.regNo || '-'}</td><td>${r.patientName || '-'}</td>
+        <td style="text-align:center;">${r.regNo || '-'}</td><td style="text-align:center;">${r.patientName || '-'}</td>
         <td style="text-align:center;">${r.insertCount || '-'}</td><td style="text-align:center;">${r.removeCount || '-'}</td><td style="text-align:center;">${r.confirmer || '-'}</td>
     </tr>`;
 }
