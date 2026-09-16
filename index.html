@@ -166,6 +166,11 @@
             .official-form-sheet { box-shadow: none; break-inside: avoid; page-break-after: always; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
             .official-form-sheet:last-child { page-break-after: auto; }
         }
+        /* 발침계수 확인서처럼 한 화면에 행이 계속 늘어나는 목록형 서류는, 위의 "한 장짜리 서식" 인쇄 규칙(전체 높이 강제 + 세로 중앙정렬 + 한 페이지 강제)을
+           적용하면 표가 길어질수록 인쇄가 이상하게 잘리므로, 이 화면만 일반 문서처럼 자연스럽게 흘러서 여러 페이지로 나뉘어 인쇄되게 합니다. */
+        @media print {
+            #page-nlc-input .official-form-sheet { min-height: auto; display: block; break-inside: auto; page-break-after: auto; }
+        }
         .terms-box { max-height: 170px; overflow-y: auto; font-size: 12px; line-height: 1.6; background: #fff9e6; border: 1px solid #ffe58f; }
         .terms-box ol { margin: 8px 0 0 18px; padding: 0; }
         .terms-box ul { margin: 5px 0 0 18px; padding: 0; }
@@ -441,7 +446,7 @@
     <!-- PRN(필요시) 처방 목록 -->
     <div id="page-med-prn" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>💊 필요시(PRN) 처방 목록</h2>
+        <h2 data-doctitle="1.1.2" data-doctitle-icon="💊 ">💊 필요시(PRN) 처방 목록</h2>
         <div id="prn-related"></div>
         <div style="overflow-x: auto;">
             <table>
@@ -684,7 +689,7 @@
     <!-- 신체보호대 사용환자 관리대장 -->
     <div id="page-restraint-menu" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🔒 신체보호대 사용환자 관리대장</h2>
+        <h2 data-doctitle="3.2.3.1" data-doctitle-icon="🔒 ">🔒 신체보호대 사용환자 관리대장</h2>
         <div id="restraint-menu-related"></div>
         <div class="menu-grid">
             <div class="menu-btn-sub" onclick="showPage('restraint-input')">📝 신규 등록</div>
@@ -772,7 +777,7 @@
     <div id="page-cctv-status" class="hidden">
         <button class="back-btn no-print" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📹 CCTV 설치현황</h2>
+            <h2 style="margin: 0;" data-doctitle="10.4.4" data-doctitle-icon="📹 ">📹 CCTV 설치현황</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
         <div id="cctv-status-related"></div>
@@ -849,7 +854,7 @@
     <div id="page-org-roster" class="hidden">
         <button class="back-btn no-print" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📋 운영위원회 구성표</h2>
+            <h2 style="margin: 0;" data-doctitle="8.1.5.3" data-doctitle-icon="📋 ">📋 운영위원회 구성표</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
         <div id="org-roster-related"></div>
@@ -974,7 +979,7 @@
     <div id="page-mission-report-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 미션 이행 활동 결과 보고 및 평가</h2>
+            <h2 style="margin: 0;" data-doctitle="8.2.1" data-doctitle-icon="📝 ">📝 미션 이행 활동 결과 보고 및 평가</h2>
             <button class="toggle-history-btn" onclick="showPage('mission-report-history')">📜 이력 보기</button>
         </div>
         <div id="mission-report-related"></div>
@@ -1061,7 +1066,7 @@
     <div id="page-qps-edu-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 교육 결과 보고서 (QPS)</h2>
+            <h2 style="margin: 0;" data-doctitle="9.2.6.3" data-doctitle-icon="📝 ">📝 교육 결과 보고서 (QPS)</h2>
             <button class="toggle-history-btn" onclick="showPage('qps-edu-history')">📜 이력 보기</button>
         </div>
         <div id="qps-edu-related"></div>
@@ -1145,7 +1150,7 @@
     <div id="page-qps-rounding-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 환자안전 라운딩 일지</h2>
+            <h2 style="margin: 0;" data-doctitle="6.1.2.4" data-doctitle-icon="📝 ">📝 환자안전 라운딩 일지</h2>
             <button class="toggle-history-btn" onclick="showPage('qps-rounding-history')">📜 이력 보기</button>
         </div>
         <div id="qps-rounding-related"></div>
@@ -1209,7 +1214,7 @@
     <div id="page-psi-fall-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 환자 안전사고 보고서(낙상)</h2>
+            <h2 style="margin: 0;" data-doctitle="6.2.1" data-doctitle-icon="📝 ">📝 환자 안전사고 보고서(낙상)</h2>
             <button class="toggle-history-btn" onclick="showPage('psi-fall-history')">📜 이력 보기</button>
         </div>
         <div class="official-form-sheet" style="margin-top: 15px;">
@@ -1302,7 +1307,7 @@
     <div id="page-psi-pressuresore-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 환자 안전사고 보고서(욕창)</h2>
+            <h2 style="margin: 0;" data-doctitle="6.2.2" data-doctitle-icon="📝 ">📝 환자 안전사고 보고서(욕창)</h2>
             <button class="toggle-history-btn" onclick="showPage('psi-pressuresore-history')">📜 이력 보기</button>
         </div>
         <div class="official-form-sheet" style="margin-top: 15px;">
@@ -1406,7 +1411,7 @@
     <div id="page-psi-medication-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 환자 안전사고 보고서(투약)</h2>
+            <h2 style="margin: 0;" data-doctitle="6.2.3" data-doctitle-icon="📝 ">📝 환자 안전사고 보고서(투약)</h2>
             <button class="toggle-history-btn" onclick="showPage('psi-medication-history')">📜 이력 보기</button>
         </div>
         <div class="official-form-sheet" style="margin-top: 15px;">
@@ -1480,7 +1485,7 @@
     <div id="page-psi-other-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 환자 안전사고 보고서(기타)</h2>
+            <h2 style="margin: 0;" data-doctitle="6.2.4" data-doctitle-icon="📝 ">📝 환자 안전사고 보고서(기타)</h2>
             <button class="toggle-history-btn" onclick="showPage('psi-other-history')">📜 이력 보기</button>
         </div>
         <div class="official-form-sheet" style="margin-top: 15px;">
@@ -1730,7 +1735,7 @@
     <div id="page-incident-report-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 사건·사고 발생 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="8.3.3" data-doctitle-icon="📝 ">📝 사건·사고 발생 보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('incident-report-history')">📜 이력 보기</button>
         </div>
 
@@ -2777,7 +2782,7 @@
     <div id="page-esa-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 직원안전사고 발생보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="9.4.9.2" data-doctitle-icon="📝 ">📝 직원안전사고 발생보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('esa-history')">📜 이력 보기</button>
         </div>
 
@@ -2842,7 +2847,7 @@
     <div id="page-gongsang-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 공상 승인 신청서</h2>
+            <h2 style="margin: 0;" data-doctitle="9.4.9.4" data-doctitle-icon="📝 ">📝 공상 승인 신청서</h2>
             <button class="toggle-history-btn" onclick="showPage('gongsang-history')">📜 이력 보기</button>
         </div>
         <div id="gongsang-related"></div>
@@ -2910,7 +2915,7 @@
     <div id="page-dds-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 당직의 근무표</h2>
+            <h2 style="margin: 0;" data-doctitle="13.7.1" data-doctitle-icon="📝 ">📝 당직의 근무표</h2>
             <button class="toggle-history-btn" onclick="showPage('dds-history')">📜 이력 보기</button>
         </div>
 
@@ -3153,7 +3158,7 @@
     <div id="page-fpc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 식중독 예방 일일 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.12" data-doctitle-icon="📝 ">📝 식중독 예방 일일 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('fpc-history')">📜 이력 보기</button>
         </div>
 
@@ -3194,7 +3199,7 @@
     <div id="page-sym-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 유증상 관리일지</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.13" data-doctitle-icon="📝 ">📝 유증상 관리일지</h2>
             <button class="toggle-history-btn" onclick="showPage('sym-history')">📜 이력 보기</button>
         </div>
 
@@ -3232,7 +3237,7 @@
     <div id="page-hc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 건강검진 결과표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.14" data-doctitle-icon="📝 ">📝 건강검진 결과표</h2>
             <button class="toggle-history-btn" onclick="showPage('hc-history')">📜 이력 보기</button>
         </div>
 
@@ -3267,7 +3272,7 @@
     <div id="page-spc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 안전 점검 일지</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.16" data-doctitle-icon="📝 ">📝 안전 점검 일지</h2>
             <button class="toggle-history-btn" onclick="showPage('spc-history')">📜 이력 보기</button>
         </div>
 
@@ -3307,7 +3312,7 @@
     <div id="page-ccp-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 조리장 청소 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.20" data-doctitle-icon="📝 ">📝 조리장 청소 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('ccp-history')">📜 이력 보기</button>
         </div>
 
@@ -3493,7 +3498,7 @@
     <div id="page-dw-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 식기세척기 관리일지</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.5" data-doctitle-icon="📝 ">📝 식기세척기 관리일지</h2>
             <button class="toggle-history-btn" onclick="showPage('dw-history')">📜 이력 보기</button>
         </div>
 
@@ -3529,7 +3534,7 @@
     <div id="page-oil-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 폐식용유 관리대장</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.21" data-doctitle-icon="📝 ">📝 폐식용유 관리대장</h2>
             <button class="toggle-history-btn" onclick="showPage('oil-history')">📜 이력 보기</button>
         </div>
 
@@ -3692,7 +3697,7 @@
     <div id="page-iap-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 감염관리활동 연간계획서</h2>
+            <h2 style="margin: 0;" data-doctitle="7.1.1.1" data-doctitle-icon="📝 ">📝 감염관리활동 연간계획서</h2>
             <button class="toggle-history-btn" onclick="showPage('iap-history')">📜 이력 보기</button>
         </div>
 
@@ -3739,7 +3744,7 @@
     <!-- 감염관리실 조직도 -->
     <div id="page-icdorg-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2 style="margin: 0;">🗂️ 감염관리실 조직도</h2>
+        <h2 style="margin: 0;" data-doctitle="7.1.4.6" data-doctitle-icon="🗂️ ">🗂️ 감염관리실 조직도</h2>
 
         <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
             <table class="official-form-table">
@@ -3765,7 +3770,7 @@
     <div id="page-irnd-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 감염 예방 라운딩 주간 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.1.4.4" data-doctitle-icon="📝 ">📝 감염 예방 라운딩 주간 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('irnd-history')">📜 이력 보기</button>
         </div>
 
@@ -3801,7 +3806,7 @@
     <div id="page-lts-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 세탁물 보관장소 청소 및 소독관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.3.10.2" data-doctitle-icon="📝 ">📝 세탁물 보관장소 청소 및 소독관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('lts-history')">📜 이력 보기</button>
         </div>
 
@@ -3841,7 +3846,7 @@
     <div id="page-ltc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 세탁물 수집장소 청소 및 소독관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.3.10.1" data-doctitle-icon="📝 ">📝 세탁물 수집장소 청소 및 소독관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('ltc-history')">📜 이력 보기</button>
         </div>
 
@@ -3881,7 +3886,7 @@
     <div id="page-lnc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 린넨 관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.3.10.3" data-doctitle-icon="📝 ">📝 린넨 관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('lnc-history')">📜 이력 보기</button>
         </div>
 
@@ -3921,7 +3926,7 @@
     <div id="page-hyc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 위생관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.6.17" data-doctitle-icon="📝 ">📝 위생관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('hyc-history')">📜 이력 보기</button>
         </div>
 
@@ -3961,7 +3966,7 @@
     <div id="page-konis-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 KONIS 혈류감염 기록지 (혈류감염, BSI)</h2>
+            <h2 style="margin: 0;" data-doctitle="7.1.3.8" data-doctitle-icon="📝 ">📝 KONIS 혈류감염 기록지 (혈류감염, BSI)</h2>
             <button class="toggle-history-btn" onclick="showPage('konis-history')">📜 이력 보기</button>
         </div>
 
@@ -4118,7 +4123,7 @@
     <div id="page-mtc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 남자 화장실 청소 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.4.13.1" data-doctitle-icon="📝 ">📝 남자 화장실 청소 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('mtc-history')">📜 이력 보기</button>
         </div>
 
@@ -4158,7 +4163,7 @@
     <div id="page-shw-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 샤워실 청소 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="7.4.16" data-doctitle-icon="📝 ">📝 샤워실 청소 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('shw-history')">📜 이력 보기</button>
         </div>
 
@@ -4198,7 +4203,7 @@
     <div id="page-sfc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 소파 세탁 관리대장</h2>
+            <h2 style="margin: 0;" data-doctitle="7.3.10.7" data-doctitle-icon="📝 ">📝 소파 세탁 관리대장</h2>
             <button class="toggle-history-btn" onclick="showPage('sfc-view')">📄 대장 보기</button>
         </div>
 
@@ -4228,7 +4233,7 @@
     <div id="page-sfc-view" class="hidden">
         <button class="back-btn no-print" onclick="showPage('sfc-input')">← 작성으로</button>
         <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📄 소파 세탁 관리대장</h2>
+            <h2 style="margin: 0;" data-doctitle="7.3.10.7" data-doctitle-icon="📄 ">📄 소파 세탁 관리대장</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
         <div id="sfc-view-content"></div>
@@ -4385,7 +4390,7 @@
     <div id="page-fdi-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 시설물(건축물) 일일점검일지</h2>
+            <h2 style="margin: 0;" data-doctitle="10.1.2" data-doctitle-icon="📝 ">📝 시설물(건축물) 일일점검일지</h2>
             <button class="toggle-history-btn" onclick="showPage('fdi-history')">📜 이력 보기</button>
         </div>
 
@@ -4478,7 +4483,7 @@
     <div id="page-fac-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 시설 안전사고 발생 경위서</h2>
+            <h2 style="margin: 0;" data-doctitle="10.1.5" data-doctitle-icon="📝 ">📝 시설 안전사고 발생 경위서</h2>
             <button class="toggle-history-btn" onclick="showPage('fac-history')">📜 이력 보기</button>
         </div>
 
@@ -4622,7 +4627,7 @@
     <div id="page-fei-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 시설환경 개선활동 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="10.1.10" data-doctitle-icon="📝 ">📝 시설환경 개선활동 보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('fei-view')">📄 보기</button>
         </div>
 
@@ -4656,7 +4661,7 @@
     <div id="page-fei-view" class="hidden">
         <button class="back-btn no-print" onclick="showPage('fei-input')">← 작성으로</button>
         <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📄 시설환경 개선활동 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="10.1.10" data-doctitle-icon="📄 ">📄 시설환경 개선활동 보고서</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
         </div>
         <div id="fei-view-content"></div>
@@ -4666,7 +4671,7 @@
     <div id="page-egr-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 전기실 및 발전기실 안전관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="10.2.1" data-doctitle-icon="📝 ">📝 전기실 및 발전기실 안전관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('egr-history')">📜 이력 보기</button>
         </div>
 
@@ -4753,7 +4758,7 @@
     <div id="page-ups-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 무정전 전원장치(UPS) 점검일지</h2>
+            <h2 style="margin: 0;" data-doctitle="10.2.3" data-doctitle-icon="📝 ">📝 무정전 전원장치(UPS) 점검일지</h2>
             <button class="toggle-history-btn" onclick="showPage('ups-history')">📜 이력 보기</button>
         </div>
 
@@ -4835,7 +4840,7 @@
     <div id="page-vcl-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 환기시설물 체크리스트</h2>
+            <h2 style="margin: 0;" data-doctitle="10.2.8" data-doctitle-icon="📝 ">📝 환기시설물 체크리스트</h2>
             <button class="toggle-history-btn" onclick="showPage('vcl-history')">📜 이력 보기</button>
         </div>
 
@@ -4953,7 +4958,7 @@
     <div id="page-fcr-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 필터 점검·청소 및 교체일지</h2>
+            <h2 style="margin: 0;" data-doctitle="10.2.11" data-doctitle-icon="📝 ">📝 필터 점검·청소 및 교체일지</h2>
             <button class="toggle-history-btn" onclick="showPage('fcr-history')">📜 이력 보기</button>
         </div>
 
@@ -5041,7 +5046,7 @@
     <div id="page-acu-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 공기조화기 설치현황</h2>
+            <h2 style="margin: 0;" data-doctitle="10.2.12" data-doctitle-icon="📝 ">📝 공기조화기 설치현황</h2>
             <button class="toggle-history-btn" onclick="showPage('acu-view')">📄 보기</button>
         </div>
 
@@ -5067,7 +5072,7 @@
     <div id="page-acu-view" class="hidden">
         <button class="back-btn no-print" onclick="showPage('acu-input')">← 작성으로</button>
         <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📄 공기조화기 설치현황</h2>
+            <h2 style="margin: 0;" data-doctitle="10.2.12" data-doctitle-icon="📄 ">📄 공기조화기 설치현황</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
         <div id="acu-view-content"></div>
@@ -5077,7 +5082,7 @@
     <div id="page-hcf-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 냉·난방 필터 청소 점검일지</h2>
+            <h2 style="margin: 0;" data-doctitle="10.2.14" data-doctitle-icon="📝 ">📝 냉·난방 필터 청소 점검일지</h2>
             <button class="toggle-history-btn" onclick="showPage('hcf-history')">📜 이력 보기</button>
         </div>
 
@@ -5671,7 +5676,7 @@
     <div id="page-fir-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 소방점검 개선활동 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="10.6.4" data-doctitle-icon="📝 ">📝 소방점검 개선활동 보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('fir-view')">📄 보기</button>
         </div>
 
@@ -5705,7 +5710,7 @@
     <div id="page-fir-view" class="hidden">
         <button class="back-btn no-print" onclick="showPage('fir-input')">← 작성으로</button>
         <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📄 소방점검 개선활동 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="10.6.4" data-doctitle-icon="📄 ">📄 소방점검 개선활동 보고서</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
         </div>
         <div id="fir-view-content"></div>
@@ -5903,7 +5908,7 @@
     <div id="page-sfr-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 검체 냉장고 관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="2.3.1.13.4" data-doctitle-icon="📝 ">📝 검체 냉장고 관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('sfr-history')">📜 이력 보기</button>
         </div>
 
@@ -5940,7 +5945,7 @@
     <div id="page-sft-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 검체 냉장고 온도관리표</h2>
+            <h2 style="margin: 0;" data-doctitle="2.3.1.13.2" data-doctitle-icon="📝 ">📝 검체 냉장고 온도관리표</h2>
             <button class="toggle-history-btn" onclick="showPage('sft-history')">📜 이력 보기</button>
         </div>
 
@@ -6055,7 +6060,7 @@
     <div id="page-eolrecv-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 생애말기환자 상담 접수대장</h2>
+            <h2 style="margin: 0;" data-doctitle="3.1.6.2" data-doctitle-icon="📝 ">📝 생애말기환자 상담 접수대장</h2>
             <button class="toggle-history-btn" onclick="showPage('eolrecv-history')">📜 이력 보기</button>
         </div>
         <div class="qr-check-card" style="max-width: 560px; margin: 15px 0;">
@@ -6194,7 +6199,7 @@
     <div id="page-seal-input" class="hidden">
         <button class="back-btn no-print" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 봉인 라벨지 기록표</h2>
+            <h2 style="margin: 0;" data-doctitle="3.2.1.3" data-doctitle-icon="📝 ">📝 봉인 라벨지 기록표</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
         </div>
         <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
@@ -6220,7 +6225,7 @@
     <div id="page-aed-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 제세동기 장비 점검표(AED)</h2>
+            <h2 style="margin: 0;" data-doctitle="3.2.1.4" data-doctitle-icon="📝 ">📝 제세동기 장비 점검표(AED)</h2>
             <button class="toggle-history-btn" onclick="showPage('aed-history')">📜 이력 보기</button>
         </div>
 
@@ -6315,7 +6320,7 @@
     <div id="page-rrd-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 신체보호대 감소활동</h2>
+            <h2 style="margin: 0;" data-doctitle="3.2.3.3" data-doctitle-icon="📝 ">📝 신체보호대 감소활동</h2>
             <button class="toggle-history-btn" onclick="showPage('rrd-history')">📜 이력 보기</button>
         </div>
 
@@ -6439,7 +6444,7 @@
     <div id="page-ndi-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 신약정보자료</h2>
+            <h2 style="margin: 0;" data-doctitle="4.1.2" data-doctitle-icon="📝 ">📝 신약정보자료</h2>
             <button class="toggle-history-btn" onclick="showPage('ndi-history')">📜 이력 보기</button>
         </div>
 
@@ -6656,7 +6661,7 @@
     <div id="page-dft-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 의약품 냉장고 온도 기록지</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.24" data-doctitle-icon="📝 ">📝 의약품 냉장고 온도 기록지</h2>
             <button class="toggle-history-btn" onclick="showPage('dft-history')">📜 이력 보기</button>
         </div>
 
@@ -6692,7 +6697,7 @@
     <div id="page-rcm-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 회수의약품 관리대장</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.27" data-doctitle-icon="📝 ">📝 회수의약품 관리대장</h2>
             <button class="toggle-history-btn" onclick="showPage('rcm-history')">📜 이력 보기</button>
         </div>
 
@@ -6753,7 +6758,7 @@
     <div id="page-rdr-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 회수의약품 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.28" data-doctitle-icon="📝 ">📝 회수의약품 보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('rdr-history')">📜 이력 보기</button>
         </div>
 
@@ -6813,7 +6818,7 @@
     <div id="page-dfc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 의약품 냉장고 관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.30" data-doctitle-icon="📝 ">📝 의약품 냉장고 관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('dfc-history')">📜 이력 보기</button>
         </div>
 
@@ -6850,7 +6855,7 @@
     <div id="page-nga-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 마약류 관리 보조자 지정서</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.32" data-doctitle-icon="📝 ">📝 마약류 관리 보조자 지정서</h2>
             <button class="toggle-history-btn" onclick="showPage('nga-history')">📜 이력 보기</button>
         </div>
 
@@ -6897,7 +6902,7 @@
     <div id="page-nfc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 향정신성의약품 냉장고 관리 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.40" data-doctitle-icon="📝 ">📝 향정신성의약품 냉장고 관리 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('nfc-history')">📜 이력 보기</button>
         </div>
 
@@ -6934,7 +6939,7 @@
     <div id="page-nft-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 향정신성의약품 냉장고 온도 기록지</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.39" data-doctitle-icon="📝 ">📝 향정신성의약품 냉장고 온도 기록지</h2>
             <button class="toggle-history-btn" onclick="showPage('nft-history')">📜 이력 보기</button>
         </div>
 
@@ -7010,7 +7015,7 @@
     <div id="page-pcc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 조제실 청결 점검표</h2>
+            <h2 style="margin: 0;" data-doctitle="4.3.3" data-doctitle-icon="📝 ">📝 조제실 청결 점검표</h2>
             <button class="toggle-history-btn" onclick="showPage('pcc-history')">📜 이력 보기</button>
         </div>
 
@@ -7091,7 +7096,7 @@
     <div id="page-pad-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 약사 부재시 출입대장</h2>
+            <h2 style="margin: 0;" data-doctitle="4.3.5" data-doctitle-icon="📝 ">📝 약사 부재시 출입대장</h2>
             <button class="toggle-history-btn" onclick="showPage('pad-history')">📜 이력 보기</button>
         </div>
 
@@ -7128,7 +7133,7 @@
     <div id="page-adl-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 약물 Allergy 환자 리스트</h2>
+            <h2 style="margin: 0;" data-doctitle="4.3.6" data-doctitle-icon="📝 ">📝 약물 Allergy 환자 리스트</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
         </div>
 
@@ -7155,7 +7160,7 @@
     <div id="page-ddi-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 병용금기 의약품 목록</h2>
+            <h2 style="margin: 0;" data-doctitle="4.3.7" data-doctitle-icon="📝 ">📝 병용금기 의약품 목록</h2>
         </div>
 
         <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
@@ -7181,7 +7186,7 @@
     <div id="page-pca-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 처방전 감사대장</h2>
+            <h2 style="margin: 0;" data-doctitle="4.3.8" data-doctitle-icon="📝 ">📝 처방전 감사대장</h2>
             <button class="toggle-history-btn" onclick="showPage('pca-history')">📜 이력 보기</button>
         </div>
 
@@ -7224,7 +7229,7 @@
     <div id="page-mge-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 복약설명 안내문</h2>
+            <h2 style="margin: 0;" data-doctitle="4.4.1" data-doctitle-icon="📝 ">📝 복약설명 안내문</h2>
             <button class="toggle-history-btn" onclick="showPage('mge-history')">📜 이력 보기</button>
         </div>
 
@@ -7278,7 +7283,7 @@
     <div id="page-adi-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 의약품 부작용 발생 보고서(내부)</h2>
+            <h2 style="margin: 0;" data-doctitle="4.4.2" data-doctitle-icon="📝 ">📝 의약품 부작용 발생 보고서(내부)</h2>
             <button class="toggle-history-btn" onclick="showPage('adi-history')">📜 이력 보기</button>
         </div>
 
@@ -7361,7 +7366,7 @@
     <div id="page-kae-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 의약품 이상반응보고서(외부보고용)</h2>
+            <h2 style="margin: 0;" data-doctitle="4.4.3" data-doctitle-icon="📝 ">📝 의약품 이상반응보고서(외부보고용)</h2>
             <button class="toggle-history-btn" onclick="showPage('kae-history')">📜 이력 보기</button>
         </div>
 
@@ -7485,7 +7490,7 @@
     <div id="page-ade-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 의약품 부작용 평가 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="4.4.6" data-doctitle-icon="📝 ">📝 의약품 부작용 평가 보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('ade-history')">📜 이력 보기</button>
         </div>
 
@@ -7611,7 +7616,7 @@
     <div id="page-nsc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 의료용 마약류 저장시설 점검부</h2>
+            <h2 style="margin: 0;" data-doctitle="4.2.13" data-doctitle-icon="📝 ">📝 의료용 마약류 저장시설 점검부</h2>
             <button class="toggle-history-btn" onclick="showPage('nsc-history')">📜 이력 보기</button>
         </div>
 
@@ -7644,7 +7649,7 @@
     <div id="page-vor-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 구두(전화) 처방 기록지</h2>
+            <h2 style="margin: 0;" data-doctitle="1.1.1" data-doctitle-icon="📝 ">📝 구두(전화) 처방 기록지</h2>
             <button class="toggle-history-btn" onclick="showPage('vor-history')">📜 이력 보기</button>
         </div>
 
@@ -7702,7 +7707,7 @@
     <div id="page-pms-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 PRN 수정신청서</h2>
+            <h2 style="margin: 0;" data-doctitle="1.1.7" data-doctitle-icon="📝 ">📝 PRN 수정신청서</h2>
             <button class="toggle-history-btn" onclick="showPage('pms-history')">📜 이력 보기</button>
         </div>
 
@@ -7815,18 +7820,20 @@
     <div id="page-nlc-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 발침계수 확인서 (라운딩)</h2>
+            <h2 style="margin: 0;" data-doctitle="3.1.8.1" data-doctitle-icon="📝 ">📝 발침계수 확인서 (라운딩)</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
         </div>
 
         <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
             <table class="official-form-table">
-                <tr><th style="width:100px;">작성연도</th><td><input type="number" id="nlc-year" style="width:100%; box-sizing:border-box;" onchange="loadNlcYear()"></td></tr>
+                <tr><th style="width:100px;">작성월</th><td><input type="month" id="nlc-month" style="width:100%; box-sizing:border-box;" onchange="loadNlcMonth()"></td></tr>
             </table>
 
             <div style="overflow-x:auto;">
                 <table class="official-form-table" id="nlc-table"></table>
             </div>
+            <datalist id="nlc-regno-datalist"></datalist>
+            <datalist id="nlc-name-datalist"></datalist>
             <div class="no-print" style="margin-top:10px;">
                 <button class="back-btn" style="background:#28a745; color:white;" onclick="addNlcRow()">➕ 행 추가</button>
             </div>
@@ -7886,7 +7893,7 @@
     <div id="page-hru-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 손위생 자원 사용량</h2>
+            <h2 style="margin: 0;" data-doctitle="1.3.3" data-doctitle-icon="📝 ">📝 손위생 자원 사용량</h2>
             <button class="toggle-history-btn" onclick="showPage('hru-history')">📜 이력 보기</button>
         </div>
 
@@ -7928,7 +7935,7 @@
     <div id="page-rie-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 의뢰대상 의료기관 평가, 선정자료</h2>
+            <h2 style="margin: 0;" data-doctitle="2.1.4.4" data-doctitle-icon="📝 ">📝 의뢰대상 의료기관 평가, 선정자료</h2>
             <button class="toggle-history-btn" onclick="showPage('rie-history')">📜 이력 보기</button>
         </div>
 
@@ -8162,7 +8169,7 @@
     <div id="page-sie-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 직원감염노출사고 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="9.4.9.1" data-doctitle-icon="📝 ">📝 직원감염노출사고 보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('sie-history')">📜 이력 보기</button>
         </div>
 
@@ -8334,7 +8341,7 @@
     <div id="page-sir-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 직원안전(감염)사고 원인분석 재발방지 보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="9.4.9.5" data-doctitle-icon="📝 ">📝 직원안전(감염)사고 원인분석 재발방지 보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('sir-history')">📜 이력 보기</button>
         </div>
 
@@ -8390,7 +8397,7 @@
     <div id="page-grievance-app-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 고충 상담 신청서 (직원)</h2>
+            <h2 style="margin: 0;" data-doctitle="8.3.2" data-doctitle-icon="📝 ">📝 고충 상담 신청서 (직원)</h2>
             <button class="toggle-history-btn" onclick="showPage('grievance-app-history')">📜 이력 보기</button>
         </div>
         <div id="grievance-app-related"></div>
@@ -8464,7 +8471,7 @@
     <!-- 폭력 발생 시 대응 매뉴얼 (환자와 직원 간) -->
     <div id="page-violence-manual-patient" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🚨 폭력 발생 시 대응 매뉴얼 (환자와 직원 간)</h2>
+        <h2 data-doctitle="8.3.4" data-doctitle-icon="🚨 ">🚨 폭력 발생 시 대응 매뉴얼 (환자와 직원 간)</h2>
         <div id="violence-manual-patient-related"></div>
         <div style="max-width: 650px; margin: 15px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
             <svg viewBox="0 0 600 560" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
@@ -8535,7 +8542,7 @@
     <!-- 폭력 발생 시 대응 매뉴얼 (직원과 직원 간) -->
     <div id="page-violence-manual-staff" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🚨 폭력 발생 시 대응 매뉴얼 (직원과 직원 간)</h2>
+        <h2 data-doctitle="8.3.5" data-doctitle-icon="🚨 ">🚨 폭력 발생 시 대응 매뉴얼 (직원과 직원 간)</h2>
         <div id="violence-manual-staff-related"></div>
         <div style="max-width: 650px; margin: 15px auto; background: white; border: 1px solid #e2e5e9; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
             <svg viewBox="0 0 600 620" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
@@ -8609,7 +8616,7 @@
     <div id="page-ethics-app-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 윤리위원회 심의신청서</h2>
+            <h2 style="margin: 0;" data-doctitle="8.3.6" data-doctitle-icon="📝 ">📝 윤리위원회 심의신청서</h2>
             <button class="toggle-history-btn" onclick="showPage('ethics-app-history')">📜 이력 보기</button>
         </div>
         <div id="ethics-app-related"></div>
@@ -8656,7 +8663,7 @@
     <!-- 의료기관 내 폭력 및 윤리적 갈등 조치절차 -->
     <div id="page-conflict-procedure" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🚨 의료기관 내 폭력 및 윤리적 갈등 조치절차</h2>
+        <h2 data-doctitle="8.3.7" data-doctitle-icon="🚨 ">🚨 의료기관 내 폭력 및 윤리적 갈등 조치절차</h2>
         <div id="conflict-procedure-related"></div>
         <p style="font-size: 12px; color: #6c757d;">※ 순서도의 세부 분기(특히 "심의 필요시" 아닐 때의 경로)는 제가 가장 자연스러운 흐름으로 해석해 그렸어요 — 실제와 다르면 말씀해주세요, 바로 고칠게요.</p>
 
@@ -8799,7 +8806,7 @@
     <div id="page-reg-ledger" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 규정 관리대장</h2>
+            <h2 style="margin: 0;" data-doctitle="8.1.1" data-doctitle-icon="📝 ">📝 규정 관리대장</h2>
             <button class="toggle-history-btn" onclick="showPage('reg-ledger-history')">📜 이력 보기</button>
         </div>
         <div id="reg-ledger-related"></div>
@@ -8818,7 +8825,7 @@
     <div id="page-reg-ledger-history" class="hidden">
         <button class="back-btn no-print" onclick="showPage('reg-ledger')">← 작성으로</button>
         <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📜 규정 관리대장</h2>
+            <h2 style="margin: 0;" data-doctitle="8.1.1" data-doctitle-icon="📜 ">📜 규정 관리대장</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄 (A4 가로)</button>
         </div>
         <div style="overflow-x: auto;">
@@ -8833,7 +8840,7 @@
     <div id="page-reg-proposal-input" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 규정 입안서</h2>
+            <h2 style="margin: 0;" data-doctitle="8.1.2" data-doctitle-icon="📝 ">📝 규정 입안서</h2>
             <button class="toggle-history-btn" onclick="showPage('reg-proposal-history')">📜 이력 보기</button>
         </div>
         <div id="reg-proposal-related"></div>
@@ -9017,7 +9024,7 @@
     <div id="page-social-report" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 사회복지 프로그램 결과보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="5.4.8" data-doctitle-icon="📝 ">📝 사회복지 프로그램 결과보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('social-report-history-page')">📜 이력 보기</button>
         </div>
         <div id="social-report-related"></div>
@@ -9106,7 +9113,7 @@
     <div id="page-complaint-result" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📝 불만 및 고충처리 결과보고서</h2>
+            <h2 style="margin: 0;" data-doctitle="5.3.3" data-doctitle-icon="📝 ">📝 불만 및 고충처리 결과보고서</h2>
             <button class="toggle-history-btn" onclick="showPage('complaint-result-history-page')">📜 이력 보기</button>
         </div>
         <div id="complaint-result-related"></div>
@@ -9269,7 +9276,7 @@
     <div id="page-vulnerable-patient" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">🛡️ 취약환자 접수대장</h2>
+            <h2 style="margin: 0;" data-doctitle="5.2.1" data-doctitle-icon="🛡️ ">🛡️ 취약환자 접수대장</h2>
             <button class="toggle-history-btn" onclick="showPage('vulnerable-patient-history-page')">📜 이력 보기</button>
         </div>
         <div id="vulnerable-related"></div>
@@ -9388,7 +9395,7 @@
     <!-- 사회복지 프로그램 일정표 (월별 이미지 업로드) -->
     <div id="page-social-schedule" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2>🗓️ 사회복지 프로그램 일정표</h2>
+        <h2 data-doctitle="5.4.7" data-doctitle-icon="🗓️ ">🗓️ 사회복지 프로그램 일정표</h2>
         <div id="social-schedule-related"></div>
         <p style="font-size: 13px; color: #6c757d;">매달 만들어서 출력하시는 프로그램 일정표 이미지를 그대로 올려두는 곳입니다.</p>
 
@@ -9411,7 +9418,7 @@
     <div id="page-medrecord-copy" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📑 의무기록 사본발급 대장</h2>
+            <h2 style="margin: 0;" data-doctitle="11.5" data-doctitle-icon="📑 ">📑 의무기록 사본발급 대장</h2>
             <button class="toggle-history-btn" onclick="showPage('medrecord-history')">📜 사본 발급 대장 이력</button>
         </div>
         <div id="medrecord-copy-related"></div>
@@ -9572,7 +9579,7 @@
     <!-- 사생활 보호 신청서 (원무팀) -->
     <div id="page-privacy-request" class="hidden">
         <button class="back-btn" onclick="showTeamWorkspace('원무팀')">← 원무팀으로</button>
-        <h2>🔒 사생활 보호 신청서</h2>
+        <h2 data-doctitle="5.1.1" data-doctitle-icon="🔒 ">🔒 사생활 보호 신청서</h2>
         <div id="privacy-request-related"></div>
         <div class="qr-check-card" style="max-width: 560px; margin: 15px 0;">
             <p>
@@ -9598,7 +9605,7 @@
     <div id="page-complaint-log" class="hidden">
         <button class="back-btn" onclick="showTeamWorkspace('원무팀')">← 원무팀으로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin: 0;">📋 불만 및 고충 처리대장</h2>
+            <h2 style="margin: 0;" data-doctitle="5.3.1" data-doctitle-icon="📋 ">📋 불만 및 고충 처리대장</h2>
             <button class="toggle-history-btn" onclick="showPage('complaint-log-history-page')">📜 이력 보기</button>
         </div>
         <div id="complaint-log-related"></div>
@@ -27682,9 +27689,9 @@ async function deleteAvcEntry(docId) {
 }
 
 // =========================================================
-// 발침계수 확인서 (라운딩) - 공용 연도별 목록
+// 발침계수 확인서 (라운딩) - 공용 월별 목록 (한 달 분량씩 끊어서 저장 - 인쇄했을 때 표가 너무 길어지지 않도록)
 // =========================================================
-let nlcCurrentYear = '';
+let nlcCurrentMonth = '';
 let nlcRows = [];
 let nlcRowCounter = 1;
 
@@ -27698,21 +27705,45 @@ function openNeedleCountConfirm() {
 }
 
 async function initNlcInput() {
-    document.getElementById('nlc-year').value = new Date().getFullYear();
+    document.getElementById('nlc-month').value = todayStr().slice(0, 7);
     document.getElementById('nlc-result').textContent = '';
-    await loadNlcYear();
+    ensurePatientMasterLoaded().then(populateNlcPatientDatalists);
+    await loadNlcMonth();
 }
 
-async function loadNlcYear() {
-    const year = document.getElementById('nlc-year').value.trim() || String(new Date().getFullYear());
-    nlcCurrentYear = year;
+// 등록번호/환자성명 입력칸에서 자동완성 목록으로 뜨도록, 환자 마스터 목록을 datalist에 채워줍니다.
+function populateNlcPatientDatalists() {
+    const regnoList = document.getElementById('nlc-regno-datalist');
+    const nameList = document.getElementById('nlc-name-datalist');
+    if (!regnoList || !nameList) return;
+    regnoList.innerHTML = patientMasterListCache.map(p => `<option value="${escapeAttr(p.regNo)}">${escapeAttr(p.name)}</option>`).join('');
+    const uniqueNames = [...new Set(patientMasterListCache.map(p => p.name).filter(Boolean))];
+    nameList.innerHTML = uniqueNames.map(n => `<option value="${escapeAttr(n)}"></option>`).join('');
+}
+
+async function loadNlcMonth() {
+    const month = document.getElementById('nlc-month').value.trim() || todayStr().slice(0, 7);
+    nlcCurrentMonth = month;
     nlcRows = [];
     nlcRowCounter = 1;
     try {
-        const doc = await db.collection('needle_count_confirmations').doc(year).get();
+        const doc = await db.collection('needle_count_confirmations').doc(month).get();
         if (doc.exists) {
             const data = doc.data();
             if (data.rows && data.rows.length) nlcRows = data.rows.map(r => ({ id: nlcRowCounter++, ...r }));
+        } else {
+            // 이전(연도 단위) 저장 방식으로 남아있는 기록이 있으면 불러와서, 그 해 안에서 이번 달치만 보여줍니다.
+            const year = month.slice(0, 4);
+            const legacyDoc = await db.collection('needle_count_confirmations').doc(year).get();
+            if (legacyDoc.exists) {
+                const legacyData = legacyDoc.data();
+                const mm = month.slice(5, 7).replace(/^0/, '');
+                const legacyRows = (legacyData.rows || []).filter(r => {
+                    const rowMonth = (r.date || '').split('.')[0].replace(/^0/, '');
+                    return rowMonth === mm;
+                });
+                if (legacyRows.length) nlcRows = legacyRows.map(r => ({ id: nlcRowCounter++, ...r }));
+            }
         }
     } catch (err) { /* keep empty */ }
     if (nlcRows.length === 0) nlcRows = [nlcDefaultRow()];
@@ -27731,7 +27762,28 @@ function removeNlcRow(id) {
 
 function updateNlcField(id, field, value) {
     const row = nlcRows.find(r => r.id === id);
-    if (row) row[field] = value;
+    if (!row) return;
+    row[field] = value;
+
+    // 등록번호나 환자성명을 입력하면, 환자 마스터 목록에서 찾아서 나머지 칸을 자동으로 채워줍니다.
+    // (전체 표를 다시 그리면 입력 중이던 칸의 포커스가 날아가므로, 매칭된 칸만 콕 집어서 값을 바꿔줍니다)
+    if (field === 'regNo') {
+        const trimmed = value.trim();
+        const match = trimmed && patientMasterListCache.find(p => String(p.regNo || '').trim() === trimmed);
+        if (match && row.patientName !== match.name) {
+            row.patientName = match.name;
+            const nameInput = document.querySelector(`input[data-nlc-id="${id}"][data-nlc-field="patientName"]`);
+            if (nameInput) nameInput.value = match.name;
+        }
+    } else if (field === 'patientName') {
+        const trimmed = value.trim();
+        const matches = trimmed ? patientMasterListCache.filter(p => (p.name || '') === trimmed) : [];
+        if (matches.length === 1 && row.regNo !== matches[0].regNo) {
+            row.regNo = matches[0].regNo;
+            const regInput = document.querySelector(`input[data-nlc-id="${id}"][data-nlc-field="regNo"]`);
+            if (regInput) regInput.value = matches[0].regNo;
+        }
+    }
 }
 
 function nlcRowHtml(r, idx, editable) {
@@ -27740,8 +27792,8 @@ function nlcRowHtml(r, idx, editable) {
             <td style="text-align:center;">${idx + 1}</td>
             <td><input type="text" value="${escapeAttr(r.date)}" placeholder="MM.DD" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'date', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.room)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'room', this.value)"></td>
-            <td><input type="text" value="${escapeAttr(r.regNo)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'regNo', this.value)"></td>
-            <td><input type="text" value="${escapeAttr(r.patientName)}" style="width:100%; box-sizing:border-box; border:none;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.regNo)}" list="nlc-regno-datalist" data-nlc-id="${r.id}" data-nlc-field="regNo" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'regNo', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.patientName)}" list="nlc-name-datalist" data-nlc-id="${r.id}" data-nlc-field="patientName" style="width:100%; box-sizing:border-box; border:none;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.insertCount)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'insertCount', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.removeCount)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'removeCount', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.confirmer)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'confirmer', this.value)"></td>
@@ -27771,15 +27823,15 @@ function renderNlcTable() {
 
 async function saveNlc() {
     const resultEl = document.getElementById('nlc-result');
-    const year = document.getElementById('nlc-year').value.trim();
-    if (!year) {
+    const month = document.getElementById('nlc-month').value.trim();
+    if (!month) {
         resultEl.style.color = '#dc3545';
-        resultEl.textContent = '❌ 작성연도를 입력해 주세요.';
+        resultEl.textContent = '❌ 작성월을 선택해 주세요.';
         return;
     }
     try {
-        await db.collection('needle_count_confirmations').doc(year).set({
-            year: year,
+        await db.collection('needle_count_confirmations').doc(month).set({
+            month: month,
             rows: nlcRows.map(({ id, ...r }) => r),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -35890,6 +35942,20 @@ async function loadCatalogOverrides() {
     } catch (err) {
         console.error(err);
     }
+    applyCatalogTitleOverrides();
+}
+
+// 관리자가 문서명을 바꾸면(catalog_overrides의 title), 각 서류 화면 상단 제목(h2)도 같이 바꿔줍니다.
+// 화면에 있는 h2 태그에 data-doctitle="서류번호" / data-doctitle-icon="이모지 접두사"를 미리 붙여뒀고,
+// 여기서는 그 태그들을 찾아서 아이콘은 그대로 두고 제목 글자만 최신 값으로 바꿉니다.
+function applyCatalogTitleOverrides() {
+    const catalog = getEffectiveCatalog();
+    document.querySelectorAll('[data-doctitle]').forEach(el => {
+        const num = el.getAttribute('data-doctitle');
+        const icon = el.getAttribute('data-doctitle-icon') || '';
+        const item = catalog.find(d => d.num === num);
+        if (item) el.textContent = icon + item.title;
+    });
 }
 
 // DOCUMENT_CATALOG에 저장된 덮어쓰기 내용을 반영한 배열을 돌려줍니다. 팀 필터링 등은 항상 이 함수를 통해서 하세요.
@@ -36265,6 +36331,7 @@ async function saveCatalogEdit(num, safeId) {
         };
         await db.collection('catalog_overrides').doc(num).set(overrideData);
         catalogOverrides[num] = overrideData;
+        applyCatalogTitleOverrides(); // 바뀐 문서명을 해당 서류 화면 제목에도 바로 반영
         if (resultEl) {
             resultEl.style.color = '#28a745';
             resultEl.textContent = '✅ 저장됨! 목록을 새로고침합니다...';
@@ -36288,6 +36355,24 @@ async function saveCatalogEdit(num, safeId) {
 }
 
 let patientMasterListCache = [];
+let patientMasterLoadPromise = null;
+
+// 관리자 페이지가 아닌 다른 화면(발침계수 확인서 등)에서 환자 마스터 목록을 자동완성용으로 쓸 때 호출합니다.
+// 이미 불러온 적이 있으면 다시 조회하지 않고, 여러 화면에서 동시에 불러도 조회는 한 번만 나가도록 프라미스를 캐싱합니다.
+function ensurePatientMasterLoaded() {
+    if (patientMasterListCache.length > 0) return Promise.resolve(patientMasterListCache);
+    if (!patientMasterLoadPromise) {
+        patientMasterLoadPromise = db.collection('patient_master').get().then(snapshot => {
+            patientMasterListCache = [];
+            snapshot.forEach(doc => patientMasterListCache.push(doc.data()));
+            return patientMasterListCache;
+        }).catch(err => {
+            console.error(err);
+            return patientMasterListCache;
+        });
+    }
+    return patientMasterLoadPromise;
+}
 
 async function loadPatientMasterData() {
     try {
@@ -36314,7 +36399,7 @@ function renderPatientMasterList() {
     list = [...list].sort((a, b) => {
         const na = parseInt(String(a.regNo).replace(/\D/g, ''), 10) || 0;
         const nb = parseInt(String(b.regNo).replace(/\D/g, ''), 10) || 0;
-        return na - nb;
+        return nb - na; // 등록번호 내림차순 - 번호가 가장 높은(최근 등록) 환자가 위로 오도록
     });
 
     document.getElementById('pm-list-count').textContent = list.length;
