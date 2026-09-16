@@ -7823,6 +7823,7 @@
             <h2 style="margin: 0;" data-doctitle="3.1.8.1" data-doctitle-icon="📝 ">📝 발침계수 확인서 (라운딩)</h2>
             <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
+        <div id="nlc-related" class="no-print"></div>
 
         <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
             <table class="official-form-table">
@@ -27703,6 +27704,7 @@ function openNeedleCountConfirm() {
 }
 
 async function initNlcInput() {
+    document.getElementById('nlc-related').innerHTML = renderRelatedPolicyLink('3.1.8');
     document.getElementById('nlc-month').value = todayStr().slice(0, 7);
     document.getElementById('nlc-result').textContent = '';
     ensurePatientMasterLoaded();
@@ -27757,11 +27759,24 @@ function updateNlcField(id, field, value) {
     // (전체 표를 다시 그리면 입력 중이던 칸의 포커스가 날아가므로, 매칭된 칸만 콕 집어서 값을 바꿔줍니다)
     if (field === 'regNo') {
         const trimmed = value.trim();
-        const match = trimmed && patientMasterListCache.find(p => String(p.regNo || '').trim() === trimmed);
-        if (match && row.patientName !== match.name) {
-            row.patientName = match.name;
-            const nameInput = document.querySelector(`input[data-nlc-id="${id}"][data-nlc-field="patientName"]`);
-            if (nameInput) nameInput.value = match.name;
+        let match = trimmed && patientMasterListCache.find(p => String(p.regNo || '').trim() === trimmed);
+        if (!match && trimmed.length >= 4) {
+            // 등록번호를 다 안 치고 뒷 4자리 이상만 입력해도, 그 번호로 끝나는 환자가 한 명뿐이면 그걸로 찾아줍니다.
+            const suffixMatches = patientMasterListCache.filter(p => String(p.regNo || '').trim().endsWith(trimmed));
+            if (suffixMatches.length === 1) match = suffixMatches[0];
+        }
+        if (match) {
+            const fullRegNo = String(match.regNo || '').trim();
+            if (row.regNo !== fullRegNo) {
+                row.regNo = fullRegNo;
+                const regInput = document.querySelector(`input[data-nlc-id="${id}"][data-nlc-field="regNo"]`);
+                if (regInput) regInput.value = fullRegNo;
+            }
+            if (row.patientName !== match.name) {
+                row.patientName = match.name;
+                const nameInput = document.querySelector(`input[data-nlc-id="${id}"][data-nlc-field="patientName"]`);
+                if (nameInput) nameInput.value = match.name;
+            }
         }
     } else if (field === 'patientName') {
         const trimmed = value.trim();
@@ -27778,7 +27793,7 @@ function nlcRowHtml(r, idx, editable) {
     if (editable) {
         return `<tr>
             <td style="text-align:center;">${idx + 1}</td>
-            <td><input type="text" value="${escapeAttr(r.date)}" placeholder="MM.DD" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'date', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.date)}" placeholder="MM.DD" data-nlc-id="${r.id}" data-nlc-field="date" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'date', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.room)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'room', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.regNo)}" data-nlc-id="${r.id}" data-nlc-field="regNo" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'regNo', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.patientName)}" data-nlc-id="${r.id}" data-nlc-field="patientName" style="width:100%; box-sizing:border-box; border:none;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
@@ -27817,6 +27832,15 @@ async function saveNlc() {
         resultEl.textContent = '❌ 작성월을 선택해 주세요.';
         return;
     }
+    // 일자를 안 적고 저장하면 오늘 날짜(MM.DD)로 자동으로 채워줍니다.
+    const todayMd = todayStr().slice(5).replace('-', '.');
+    nlcRows.forEach(r => {
+        if (!r.date || !r.date.trim()) {
+            r.date = todayMd;
+            const dateInput = document.querySelector(`input[data-nlc-id="${r.id}"][data-nlc-field="date"]`);
+            if (dateInput) dateInput.value = todayMd;
+        }
+    });
     try {
         await db.collection('needle_count_confirmations').doc(month).set({
             month: month,
