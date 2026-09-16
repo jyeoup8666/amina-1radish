@@ -27779,7 +27779,7 @@ function nlcRowHtml(r, idx, editable) {
         return `<tr>
             <td style="text-align:center;">${idx + 1}</td>
             <td><input type="text" value="${escapeAttr(r.date)}" placeholder="MM.DD" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'date', this.value)"></td>
-            <td><input type="text" value="${escapeAttr(r.room)}" placeholder="예: 4-2, 외래" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'room', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.room)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'room', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.regNo)}" data-nlc-id="${r.id}" data-nlc-field="regNo" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'regNo', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.patientName)}" data-nlc-id="${r.id}" data-nlc-field="patientName" style="width:100%; box-sizing:border-box; border:none;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.insertCount)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'insertCount', this.value)"></td>
