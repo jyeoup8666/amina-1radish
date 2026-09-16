@@ -7821,7 +7821,7 @@
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0;" data-doctitle="3.1.8.1" data-doctitle-icon="📝 ">📝 발침계수 확인서 (라운딩)</h2>
-            <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
+            <button class="toggle-history-btn no-print" onclick="printHistoryPage('portrait')">🖨️ 인쇄</button>
         </div>
 
         <div class="official-form-sheet" style="margin-top: 15px; max-width:100%;">
@@ -7832,8 +7832,6 @@
             <div style="overflow-x:auto;">
                 <table class="official-form-table" id="nlc-table"></table>
             </div>
-            <datalist id="nlc-regno-datalist"></datalist>
-            <datalist id="nlc-name-datalist"></datalist>
             <div class="no-print" style="margin-top:10px;">
                 <button class="back-btn" style="background:#28a745; color:white;" onclick="addNlcRow()">➕ 행 추가</button>
             </div>
@@ -27707,18 +27705,8 @@ function openNeedleCountConfirm() {
 async function initNlcInput() {
     document.getElementById('nlc-month').value = todayStr().slice(0, 7);
     document.getElementById('nlc-result').textContent = '';
-    ensurePatientMasterLoaded().then(populateNlcPatientDatalists);
+    ensurePatientMasterLoaded();
     await loadNlcMonth();
-}
-
-// 등록번호/환자성명 입력칸에서 자동완성 목록으로 뜨도록, 환자 마스터 목록을 datalist에 채워줍니다.
-function populateNlcPatientDatalists() {
-    const regnoList = document.getElementById('nlc-regno-datalist');
-    const nameList = document.getElementById('nlc-name-datalist');
-    if (!regnoList || !nameList) return;
-    regnoList.innerHTML = patientMasterListCache.map(p => `<option value="${escapeAttr(p.regNo)}">${escapeAttr(p.name)}</option>`).join('');
-    const uniqueNames = [...new Set(patientMasterListCache.map(p => p.name).filter(Boolean))];
-    nameList.innerHTML = uniqueNames.map(n => `<option value="${escapeAttr(n)}"></option>`).join('');
 }
 
 async function loadNlcMonth() {
@@ -27791,9 +27779,9 @@ function nlcRowHtml(r, idx, editable) {
         return `<tr>
             <td style="text-align:center;">${idx + 1}</td>
             <td><input type="text" value="${escapeAttr(r.date)}" placeholder="MM.DD" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'date', this.value)"></td>
-            <td><input type="text" value="${escapeAttr(r.room)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'room', this.value)"></td>
-            <td><input type="text" value="${escapeAttr(r.regNo)}" list="nlc-regno-datalist" data-nlc-id="${r.id}" data-nlc-field="regNo" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'regNo', this.value)"></td>
-            <td><input type="text" value="${escapeAttr(r.patientName)}" list="nlc-name-datalist" data-nlc-id="${r.id}" data-nlc-field="patientName" style="width:100%; box-sizing:border-box; border:none;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.room)}" placeholder="예: 4-2, 외래" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'room', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.regNo)}" data-nlc-id="${r.id}" data-nlc-field="regNo" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'regNo', this.value)"></td>
+            <td><input type="text" value="${escapeAttr(r.patientName)}" data-nlc-id="${r.id}" data-nlc-field="patientName" style="width:100%; box-sizing:border-box; border:none;" oninput="updateNlcField(${r.id}, 'patientName', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.insertCount)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'insertCount', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.removeCount)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'removeCount', this.value)"></td>
             <td><input type="text" value="${escapeAttr(r.confirmer)}" style="width:100%; box-sizing:border-box; border:none; text-align:center;" oninput="updateNlcField(${r.id}, 'confirmer', this.value)"></td>
@@ -27808,7 +27796,7 @@ function nlcRowHtml(r, idx, editable) {
 }
 
 function nlcTableHtml(rows, editable) {
-    let html = `<tr><th style="width:40px;">번호</th><th style="width:70px;">일자</th><th style="width:70px;">병실</th><th style="width:90px;">등록번호</th><th>환자성명</th><th style="width:70px;">시침계수</th><th style="width:70px;">발침계수</th><th style="width:80px;">확인자</th>`;
+    let html = `<tr><th style="width:40px;">번호</th><th style="width:70px;">일자</th><th style="width:80px;">병실/외래</th><th style="width:90px;">등록번호</th><th>환자성명</th><th style="width:70px;">시침계수</th><th style="width:70px;">발침계수</th><th style="width:80px;">확인자</th>`;
     if (editable) html += `<th class="no-print" style="width:60px;">삭제</th>`;
     html += `</tr>`;
     (rows || []).forEach((r, idx) => { html += nlcRowHtml(r, idx, editable); });
