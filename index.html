@@ -12427,6 +12427,8 @@ async function initCctvStatusPage() {
     cctvRowCounter = 0;
     genericSignatureStore['cctv-author'] = '';
     document.getElementById('cctv-author-sig-preview').innerHTML = '';
+    const cctv_authorEl = document.getElementById('cctv-author');
+    if (cctv_authorEl) cctv_authorEl.style.display = '';
 
     try {
         const doc = await db.collection('facility_status').doc('cctv_installation').get();
@@ -12435,8 +12437,7 @@ async function initCctvStatusPage() {
             document.getElementById('cctv-author').value = d.author || '';
             document.getElementById('cctv-date').value = d.date || todayStr();
             if (d.authorSignature) {
-                genericSignatureStore['cctv-author'] = d.authorSignature;
-                document.getElementById('cctv-author-sig-preview').innerHTML = `<img src="${d.authorSignature}" style="max-height:26px; vertical-align:middle;">`;
+                applyNamedSignature({ name: d.author || '', signature: d.authorSignature }, 'cctv-author', 'cctv-author', 'cctv-author-sig-preview');
             }
             (d.rows || []).forEach(r => {
                 cctvRows.push({ id: cctvRowCounter++, category: r.category || '', location: r.location || '', count: r.count || '' });
@@ -12690,6 +12691,8 @@ async function initOrgRosterPage() {
     genericSignatureStore['or-approver-uid'] = '';
     document.getElementById('or-author-sig-preview').innerHTML = '';
     document.getElementById('or-approver-sig-preview').innerHTML = '';
+    const or_authorEl = document.getElementById('or-author');
+    if (or_authorEl) or_authorEl.style.display = '';
     let orgRosterSavedApproverUid = '';
 
     try {
@@ -12700,12 +12703,11 @@ async function initOrgRosterPage() {
             document.getElementById('or-yearmonth').value = d.yearMonth || '';
             orgRosterSavedApproverUid = d.approverUid || '';
             if (d.authorSignature) {
-                genericSignatureStore['or-author'] = d.authorSignature;
-                document.getElementById('or-author-sig-preview').innerHTML = `<img src="${d.authorSignature}" style="max-height:26px; vertical-align:middle;">`;
+                applyNamedSignature({ name: d.author || '', signature: d.authorSignature }, 'or-author', 'or-author', 'or-author-sig-preview');
             }
             if (d.approvalSignature) {
                 genericSignatureStore['or-approver-uid'] = d.approvalSignature;
-                document.getElementById('or-approver-sig-preview').innerHTML = `<img src="${d.approvalSignature}" style="max-height:26px; vertical-align:middle;">`;
+                document.getElementById('or-approver-sig-preview').innerHTML = `<img src="${d.approvalSignature}" style="max-height:26px; vertical-align:middle; margin-left:8px;"> <span style="font-size:12px; color:#28a745;">${escapeAttr(d.approverName || '')} 서명 첨부됨</span>`;
             }
             (d.rows || []).forEach(r => {
                 orgRosterRows.push({ id: orgRosterRowCounter++, ...r });
@@ -12813,6 +12815,8 @@ async function initOrgMinutesInput() {
     document.getElementById('org-minutes-result').textContent = '';
     genericSignatureStore['om-author'] = '';
     document.getElementById('om-author-sig-preview').innerHTML = '';
+    const om_authorEl = document.getElementById('om-author');
+    if (om_authorEl) om_authorEl.style.display = '';
 
     populateApproverSelect('om-approver-uid');
 
@@ -13134,7 +13138,6 @@ function renderOrgPlanMetaFields() {
                 <input type="text" id="org-plan-author" value="${escapeAttr(orgPlanMeta.author)}" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름" oninput="orgPlanMeta.author = this.value">
                 <div style="margin-top:4px;">
                     <button class="nav-btn" style="margin:0; padding:2px 6px; font-size:10px; width:auto; display:inline-block;" onclick="loadOrgPlanAuthorSignature()">🖊️ 서명 불러오기</button>
-                    <button class="back-btn" style="margin:0 0 0 3px; padding:2px 6px; font-size:10px; width:auto; display:inline-block;" onclick="clearOrgPlanAuthorSignature()">지우기</button>
                     <div id="org-plan-author-sig-preview" style="margin-top:3px;"></div>
                 </div>
             </td>
@@ -13144,10 +13147,14 @@ function renderOrgPlanMetaFields() {
             const select = document.getElementById('org-plan-approver-uid');
             if (select) select.value = orgPlanMeta.approverUid || '';
         });
+        const authorInputEl = document.getElementById('org-plan-author');
         const sigPreviewEl = document.getElementById('org-plan-author-sig-preview');
-        if (sigPreviewEl) {
-            const sig = genericSignatureStore['org-plan-author'];
-            sigPreviewEl.innerHTML = sig ? `<img src="${sig}" style="max-height:28px; vertical-align:middle;"> <span style="font-size:12px; color:#495057;">현재 서명</span>` : '';
+        const sig = genericSignatureStore['org-plan-author'];
+        if (sig && authorInputEl && sigPreviewEl) {
+            authorInputEl.style.display = 'none';
+            sigPreviewEl.innerHTML = `<img src="${sig}" style="max-height:28px; vertical-align:middle;"> <button class="back-btn no-print" style="margin:0 0 0 4px; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="clearNamedSignature('org-plan-author', 'org-plan-author', 'org-plan-author-sig-preview')">지우기</button>`;
+        } else if (sigPreviewEl) {
+            sigPreviewEl.innerHTML = '';
         }
         reportDateCell.innerHTML = `<input type="date" id="org-plan-report-date" value="${escapeAttr(orgPlanMeta.reportDate)}" oninput="orgPlanMeta.reportDate = this.value">`;
         reporterCell.innerHTML = `<input type="text" id="org-plan-reporter" value="${escapeAttr(orgPlanMeta.reporter)}" style="width:200px;" placeholder="이름" oninput="orgPlanMeta.reporter = this.value">`;
@@ -13164,12 +13171,6 @@ function renderOrgPlanMetaFields() {
 
 async function loadOrgPlanAuthorSignature() {
     await loadNamedSignature('org-plan-author', 'org-plan-author', 'org-plan-author-sig-preview');
-}
-
-function clearOrgPlanAuthorSignature() {
-    genericSignatureStore['org-plan-author'] = '';
-    const previewEl = document.getElementById('org-plan-author-sig-preview');
-    if (previewEl) previewEl.innerHTML = '<span style="font-size:12px; color:#6c757d;">서명 삭제됨</span>';
 }
 
 function updateOrgPlanApproverFromSelect() {
@@ -13279,7 +13280,8 @@ async function saveOrgAnnualPlan() {
         resultEl.textContent = '❌ 연도를 입력해 주세요.';
         return;
     }
-    orgPlanMeta.author = (orgPlanMeta.author || '').trim();
+    const orgPlanAuthorEl = document.getElementById('org-plan-author');
+    orgPlanMeta.author = (orgPlanAuthorEl ? orgPlanAuthorEl.value : (orgPlanMeta.author || '')).trim();
     orgPlanMeta.reporter = (orgPlanMeta.reporter || '').trim();
     if (orgPlanMeta.author) localStorage.setItem('inspector_name_cache', orgPlanMeta.author);
 
@@ -13329,6 +13331,8 @@ function initMissionReportInput() {
     document.getElementById('mr-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['mr-author'] = '';
     document.getElementById('mr-author-sig-preview').innerHTML = '';
+    const mr_authorEl = document.getElementById('mr-author');
+    if (mr_authorEl) mr_authorEl.style.display = '';
     document.getElementById('mr-mission').value = '';
     document.getElementById('mr-period-start').value = '';
     document.getElementById('mr-period-end').value = '';
@@ -13603,6 +13607,8 @@ function initQpsEduInput() {
     document.getElementById('qe-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['qe-author'] = '';
     document.getElementById('qe-author-sig-preview').innerHTML = '';
+    const qe_authorEl = document.getElementById('qe-author');
+    if (qe_authorEl) qe_authorEl.style.display = '';
     document.getElementById('qe-date').value = todayStr();
     document.querySelector('input[name="qe-type"][value="내부교육"]').checked = true;
     document.getElementById('qe-title').value = '';
@@ -13934,6 +13940,8 @@ function initQpsRoundingInput() {
     document.getElementById('qr-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['qr-author'] = '';
     document.getElementById('qr-author-sig-preview').innerHTML = '';
+    const qr_authorEl = document.getElementById('qr-author');
+    if (qr_authorEl) qr_authorEl.style.display = '';
     document.getElementById('qr-month').value = new Date().toISOString().substring(0, 7);
     document.getElementById('qps-rounding-result').textContent = '';
 
@@ -14160,6 +14168,8 @@ function initPsiFallInput() {
     document.getElementById('pf-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['pf-author'] = '';
     document.getElementById('pf-author-sig-preview').innerHTML = '';
+    const pf_authorEl = document.getElementById('pf-author');
+    if (pf_authorEl) pf_authorEl.style.display = '';
     document.getElementById('pf-date').value = '';
     document.getElementById('pf-time').value = '';
     document.getElementById('pf-report-date').value = todayStr();
@@ -14339,6 +14349,8 @@ function initPsiPressureSoreInput() {
     document.getElementById('ps-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['ps-author'] = '';
     document.getElementById('ps-author-sig-preview').innerHTML = '';
+    const ps_authorEl = document.getElementById('ps-author');
+    if (ps_authorEl) ps_authorEl.style.display = '';
     document.getElementById('ps-date').value = '';
     document.getElementById('ps-time').value = '';
     document.getElementById('ps-report-date').value = todayStr();
@@ -14577,6 +14589,8 @@ function initPsiMedicationInput() {
     document.getElementById('pm-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['pm-author'] = '';
     document.getElementById('pm-author-sig-preview').innerHTML = '';
+    const pm_authorEl = document.getElementById('pm-author');
+    if (pm_authorEl) pm_authorEl.style.display = '';
     document.getElementById('pm-date').value = '';
     document.getElementById('pm-time').value = '';
     document.getElementById('pm-report-date').value = todayStr();
@@ -14735,6 +14749,8 @@ function initPsiOtherInput() {
     document.getElementById('po-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['po-author'] = '';
     document.getElementById('po-author-sig-preview').innerHTML = '';
+    const po_authorEl = document.getElementById('po-author');
+    if (po_authorEl) po_authorEl.style.display = '';
     document.getElementById('po-incident-name').value = '';
     document.getElementById('po-date').value = '';
     document.getElementById('po-time').value = '';
@@ -14896,6 +14912,8 @@ function initPsiAnalysisInput() {
     document.getElementById('pan-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['pan-author'] = '';
     document.getElementById('pan-author-sig-preview').innerHTML = '';
+    const pan_authorEl = document.getElementById('pan-author');
+    if (pan_authorEl) pan_authorEl.style.display = '';
     const now = new Date();
     document.getElementById('pan-year').value = now.getFullYear();
     document.getElementById('pan-quarter').value = String(Math.floor(now.getMonth() / 3) + 1);
@@ -15191,6 +15209,8 @@ function initQpsMinutesInput() {
     document.getElementById('qm-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['qm-author'] = '';
     document.getElementById('qm-author-sig-preview').innerHTML = '';
+    const qm_authorEl = document.getElementById('qm-author');
+    if (qm_authorEl) qm_authorEl.style.display = '';
     document.getElementById('qm-date').value = todayStr();
     document.getElementById('qm-time-start').value = '';
     document.getElementById('qm-time-end').value = '';
@@ -15444,6 +15464,8 @@ function initIncidentReportInput() {
     document.getElementById('iar-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['iar-author'] = '';
     document.getElementById('iar-author-sig-preview').innerHTML = '';
+    const iar_authorEl = document.getElementById('iar-author');
+    if (iar_authorEl) iar_authorEl.style.display = '';
     document.getElementById('iar-write-date').value = todayStr();
     document.getElementById('iar-type-other').value = '';
     document.getElementById('iar-date').value = '';
@@ -15592,6 +15614,8 @@ function initQiMinutesInput() {
     document.getElementById('qim-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['qim-author'] = '';
     document.getElementById('qim-author-sig-preview').innerHTML = '';
+    const qim_authorEl = document.getElementById('qim-author');
+    if (qim_authorEl) qim_authorEl.style.display = '';
     document.getElementById('qim-session').value = '';
     document.getElementById('qim-meeting-name').value = '';
     document.getElementById('qim-date').value = todayStr();
@@ -15850,6 +15874,8 @@ function initQiPlanInput() {
     document.getElementById('qip-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['qip-author'] = '';
     document.getElementById('qip-author-sig-preview').innerHTML = '';
+    const qip_authorEl = document.getElementById('qip-author');
+    if (qip_authorEl) qip_authorEl.style.display = '';
     document.getElementById('qip-year').value = new Date().getFullYear();
     document.getElementById('qip-submit-date').value = todayStr();
     document.getElementById('qip-subject').value = '환자 및 보호자의 만족도 향상';
@@ -16059,6 +16085,8 @@ function initQbpInput() {
     document.getElementById('qbp-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['qbp-author'] = '';
     document.getElementById('qbp-author-sig-preview').innerHTML = '';
+    const qbp_authorEl = document.getElementById('qbp-author');
+    if (qbp_authorEl) qbp_authorEl.style.display = '';
     document.getElementById('qbp-year').value = new Date().getFullYear();
     document.getElementById('qbp-report-date').value = todayStr();
     document.getElementById('qbp-reporter').value = '';
@@ -17184,6 +17212,8 @@ function initHazmatInput() {
     document.getElementById('hz-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['hz-author'] = '';
     document.getElementById('hz-author-sig-preview').innerHTML = '';
+    const hz_authorEl = document.getElementById('hz-author');
+    if (hz_authorEl) hz_authorEl.style.display = '';
     document.getElementById('hz-report-date').value = todayStr();
     document.getElementById('hz-reporter').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('hazmat-result').textContent = '';
@@ -17592,6 +17622,8 @@ function initGongsangInput() {
     document.getElementById('gs-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['gs-author'] = '';
     document.getElementById('gs-author-sig-preview').innerHTML = '';
+    const gs_authorEl = document.getElementById('gs-author');
+    if (gs_authorEl) gs_authorEl.style.display = '';
     document.getElementById('gs-dept').value = '';
     document.getElementById('gs-position').value = '';
     document.getElementById('gs-name').value = '';
@@ -18939,6 +18971,8 @@ async function initFeiInput() {
     document.getElementById('fei-author').value = '';
     genericSignatureStore['fei-author'] = '';
     document.getElementById('fei-author-sig-preview').innerHTML = '';
+    const fei_authorEl = document.getElementById('fei-author');
+    if (fei_authorEl) fei_authorEl.style.display = '';
     document.getElementById('fei-result').textContent = '';
     populateApproverSelect('fei-approver-uid');
     feiRows = [];
@@ -21005,6 +21039,8 @@ function initMwdInput() {
     document.getElementById('mwd-author').value = '';
     genericSignatureStore['mwd-author'] = '';
     document.getElementById('mwd-author-sig-preview').innerHTML = '';
+    const mwd_authorEl = document.getElementById('mwd-author');
+    if (mwd_authorEl) mwd_authorEl.style.display = '';
     document.getElementById('mwd-note').value = '';
     document.getElementById('mwd-result').textContent = '';
     populateApproverSelect('mwd-approver-uid');
@@ -21750,6 +21786,8 @@ function initSapInput() {
     document.getElementById('sap-reporter').value = '';
     genericSignatureStore['sap-reporter'] = '';
     document.getElementById('sap-reporter-sig-preview').innerHTML = '';
+    const sap_reporterEl = document.getElementById('sap-reporter');
+    if (sap_reporterEl) sap_reporterEl.style.display = '';
     document.getElementById('sap-result').textContent = '';
     loadSapDefaults();
     renderSapTable();
@@ -21996,6 +22034,8 @@ function initFsaInput() {
     document.getElementById('fsa-author').value = '';
     genericSignatureStore['fsa-author'] = '';
     document.getElementById('fsa-author-sig-preview').innerHTML = '';
+    const fsa_authorEl = document.getElementById('fsa-author');
+    if (fsa_authorEl) fsa_authorEl.style.display = '';
     document.getElementById('fsa-result').textContent = '';
     loadFsaDefaults();
     renderFsaTable();
@@ -22359,6 +22399,8 @@ async function initFirInput() {
     document.getElementById('fir-author').value = '';
     genericSignatureStore['fir-author'] = '';
     document.getElementById('fir-author-sig-preview').innerHTML = '';
+    const fir_authorEl = document.getElementById('fir-author');
+    if (fir_authorEl) fir_authorEl.style.display = '';
     document.getElementById('fir-result').textContent = '';
     populateApproverSelect('fir-approver-uid');
     firRows = [];
@@ -24499,6 +24541,8 @@ function initNdaInput() {
     document.getElementById('nda-author').value = '';
     genericSignatureStore['nda-author'] = '';
     document.getElementById('nda-author-sig-preview').innerHTML = '';
+    const nda_authorEl = document.getElementById('nda-author');
+    if (nda_authorEl) nda_authorEl.style.display = '';
     document.getElementById('nda-approver-uid').value = '';
     populateApproverSelect('nda-approver-uid');
     document.getElementById('nda-name-kr').value = '';
@@ -25598,6 +25642,8 @@ function initRdrInput() {
     document.getElementById('rdr-author').value = '';
     genericSignatureStore['rdr-author'] = '';
     document.getElementById('rdr-author-sig-preview').innerHTML = '';
+    const rdr_authorEl = document.getElementById('rdr-author');
+    if (rdr_authorEl) rdr_authorEl.style.display = '';
     populateApproverSelect('rdr-approver-uid');
     document.getElementById('rdr-result').textContent = '';
 }
@@ -28094,6 +28140,8 @@ function initPmsInput() {
     document.getElementById('pms-author').value = '';
     genericSignatureStore['pms-author'] = '';
     document.getElementById('pms-author-sig-preview').innerHTML = '';
+    const pms_authorEl = document.getElementById('pms-author');
+    if (pms_authorEl) pms_authorEl.style.display = '';
     populateApproverSelect('pms-approver-uid');
     document.getElementById('pms-result').textContent = '';
 }
@@ -28942,6 +28990,8 @@ function initRieInput() {
     document.getElementById('rie-author').value = '';
     genericSignatureStore['rie-author'] = '';
     document.getElementById('rie-author-sig-preview').innerHTML = '';
+    const rie_authorEl = document.getElementById('rie-author');
+    if (rie_authorEl) rie_authorEl.style.display = '';
     populateApproverSelect('rie-approver-uid');
     document.getElementById('rie-file-input').value = '';
     document.getElementById('rie-result').textContent = '';
@@ -29293,6 +29343,8 @@ function initImrInput() {
     document.getElementById('imr-author').value = '';
     genericSignatureStore['imr-author'] = '';
     document.getElementById('imr-author-sig-preview').innerHTML = '';
+    const imr_authorEl = document.getElementById('imr-author');
+    if (imr_authorEl) imr_authorEl.style.display = '';
     populateApproverSelect('imr-approver-uid');
     const def = IND_DEFAULTS[initialCode] || {};
     document.getElementById('imr-indicator-name').value = def.indicatorName || '';
@@ -29943,6 +29995,8 @@ function initSieInput() {
     document.getElementById('sie-author').value = '';
     genericSignatureStore['sie-author'] = '';
     document.getElementById('sie-author-sig-preview').innerHTML = '';
+    const sie_authorEl = document.getElementById('sie-author');
+    if (sie_authorEl) sie_authorEl.style.display = '';
     populateApproverSelect('sie-approver-uid');
     ['sie-name', 'sie-birth', 'sie-position', 'sie-career',
      'sie-place-other', 'sie-duty-other', 'sie-cause-other', 'sie-route-other',
@@ -30098,6 +30152,8 @@ function initSirInput() {
     document.getElementById('sir-author').value = '';
     genericSignatureStore['sir-author'] = '';
     document.getElementById('sir-author-sig-preview').innerHTML = '';
+    const sir_authorEl = document.getElementById('sir-author');
+    if (sir_authorEl) sir_authorEl.style.display = '';
     populateApproverSelect('sir-approver-uid');
     ['sir-incident-datetime', 'sir-dept', 'sir-idnum', 'sir-name', 'sir-phone', 'sir-hire-date', 'sir-job',
      'sir-incident-course', 'sir-injury-part', 'sir-injury-type', 'sir-occur-form', 'sir-agent',
@@ -30246,6 +30302,8 @@ function initIactInput() {
     document.getElementById('iact-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['iact-author'] = '';
     document.getElementById('iact-author-sig-preview').innerHTML = '';
+    const iact_authorEl = document.getElementById('iact-author');
+    if (iact_authorEl) iact_authorEl.style.display = '';
     document.getElementById('iact-date').value = todayStr();
     document.getElementById('iact-notes').value = `1. 위원회 활동 – 분기별 회의\n1) 분기별 정기회의 : _월, _월, _월, _월\n\n2. 대표적인 감염감시활동 : 감염관리위원회에서 우선순위를 선정하여 대표적인 감염감시활동으로 "손위생관련 감염활동"을 하기로 결정함\n\n3. 지표관리 : 감염관리위원회에서 심의하여 의료기관평가기준에 맞추어 2가지 지표관리를 시행함 (손위생수행률, 직원안전사고보고율)\n\n4. 병원 환경관리 : 월별 1회 병원환경관리점검표를 이용하여 감염관리담당자가 라운딩 실시하여 환경을 관리함. 정기적인 청소 및 소독을 시행함 (주1회 감염점검 병행 시행)\n\n5. 직원교육보고 : (교육 진행 현황 작성)\n\n6. 예산관리 : 손소독제구입 및 교육.`;
     document.getElementById('iact-hh-target-q1').value = '90% 이상';
@@ -31914,6 +31972,8 @@ function initIcdInput() {
     document.getElementById('icd-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['icd-author'] = '';
     document.getElementById('icd-author-sig-preview').innerHTML = '';
+    const icd_authorEl = document.getElementById('icd-author');
+    if (icd_authorEl) icd_authorEl.style.display = '';
     document.getElementById('icd-name').value = '';
     document.getElementById('icd-regno').value = '';
     document.getElementById('icd-gender').value = '';
@@ -32244,6 +32304,8 @@ function initIapInput() {
     document.getElementById('iap-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['iap-author'] = '';
     document.getElementById('iap-author-sig-preview').innerHTML = '';
+    const iap_authorEl = document.getElementById('iap-author');
+    if (iap_authorEl) iap_authorEl.style.display = '';
     document.getElementById('iap-reportdate').value = todayStr();
     document.getElementById('iap-reporter').value = '';
     document.getElementById('iap-result').textContent = '';
@@ -33087,6 +33149,8 @@ function initFmrInput() {
     document.getElementById('fmr-author').value = '';
     genericSignatureStore['fmr-author'] = '';
     document.getElementById('fmr-author-sig-preview').innerHTML = '';
+    const fmr_authorEl = document.getElementById('fmr-author');
+    if (fmr_authorEl) fmr_authorEl.style.display = '';
     document.getElementById('fmr-affiliation').value = '';
     document.getElementById('fmr-job').value = '';
     document.getElementById('fmr-name').value = '';
@@ -33215,6 +33279,8 @@ function initNapInput() {
     document.getElementById('nap-author').value = '';
     genericSignatureStore['nap-author'] = '';
     document.getElementById('nap-author-sig-preview').innerHTML = '';
+    const nap_authorEl = document.getElementById('nap-author');
+    if (nap_authorEl) nap_authorEl.style.display = '';
     document.getElementById('nap-chairman-name').value = '';
     document.getElementById('nap-secretary-name').value = '';
     document.getElementById('nap-member').value = '병원장';
@@ -33620,6 +33686,8 @@ function initFqiInput() {
     document.getElementById('fqi-author').value = '';
     genericSignatureStore['fqi-author'] = '';
     document.getElementById('fqi-author-sig-preview').innerHTML = '';
+    const fqi_authorEl = document.getElementById('fqi-author');
+    if (fqi_authorEl) fqi_authorEl.style.display = '';
     document.getElementById('fqi-note').value = '';
     document.getElementById('fqi-result').textContent = '';
     populateApproverSelect('fqi-approver-uid');
@@ -33766,6 +33834,8 @@ function initFacInput() {
     document.getElementById('fac-author').value = '';
     genericSignatureStore['fac-author'] = '';
     document.getElementById('fac-author-sig-preview').innerHTML = '';
+    const fac_authorEl = document.getElementById('fac-author');
+    if (fac_authorEl) fac_authorEl.style.display = '';
     document.getElementById('fac-datetime').value = '';
     document.getElementById('fac-location').value = '';
     document.getElementById('fac-witness1-name').value = '';
@@ -34095,6 +34165,8 @@ function initRegProposalInput() {
     document.getElementById('rp-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['rp-author'] = '';
     document.getElementById('rp-author-sig-preview').innerHTML = '';
+    const rp_authorEl = document.getElementById('rp-author');
+    if (rp_authorEl) rp_authorEl.style.display = '';
     document.getElementById('rp-dept').value = '';
     document.getElementById('rp-date').value = todayStr();
     document.getElementById('rp-reg-names').value = '';
@@ -34217,6 +34289,8 @@ function initRegAmendmentInput() {
     document.getElementById('ram-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['ram-author'] = '';
     document.getElementById('ram-author-sig-preview').innerHTML = '';
+    const ram_authorEl = document.getElementById('ram-author');
+    if (ram_authorEl) ram_authorEl.style.display = '';
     document.getElementById('ram-reg-num').value = '';
     document.getElementById('ram-reg-name').value = '';
     document.getElementById('ram-reason').value = '';
@@ -34473,6 +34547,8 @@ function initGrievanceAppInput() {
     document.getElementById('ga-author').value = localStorage.getItem('inspector_name_cache') || '';
     genericSignatureStore['ga-author'] = '';
     document.getElementById('ga-author-sig-preview').innerHTML = '';
+    const ga_authorEl = document.getElementById('ga-author');
+    if (ga_authorEl) ga_authorEl.style.display = '';
     document.getElementById('ga-date').value = todayStr();
     ['ga-reporter-name', 'ga-reporter-dept', 'ga-reporter-phone', 'ga-reporter-position',
      'ga-agent-name', 'ga-agent-dept', 'ga-agent-phone', 'ga-agent-position',
@@ -35795,13 +35871,20 @@ async function loadNamedSignature(key, nameInputId, previewElId) {
 
 function applyNamedSignature(chosen, key, nameInputId, previewElId) {
     genericSignatureStore[key] = chosen.signature;
+    // 결재란에 서명 도장이 찍히면, 굳이 이름을 따로 글자로 적어둘 필요가 없어서 이름 입력칸은 숨깁니다.
+    // (종이 결재판도 서명/도장만 있고 옆에 이름을 따로 안 적는 것과 같은 이치)
     if (nameInputId) {
         const nameEl = document.getElementById(nameInputId);
-        if (nameEl) nameEl.value = chosen.name;
+        if (nameEl) {
+            nameEl.value = chosen.name;
+            nameEl.style.display = 'none';
+        }
     }
     if (previewElId) {
         const previewEl = document.getElementById(previewElId);
-        if (previewEl) previewEl.innerHTML = `<img src="${chosen.signature}" style="max-height:28px; vertical-align:middle; margin-left:8px;"> <span style="font-size:12px; color:#28a745;">${chosen.name} 서명 첨부됨</span>`;
+        if (previewEl) {
+            previewEl.innerHTML = `<img src="${chosen.signature}" style="max-height:28px; vertical-align:middle;"> <button class="back-btn no-print" style="margin:0 0 0 4px; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="clearNamedSignature('${key}', '${nameInputId || ''}', '${previewElId}')">지우기</button>`;
+        }
     }
 }
 
@@ -35834,8 +35917,16 @@ function confirmSignaturePicker(pickerId) {
     delete window[`__sigPickerChoose_${pickerId}`];
 }
 
-function clearNamedSignature(key, previewElId) {
+function clearNamedSignature(key, nameInputId, previewElId) {
     delete genericSignatureStore[key];
+    if (nameInputId) {
+        const nameEl = document.getElementById(nameInputId);
+        if (nameEl) {
+            nameEl.style.display = '';
+            nameEl.value = '';
+            nameEl.focus();
+        }
+    }
     if (previewElId) {
         const previewEl = document.getElementById(previewElId);
         if (previewEl) previewEl.innerHTML = '';
