@@ -957,7 +957,8 @@
             <h2 style="margin: 0;">📅 운영위원회 연간계획서</h2>
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                 <label style="font-size:13px;">연도: <input type="number" id="org-plan-year" style="width:80px; text-align:center;" onchange="loadOrgAnnualPlan()"></label>
-                <button class="save-btn" style="margin:0; padding:6px 12px; font-size:13px;" onclick="saveOrgAnnualPlan()">☁️ 저장</button>
+                <button class="nav-btn no-print" id="org-plan-edit-btn" style="margin:0; padding:6px 12px; font-size:13px;" onclick="toggleOrgPlanEditMode()">✏️ 수정</button>
+                <button class="save-btn no-print hidden" id="org-plan-save-btn" style="margin:0; padding:6px 12px; font-size:13px;" onclick="saveOrgAnnualPlan()">☁️ 저장</button>
                 <button class="toggle-history-btn no-print" onclick="printHistoryPage('landscape')">🖨️ 인쇄</button>
             </div>
         </div>
@@ -969,15 +970,12 @@
                 <h2 class="official-form-title">『 <span id="org-plan-year-label">2026</span>년 』<br>운영위원회 연간계획서</h2>
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
-                    <tr>
-                        <td><input type="text" id="org-plan-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
-                        <td><select id="org-plan-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
-                    </tr>
+                    <tr id="org-plan-approval-row"></tr>
                 </table>
             </div>
             <table class="official-form-table">
-                <tr><th style="width:110px;">보고일</th><td><input type="date" id="org-plan-report-date"></td></tr>
-                <tr><th>보고자</th><td><input type="text" id="org-plan-reporter" style="width:200px;" placeholder="이름"></td></tr>
+                <tr><th style="width:110px;">보고일</th><td id="org-plan-reportdate-cell"></td></tr>
+                <tr><th>보고자</th><td id="org-plan-reporter-cell"></td></tr>
             </table>
 
             <h3 class="policy-chapter-title">Ⅰ. 운영위원회 사업 계획</h3>
@@ -988,7 +986,7 @@
                 <table id="org-annual-plan-table" style="font-size:11px;"></table>
             </div>
             <p style="text-align:right; font-weight:bold; margin-top:8px;">예산합계: <span id="org-plan-total">0</span> 원</p>
-            <div class="no-print" style="margin:10px 0;">
+            <div class="no-print hidden" id="org-plan-row-controls" style="margin:10px 0;">
                 <button class="nav-btn" style="margin:0; font-size:12px; padding:5px 10px;" onclick="addOrgPlanRow()">➕ 행 추가</button>
                 <button class="nav-btn" style="margin:0 0 0 6px; font-size:12px; padding:5px 10px; background:#6c757d;" onclick="resetOrgPlanDefaults()">↺ 기본값으로 되돌리기</button>
             </div>
@@ -12695,6 +12693,8 @@ function orgPlanDefaultRows() {
 
 let orgPlanRows = [];
 let orgPlanIdCounter = 1;
+let orgPlanMeta = { author: '', approverUid: '', approverName: '', reportDate: '', reporter: '' };
+let orgPlanEditMode = false;
 
 function openOrgAnnualPlan() {
     sharedToolEntryTeam = currentTeamName;
@@ -12705,7 +12705,6 @@ async function initOrgAnnualPlanPage() {
     document.getElementById('org-annual-plan-related').innerHTML = renderRelatedPolicyLink('8.1');
     document.getElementById('org-annual-plan-text').innerHTML = ORG_ANNUAL_PLAN_TEXT_HTML;
     document.getElementById('org-plan-year').value = new Date().getFullYear();
-    populateApproverSelect('org-plan-approver-uid');
     await loadOrgAnnualPlan();
 }
 
@@ -12715,10 +12714,13 @@ async function loadOrgAnnualPlan() {
     const year = document.getElementById('org-plan-year').value.trim() || String(new Date().getFullYear());
     document.getElementById('org-plan-year-label').textContent = year;
 
-    document.getElementById('org-plan-author').value = localStorage.getItem('inspector_name_cache') || '';
-    document.getElementById('org-plan-approver-uid').value = '';
-    document.getElementById('org-plan-report-date').value = todayStr();
-    document.getElementById('org-plan-reporter').value = localStorage.getItem('inspector_name_cache') || '';
+    orgPlanMeta = {
+        author: localStorage.getItem('inspector_name_cache') || '',
+        approverUid: '',
+        approverName: '',
+        reportDate: todayStr(),
+        reporter: localStorage.getItem('inspector_name_cache') || ''
+    };
     orgPlanRows = orgPlanDefaultRows();
     orgPlanIdCounter = orgPlanRows.length + 1;
 
@@ -12726,18 +12728,67 @@ async function loadOrgAnnualPlan() {
         const doc = await db.collection('org_annual_plans').doc(year).get();
         if (doc.exists) {
             const data = doc.data();
-            document.getElementById('org-plan-author').value = data.author || '';
-            document.getElementById('org-plan-approver-uid').value = data.approverUid || '';
-            document.getElementById('org-plan-report-date').value = data.reportDate || '';
-            document.getElementById('org-plan-reporter').value = data.reporter || '';
+            orgPlanMeta = {
+                author: data.author || '',
+                approverUid: data.approverUid || '',
+                approverName: data.approverName || '',
+                reportDate: data.reportDate || '',
+                reporter: data.reporter || ''
+            };
             if (data.rows && data.rows.length) {
                 orgPlanRows = data.rows.map(r => ({ id: orgPlanIdCounter++, ...r }));
             }
         }
     } catch (err) { console.error(err); }
 
+    // 연도를 바꿔서 새로 불러올 때는 항상 "보기" 상태로 시작하고, 고치려면 수정 버튼을 눌러야 합니다.
+    orgPlanEditMode = false;
+    renderOrgPlanEditControls();
+    renderOrgPlanMetaFields();
     renderOrgAnnualPlanTable();
     recalcOrgPlanTotal();
+}
+
+function toggleOrgPlanEditMode() {
+    orgPlanEditMode = !orgPlanEditMode;
+    renderOrgPlanEditControls();
+    renderOrgPlanMetaFields();
+    renderOrgAnnualPlanTable();
+}
+
+function renderOrgPlanEditControls() {
+    document.getElementById('org-plan-edit-btn').textContent = orgPlanEditMode ? '✖️ 수정 취소' : '✏️ 수정';
+    document.getElementById('org-plan-save-btn').classList.toggle('hidden', !orgPlanEditMode);
+    document.getElementById('org-plan-row-controls').classList.toggle('hidden', !orgPlanEditMode);
+}
+
+function renderOrgPlanMetaFields() {
+    const approvalRow = document.getElementById('org-plan-approval-row');
+    const reportDateCell = document.getElementById('org-plan-reportdate-cell');
+    const reporterCell = document.getElementById('org-plan-reporter-cell');
+
+    if (orgPlanEditMode) {
+        approvalRow.innerHTML = `
+            <td><input type="text" id="org-plan-author" value="${escapeAttr(orgPlanMeta.author)}" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름" oninput="orgPlanMeta.author = this.value"></td>
+            <td><select id="org-plan-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;" onchange="updateOrgPlanApproverFromSelect()"></select></td>
+        `;
+        populateApproverSelect('org-plan-approver-uid').then(() => {
+            const select = document.getElementById('org-plan-approver-uid');
+            if (select) select.value = orgPlanMeta.approverUid || '';
+        });
+        reportDateCell.innerHTML = `<input type="date" id="org-plan-report-date" value="${escapeAttr(orgPlanMeta.reportDate)}" oninput="orgPlanMeta.reportDate = this.value">`;
+        reporterCell.innerHTML = `<input type="text" id="org-plan-reporter" value="${escapeAttr(orgPlanMeta.reporter)}" style="width:200px;" placeholder="이름" oninput="orgPlanMeta.reporter = this.value">`;
+    } else {
+        approvalRow.innerHTML = `<td>${escapeAttr(orgPlanMeta.author) || '-'}</td><td>${escapeAttr(orgPlanMeta.approverName) || '-'}</td>`;
+        reportDateCell.textContent = orgPlanMeta.reportDate || '-';
+        reporterCell.textContent = orgPlanMeta.reporter || '-';
+    }
+}
+
+function updateOrgPlanApproverFromSelect() {
+    const select = document.getElementById('org-plan-approver-uid');
+    orgPlanMeta.approverUid = select.value;
+    orgPlanMeta.approverName = select.value ? select.options[select.selectedIndex].text : '';
 }
 
 function resetOrgPlanDefaults() {
@@ -12767,6 +12818,7 @@ function updateOrgPlanField(id, field, value) {
 }
 
 function toggleOrgPlanMonth(id, c) {
+    if (!orgPlanEditMode) return;
     const row = orgPlanRows.find(r => r.id === id);
     if (!row) return;
     row.months[c] = !row.months[c];
@@ -12790,19 +12842,31 @@ function orgPlanGroupSpans(rows) {
 function renderOrgAnnualPlanTable() {
     const table = document.getElementById('org-annual-plan-table');
     if (!table) return;
+    const editable = orgPlanEditMode;
     const spans = orgPlanGroupSpans(orgPlanRows);
-    let html = `<thead><tr><th style="width:90px;">구분</th><th style="width:auto;">내용</th>${MONTHS_12.map(m => `<th style="width:26px;">${m.replace('월','')}</th>`).join('')}<th style="width:130px;">비고</th><th style="width:90px;">예산(원)</th><th class="no-print" style="width:50px;"></th></tr></thead><tbody>`;
+    let html = `<thead><tr><th style="width:90px;">구분</th><th style="width:auto;">내용</th>${MONTHS_12.map(m => `<th style="width:26px;">${m.replace('월','')}</th>`).join('')}<th style="width:130px;">비고</th><th style="width:90px;">예산(원)</th>${editable ? '<th class="no-print" style="width:50px;"></th>' : ''}</tr></thead><tbody>`;
 
     orgPlanRows.forEach((row, idx) => {
         html += '<tr>';
         if (spans[idx] !== 'cont') {
-            html += `<td rowspan="${spans[idx]}"><input type="text" value="${escapeAttr(row.group)}" style="width:100%; box-sizing:border-box; text-align:center; font-weight:bold; font-size:11px;" oninput="updateOrgPlanField(${row.id}, 'group', this.value)"></td>`;
+            const groupCell = editable
+                ? `<input type="text" value="${escapeAttr(row.group)}" style="width:100%; box-sizing:border-box; text-align:center; font-weight:bold; font-size:11px;" oninput="updateOrgPlanField(${row.id}, 'group', this.value)">`
+                : `${escapeAttr(row.group) || '-'}`;
+            html += `<td rowspan="${spans[idx]}" style="${editable ? '' : 'text-align:center; font-weight:bold;'}">${groupCell}</td>`;
         }
-        html += `<td style="text-align:left;"><input type="text" value="${escapeAttr(row.name)}" style="width:100%; box-sizing:border-box; font-size:11px;" oninput="updateOrgPlanField(${row.id}, 'name', this.value)"></td>`;
-        html += row.months.map((v, c) => `<td class="${v ? 'ledger-o' : ''}" style="text-align:center; cursor:pointer;" onclick="toggleOrgPlanMonth(${row.id}, ${c})">${v ? 'O' : ''}</td>`).join('');
-        html += `<td><input type="text" value="${escapeAttr(row.note)}" style="width:100%; box-sizing:border-box; font-size:10px;" oninput="updateOrgPlanField(${row.id}, 'note', this.value)"></td>`;
-        html += `<td><input type="text" value="${escapeAttr(row.budget)}" style="width:100%; box-sizing:border-box; text-align:right; font-size:11px;" oninput="updateOrgPlanField(${row.id}, 'budget', this.value)"></td>`;
-        html += `<td class="no-print" style="text-align:center;"><button class="back-btn" style="background:#dc3545; color:white; margin:0; padding:2px 5px; font-size:10px;" onclick="removeOrgPlanRow(${row.id})">삭제</button></td>`;
+        html += editable
+            ? `<td style="text-align:left;"><input type="text" value="${escapeAttr(row.name)}" style="width:100%; box-sizing:border-box; font-size:11px;" oninput="updateOrgPlanField(${row.id}, 'name', this.value)"></td>`
+            : `<td style="text-align:left;">${escapeAttr(row.name) || '-'}</td>`;
+        html += row.months.map((v, c) => `<td class="${v ? 'ledger-o' : ''}" style="text-align:center;${editable ? ' cursor:pointer;' : ''}" onclick="toggleOrgPlanMonth(${row.id}, ${c})">${v ? 'O' : ''}</td>`).join('');
+        html += editable
+            ? `<td><input type="text" value="${escapeAttr(row.note)}" style="width:100%; box-sizing:border-box; font-size:10px;" oninput="updateOrgPlanField(${row.id}, 'note', this.value)"></td>`
+            : `<td style="font-size:10px;">${escapeAttr(row.note) || '-'}</td>`;
+        html += editable
+            ? `<td><input type="text" value="${escapeAttr(row.budget)}" style="width:100%; box-sizing:border-box; text-align:right; font-size:11px;" oninput="updateOrgPlanField(${row.id}, 'budget', this.value)"></td>`
+            : `<td style="text-align:right;">${escapeAttr(row.budget) || '0'}</td>`;
+        if (editable) {
+            html += `<td class="no-print" style="text-align:center;"><button class="back-btn" style="background:#dc3545; color:white; margin:0; padding:2px 5px; font-size:10px;" onclick="removeOrgPlanRow(${row.id})">삭제</button></td>`;
+        }
         html += '</tr>';
     });
 
@@ -12828,23 +12892,28 @@ async function saveOrgAnnualPlan() {
         resultEl.textContent = '❌ 연도를 입력해 주세요.';
         return;
     }
-    const author = document.getElementById('org-plan-author').value.trim();
-    if (author) localStorage.setItem('inspector_name_cache', author);
+    orgPlanMeta.author = (orgPlanMeta.author || '').trim();
+    orgPlanMeta.reporter = (orgPlanMeta.reporter || '').trim();
+    if (orgPlanMeta.author) localStorage.setItem('inspector_name_cache', orgPlanMeta.author);
 
-    const approverSelect = document.getElementById('org-plan-approver-uid');
     try {
         await db.collection('org_annual_plans').doc(year).set({
             year: year,
-            author: author,
-            approverUid: approverSelect.value,
-            approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
-            reportDate: document.getElementById('org-plan-report-date').value,
-            reporter: document.getElementById('org-plan-reporter').value.trim(),
+            author: orgPlanMeta.author,
+            approverUid: orgPlanMeta.approverUid || '',
+            approverName: orgPlanMeta.approverName || '',
+            reportDate: orgPlanMeta.reportDate || '',
+            reporter: orgPlanMeta.reporter,
             rows: orgPlanRows.map(({ id, ...rest }) => rest),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         resultEl.style.color = '#28a745';
         resultEl.textContent = '✅ 저장되었습니다!';
+        // 저장 후에는 다시 "보기" 상태로 돌아갑니다.
+        orgPlanEditMode = false;
+        renderOrgPlanEditControls();
+        renderOrgPlanMetaFields();
+        renderOrgAnnualPlanTable();
     } catch (err) {
         console.error(err);
         resultEl.style.color = '#dc3545';
