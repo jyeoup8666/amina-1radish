@@ -792,7 +792,13 @@
             <div class="official-form-headrow">
                 <h2 class="official-form-title">CCTV 설치현황</h2>
                 <table class="official-approval-table">
-                    <tr><td class="oa-label">작성자</td><td><input type="text" id="cctv-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td></tr>
+                    <tr><td class="oa-label">작성자</td><td>
+                        <input type="text" id="cctv-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                        <div class="no-print" style="margin-top:2px;">
+                            <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('cctv-author', null, 'cctv-author-sig-preview')">🖊️ 서명</button>
+                            <div id="cctv-author-sig-preview" style="display:inline-block;"></div>
+                        </div>
+                    </td></tr>
                     <tr><td class="oa-label">작성일자</td><td><input type="date" id="cctv-date" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;"></td></tr>
                 </table>
             </div>
@@ -871,8 +877,20 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="or-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
-                        <td><select id="or-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
+                        <td>
+                            <input type="text" id="or-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('or-author', null, 'or-author-sig-preview')">🖊️ 서명</button>
+                                <div id="or-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <select id="or-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('or-approver-uid', 'or-approver-uid', 'or-approver-sig-preview')">🖊️ 서명</button>
+                                <div id="or-approver-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -907,7 +925,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="om-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="om-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('om-author', null, 'om-author-sig-preview')">🖊️ 서명</button>
+                                <div id="om-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="om-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1008,7 +1032,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="mr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="mr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('mr-author', null, 'mr-author-sig-preview')">🖊️ 서명</button>
+                                <div id="mr-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="mr-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1095,7 +1125,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qe-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qe-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qe-author', null, 'qe-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qe-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qe-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1179,7 +1215,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">QPS담당자</th><th class="oa-label">병원장</th></tr>
                     <tr>
-                        <td><input type="text" id="qr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qr-author', null, 'qr-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qr-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qr-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1241,7 +1283,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="pf-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="pf-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('pf-author', null, 'pf-author-sig-preview')">🖊️ 서명</button>
+                                <div id="pf-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="pf-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1334,7 +1382,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="ps-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="ps-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('ps-author', null, 'ps-author-sig-preview')">🖊️ 서명</button>
+                                <div id="ps-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="ps-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1438,7 +1492,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="pm-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="pm-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('pm-author', null, 'pm-author-sig-preview')">🖊️ 서명</button>
+                                <div id="pm-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="pm-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1512,7 +1572,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="po-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="po-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('po-author', null, 'po-author-sig-preview')">🖊️ 서명</button>
+                                <div id="po-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="po-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1596,7 +1662,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="pan-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="pan-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('pan-author', null, 'pan-author-sig-preview')">🖊️ 서명</button>
+                                <div id="pan-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="pan-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1702,7 +1774,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qm-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qm-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qm-author', null, 'qm-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qm-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qm-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1763,7 +1841,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="iar-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="iar-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('iar-author', null, 'iar-author-sig-preview')">🖊️ 서명</button>
+                                <div id="iar-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="iar-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1829,7 +1913,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qim-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qim-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qim-author', null, 'qim-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qim-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qim-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1886,7 +1976,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qip-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qip-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qip-author', null, 'qip-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qip-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qip-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -1952,7 +2048,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qbp-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qbp-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qbp-author', null, 'qbp-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qbp-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qbp-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2040,7 +2142,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qmr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qmr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qmr-author', null, 'qmr-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qmr-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qmr-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2196,7 +2304,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qfr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qfr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qfr-author', null, 'qfr-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qfr-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qfr-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2352,7 +2466,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qem-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qem-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qem-author', null, 'qem-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qem-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qem-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2436,7 +2556,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="qef-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="qef-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('qef-author', null, 'qef-author-sig-preview')">🖊️ 서명</button>
+                                <div id="qef-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="qef-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2520,7 +2646,13 @@
                 <table class="official-approval-table" style="width:230px;">
                     <tr><th rowspan="2" class="oa-label oa-corner" style="width:40px;">결재</th><th class="oa-label" style="width:95px;">담당자</th><th class="oa-label" style="width:95px;">병원장</th></tr>
                     <tr>
-                        <td style="width:95px;"><input type="text" id="iem-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td style="width:95px;">
+                            <input type="text" id="iem-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('iem-author', null, 'iem-author-sig-preview')">🖊️ 서명</button>
+                                <div id="iem-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td style="width:95px;"><select id="iem-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2615,7 +2747,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="ief-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="ief-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('ief-author', null, 'ief-author-sig-preview')">🖊️ 서명</button>
+                                <div id="ief-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="ief-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2758,7 +2896,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="hz-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="hz-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('hz-author', null, 'hz-author-sig-preview')">🖊️ 서명</button>
+                                <div id="hz-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="hz-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -2810,8 +2954,20 @@
                 <table class="official-approval-table" style="width:148px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">부서장</th><th class="oa-label">위원장</th></tr>
                     <tr>
-                        <td><select id="esa-approver-dept-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
-                        <td><select id="esa-approver-chair-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
+                        <td>
+                            <select id="esa-approver-dept-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('esa-approver-dept-uid', 'esa-approver-dept-uid', 'esa-approver-dept-sig-preview')">🖊️ 서명</button>
+                                <div id="esa-approver-dept-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <select id="esa-approver-chair-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('esa-approver-chair-uid', 'esa-approver-chair-uid', 'esa-approver-chair-sig-preview')">🖊️ 서명</button>
+                                <div id="esa-approver-chair-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -2841,7 +2997,13 @@
             </table>
 
             <table class="official-form-table" style="margin-top:10px;">
-                <tr><th style="width:110px;">작성일자</th><td><input type="date" id="esa-write-date"></td><th style="width:90px;">작성자</th><td><input type="text" id="esa-author" style="width:100%; box-sizing:border-box;"></td></tr>
+                <tr><th style="width:110px;">작성일자</th><td><input type="date" id="esa-write-date"></td><th style="width:90px;">작성자</th><td>
+                    <input type="text" id="esa-author" style="width:100%; box-sizing:border-box;">
+                    <div class="no-print">
+                        <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('esa-author', null, 'esa-author-sig-preview')">🖊️ 서명</button>
+                        <div id="esa-author-sig-preview" style="display:inline-block;"></div>
+                    </div>
+                </td></tr>
             </table>
         </div>
 
@@ -2876,7 +3038,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="gs-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="gs-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('gs-author', null, 'gs-author-sig-preview')">🖊️ 서명</button>
+                                <div id="gs-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="gs-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -3130,7 +3298,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="iact-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="iact-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('iact-author', null, 'iact-author-sig-preview')">🖊️ 서명</button>
+                                <div id="iact-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="iact-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -3597,7 +3771,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="icd-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="icd-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('icd-author', null, 'icd-author-sig-preview')">🖊️ 서명</button>
+                                <div id="icd-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="icd-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -3725,7 +3905,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="iap-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="iap-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('iap-author', null, 'iap-author-sig-preview')">🖊️ 서명</button>
+                                <div id="iap-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="iap-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -4271,7 +4457,13 @@
                 <table class="official-approval-table" style="width:160px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="fmr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="fmr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('fmr-author', null, 'fmr-author-sig-preview')">🖊️ 서명</button>
+                                <div id="fmr-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="fmr-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -4324,7 +4516,13 @@
                 <table class="official-approval-table" style="width:160px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="nap-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="nap-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('nap-author', null, 'nap-author-sig-preview')">🖊️ 서명</button>
+                                <div id="nap-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="nap-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -4458,7 +4656,13 @@
                 <table class="official-approval-table" style="width:160px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="fqi-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="fqi-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('fqi-author', null, 'fqi-author-sig-preview')">🖊️ 서명</button>
+                                <div id="fqi-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="fqi-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -4511,7 +4715,13 @@
                 <table class="official-approval-table" style="width:160px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="fac-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="fac-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('fac-author', null, 'fac-author-sig-preview')">🖊️ 서명</button>
+                                <div id="fac-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="fac-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -4655,7 +4865,13 @@
                 <table class="official-approval-table" style="width:160px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="fei-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="fei-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('fei-author', null, 'fei-author-sig-preview')">🖊️ 서명</button>
+                                <div id="fei-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="fei-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -5152,7 +5368,13 @@
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
                         <td style="font-size:11px;">시설관리</td>
-                        <td><select id="pzc-manager-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
+                        <td>
+                            <select id="pzc-manager-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('pzc-manager-uid', 'pzc-manager-uid', 'pzc-manager-sig-preview')">🖊️ 서명</button>
+                                <div id="pzc-manager-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -5284,7 +5506,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="mwd-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="mwd-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('mwd-author', null, 'mwd-author-sig-preview')">🖊️ 서명</button>
+                                <div id="mwd-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="mwd-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -5454,8 +5682,20 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><select id="sar-author-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
-                        <td><select id="sar-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
+                        <td>
+                            <select id="sar-author-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('sar-author-uid', 'sar-author-uid', 'sar-author-sig-preview')">🖊️ 서명</button>
+                                <div id="sar-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <select id="sar-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('sar-approver-uid', 'sar-approver-uid', 'sar-approver-sig-preview')">🖊️ 서명</button>
+                                <div id="sar-approver-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -5504,8 +5744,20 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><select id="ccw-author-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
-                        <td><select id="ccw-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
+                        <td>
+                            <select id="ccw-author-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('ccw-author-uid', 'ccw-author-uid', 'ccw-author-sig-preview')">🖊️ 서명</button>
+                                <div id="ccw-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <select id="ccw-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select>
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadSelectSignature('ccw-approver-uid', 'ccw-approver-uid', 'ccw-approver-sig-preview')">🖊️ 서명</button>
+                                <div id="ccw-approver-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -5561,7 +5813,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="sap-reporter" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="sap-reporter" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('sap-reporter', null, 'sap-reporter-sig-preview')">🖊️ 서명</button>
+                                <div id="sap-reporter-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="sap-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -5612,7 +5870,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="fsa-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="fsa-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('fsa-author', null, 'fsa-author-sig-preview')">🖊️ 서명</button>
+                                <div id="fsa-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="fsa-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -5704,7 +5968,13 @@
                 <table class="official-approval-table" style="width:160px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="fir-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="fir-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('fir-author', null, 'fir-author-sig-preview')">🖊️ 서명</button>
+                                <div id="fir-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="fir-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -6396,7 +6666,13 @@
                 <table class="official-approval-table" style="width:160px;">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="nda-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="nda-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('nda-author', null, 'nda-author-sig-preview')">🖊️ 서명</button>
+                                <div id="nda-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="nda-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -6786,7 +7062,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="rdr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="rdr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('rdr-author', null, 'rdr-author-sig-preview')">🖊️ 서명</button>
+                                <div id="rdr-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="rdr-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -7735,7 +8017,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="pms-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="pms-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('pms-author', null, 'pms-author-sig-preview')">🖊️ 서명</button>
+                                <div id="pms-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="pms-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -7962,7 +8250,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="rie-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="rie-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('rie-author', null, 'rie-author-sig-preview')">🖊️ 서명</button>
+                                <div id="rie-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="rie-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -8058,7 +8352,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="imr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="imr-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('imr-author', null, 'imr-author-sig-preview')">🖊️ 서명</button>
+                                <div id="imr-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="imr-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -8196,7 +8496,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="sie-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="sie-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('sie-author', null, 'sie-author-sig-preview')">🖊️ 서명</button>
+                                <div id="sie-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="sie-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -8368,7 +8674,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="sir-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="sir-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('sir-author', null, 'sir-author-sig-preview')">🖊️ 서명</button>
+                                <div id="sir-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="sir-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -8423,7 +8735,13 @@
             <div class="official-form-headrow">
                 <h2 class="official-form-title">고충 상담 신청서</h2>
                 <table class="official-approval-table" style="width:230px;">
-                    <tr><td class="oa-label" style="width:70px;">작성자</td><td style="width:160px;"><input type="text" id="ga-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td></tr>
+                    <tr><td class="oa-label" style="width:70px;">작성자</td><td style="width:160px;">
+                        <input type="text" id="ga-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                        <div class="no-print">
+                            <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('ga-author', null, 'ga-author-sig-preview')">🖊️ 서명</button>
+                            <div id="ga-author-sig-preview" style="display:inline-block;"></div>
+                        </div>
+                    </td></tr>
                     <tr><td class="oa-label" style="width:70px;">작성일자</td><td style="width:160px;"><input type="date" id="ga-date" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;"></td></tr>
                 </table>
             </div>
@@ -8868,7 +9186,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="rp-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="rp-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('rp-author', null, 'rp-author-sig-preview')">🖊️ 서명</button>
+                                <div id="rp-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="rp-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -8921,7 +9245,13 @@
                 <table class="official-approval-table">
                     <tr><th rowspan="2" class="oa-label oa-corner">결재</th><th class="oa-label">작성자</th><th class="oa-label">승인자</th></tr>
                     <tr>
-                        <td><input type="text" id="ram-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름"></td>
+                        <td>
+                            <input type="text" id="ram-author" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름">
+                            <div class="no-print">
+                                <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('ram-author', null, 'ram-author-sig-preview')">🖊️ 서명</button>
+                                <div id="ram-author-sig-preview" style="display:inline-block;"></div>
+                            </div>
+                        </td>
                         <td><select id="ram-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;"></select></td>
                     </tr>
                 </table>
@@ -12095,6 +12425,8 @@ async function initCctvStatusPage() {
     document.getElementById('cctv-status-result').textContent = '';
     cctvRows = [];
     cctvRowCounter = 0;
+    genericSignatureStore['cctv-author'] = '';
+    document.getElementById('cctv-author-sig-preview').innerHTML = '';
 
     try {
         const doc = await db.collection('facility_status').doc('cctv_installation').get();
@@ -12102,6 +12434,10 @@ async function initCctvStatusPage() {
             const d = doc.data();
             document.getElementById('cctv-author').value = d.author || '';
             document.getElementById('cctv-date').value = d.date || todayStr();
+            if (d.authorSignature) {
+                genericSignatureStore['cctv-author'] = d.authorSignature;
+                document.getElementById('cctv-author-sig-preview').innerHTML = `<img src="${d.authorSignature}" style="max-height:26px; vertical-align:middle;">`;
+            }
             (d.rows || []).forEach(r => {
                 cctvRows.push({ id: cctvRowCounter++, category: r.category || '', location: r.location || '', count: r.count || '' });
             });
@@ -12161,6 +12497,7 @@ async function saveCctvStatus() {
         await db.collection('facility_status').doc('cctv_installation').set({
             author: document.getElementById('cctv-author').value.trim(),
             date: document.getElementById('cctv-date').value,
+            authorSignature: genericSignatureStore['cctv-author'] || '',
             rows: cctvRows.map(({ id, ...rest }) => rest),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -12349,6 +12686,11 @@ async function initOrgRosterPage() {
     document.getElementById('org-roster-result').textContent = '';
     orgRosterRows = [];
     orgRosterRowCounter = 0;
+    genericSignatureStore['or-author'] = '';
+    genericSignatureStore['or-approver-uid'] = '';
+    document.getElementById('or-author-sig-preview').innerHTML = '';
+    document.getElementById('or-approver-sig-preview').innerHTML = '';
+    let orgRosterSavedApproverUid = '';
 
     try {
         const doc = await db.collection('org_committee_roster').doc('main').get();
@@ -12356,6 +12698,15 @@ async function initOrgRosterPage() {
             const d = doc.data();
             document.getElementById('or-author').value = d.author || '';
             document.getElementById('or-yearmonth').value = d.yearMonth || '';
+            orgRosterSavedApproverUid = d.approverUid || '';
+            if (d.authorSignature) {
+                genericSignatureStore['or-author'] = d.authorSignature;
+                document.getElementById('or-author-sig-preview').innerHTML = `<img src="${d.authorSignature}" style="max-height:26px; vertical-align:middle;">`;
+            }
+            if (d.approvalSignature) {
+                genericSignatureStore['or-approver-uid'] = d.approvalSignature;
+                document.getElementById('or-approver-sig-preview').innerHTML = `<img src="${d.approvalSignature}" style="max-height:26px; vertical-align:middle;">`;
+            }
             (d.rows || []).forEach(r => {
                 orgRosterRows.push({ id: orgRosterRowCounter++, ...r });
             });
@@ -12373,7 +12724,10 @@ async function initOrgRosterPage() {
             orgRosterRows.push({ id: orgRosterRowCounter++, role, name: '', position: '', termStart: '', termEnd: '', note: '' });
         });
     }
-    populateApproverSelect('or-approver-uid');
+    populateApproverSelect('or-approver-uid').then(() => {
+        const sel = document.getElementById('or-approver-uid');
+        if (sel) sel.value = orgRosterSavedApproverUid;
+    });
     renderOrgRosterRows();
 }
 
@@ -12416,8 +12770,10 @@ async function saveOrgRoster() {
     try {
         await db.collection('org_committee_roster').doc('main').set({
             author: document.getElementById('or-author').value.trim(),
+            authorSignature: genericSignatureStore['or-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
+            approvalSignature: genericSignatureStore['or-approver-uid'] || '',
             yearMonth: document.getElementById('or-yearmonth').value,
             rows: orgRosterRows.map(({ id, ...rest }) => rest),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -12455,6 +12811,8 @@ async function initOrgMinutesInput() {
     document.getElementById('om-attachment').value = '';
     document.getElementById('om-author').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('org-minutes-result').textContent = '';
+    genericSignatureStore['om-author'] = '';
+    document.getElementById('om-author-sig-preview').innerHTML = '';
 
     populateApproverSelect('om-approver-uid');
 
@@ -12499,6 +12857,7 @@ async function saveOrgMinutes() {
         await db.collection('org_committee_minutes').add({
             session: parseInt(document.getElementById('om-session').value, 10) || 1,
             author: document.getElementById('om-author').value.trim(),
+            authorSignature: genericSignatureStore['om-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             date: document.getElementById('om-date').value,
@@ -12723,6 +13082,7 @@ async function loadOrgAnnualPlan() {
     };
     orgPlanRows = orgPlanDefaultRows();
     orgPlanIdCounter = orgPlanRows.length + 1;
+    genericSignatureStore['org-plan-author'] = '';
 
     try {
         const doc = await db.collection('org_annual_plans').doc(year).get();
@@ -12735,6 +13095,7 @@ async function loadOrgAnnualPlan() {
                 reportDate: data.reportDate || '',
                 reporter: data.reporter || ''
             };
+            genericSignatureStore['org-plan-author'] = data.authorSignature || '';
             if (data.rows && data.rows.length) {
                 orgPlanRows = data.rows.map(r => ({ id: orgPlanIdCounter++, ...r }));
             }
@@ -12769,20 +13130,46 @@ function renderOrgPlanMetaFields() {
 
     if (orgPlanEditMode) {
         approvalRow.innerHTML = `
-            <td><input type="text" id="org-plan-author" value="${escapeAttr(orgPlanMeta.author)}" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름" oninput="orgPlanMeta.author = this.value"></td>
+            <td>
+                <input type="text" id="org-plan-author" value="${escapeAttr(orgPlanMeta.author)}" style="width:100%; box-sizing:border-box; border:none; text-align:center; font-size:12px;" placeholder="이름" oninput="orgPlanMeta.author = this.value">
+                <div style="margin-top:4px;">
+                    <button class="nav-btn" style="margin:0; padding:2px 6px; font-size:10px; width:auto; display:inline-block;" onclick="loadOrgPlanAuthorSignature()">🖊️ 서명 불러오기</button>
+                    <button class="back-btn" style="margin:0 0 0 3px; padding:2px 6px; font-size:10px; width:auto; display:inline-block;" onclick="clearOrgPlanAuthorSignature()">지우기</button>
+                    <div id="org-plan-author-sig-preview" style="margin-top:3px;"></div>
+                </div>
+            </td>
             <td><select id="org-plan-approver-uid" style="width:100%; border:none; text-align:center; font-size:11px; background:transparent;" onchange="updateOrgPlanApproverFromSelect()"></select></td>
         `;
         populateApproverSelect('org-plan-approver-uid').then(() => {
             const select = document.getElementById('org-plan-approver-uid');
             if (select) select.value = orgPlanMeta.approverUid || '';
         });
+        const sigPreviewEl = document.getElementById('org-plan-author-sig-preview');
+        if (sigPreviewEl) {
+            const sig = genericSignatureStore['org-plan-author'];
+            sigPreviewEl.innerHTML = sig ? `<img src="${sig}" style="max-height:28px; vertical-align:middle;"> <span style="font-size:12px; color:#495057;">현재 서명</span>` : '';
+        }
         reportDateCell.innerHTML = `<input type="date" id="org-plan-report-date" value="${escapeAttr(orgPlanMeta.reportDate)}" oninput="orgPlanMeta.reportDate = this.value">`;
         reporterCell.innerHTML = `<input type="text" id="org-plan-reporter" value="${escapeAttr(orgPlanMeta.reporter)}" style="width:200px;" placeholder="이름" oninput="orgPlanMeta.reporter = this.value">`;
     } else {
-        approvalRow.innerHTML = `<td>${escapeAttr(orgPlanMeta.author) || '-'}</td><td>${escapeAttr(orgPlanMeta.approverName) || '-'}</td>`;
+        const authorSig = genericSignatureStore['org-plan-author'];
+        const authorDisplay = authorSig
+            ? `<img src="${authorSig}" style="max-height:30px; vertical-align:middle;">`
+            : (escapeAttr(orgPlanMeta.author) || '-');
+        approvalRow.innerHTML = `<td>${authorDisplay}</td><td>${escapeAttr(orgPlanMeta.approverName) || '-'}</td>`;
         reportDateCell.textContent = orgPlanMeta.reportDate || '-';
         reporterCell.textContent = orgPlanMeta.reporter || '-';
     }
+}
+
+async function loadOrgPlanAuthorSignature() {
+    await loadNamedSignature('org-plan-author', null, 'org-plan-author-sig-preview');
+}
+
+function clearOrgPlanAuthorSignature() {
+    genericSignatureStore['org-plan-author'] = '';
+    const previewEl = document.getElementById('org-plan-author-sig-preview');
+    if (previewEl) previewEl.innerHTML = '<span style="font-size:12px; color:#6c757d;">서명 삭제됨</span>';
 }
 
 function updateOrgPlanApproverFromSelect() {
@@ -12904,6 +13291,7 @@ async function saveOrgAnnualPlan() {
             approverName: orgPlanMeta.approverName || '',
             reportDate: orgPlanMeta.reportDate || '',
             reporter: orgPlanMeta.reporter,
+            authorSignature: genericSignatureStore['org-plan-author'] || '',
             rows: orgPlanRows.map(({ id, ...rest }) => rest),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
@@ -12939,6 +13327,8 @@ function openMissionReport() {
 function initMissionReportInput() {
     document.getElementById('mission-report-related').innerHTML = renderRelatedPolicyLink('8.2');
     document.getElementById('mr-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['mr-author'] = '';
+    document.getElementById('mr-author-sig-preview').innerHTML = '';
     document.getElementById('mr-mission').value = '';
     document.getElementById('mr-period-start').value = '';
     document.getElementById('mr-period-end').value = '';
@@ -13076,6 +13466,7 @@ async function saveMissionReport() {
     try {
         await db.collection('mission_reports').add({
             author: document.getElementById('mr-author').value.trim(),
+            authorSignature: genericSignatureStore['mr-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             mission: mission,
@@ -13210,6 +13601,8 @@ function openQpsEduReport() {
 function initQpsEduInput() {
     document.getElementById('qps-edu-related').innerHTML = renderRelatedPolicyLink('9.2');
     document.getElementById('qe-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['qe-author'] = '';
+    document.getElementById('qe-author-sig-preview').innerHTML = '';
     document.getElementById('qe-date').value = todayStr();
     document.querySelector('input[name="qe-type"][value="내부교육"]').checked = true;
     document.getElementById('qe-title').value = '';
@@ -13353,6 +13746,7 @@ async function saveQpsEduReport() {
     try {
         await db.collection('qps_education_reports').add({
             author: author,
+            authorSignature: genericSignatureStore['qe-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             date: document.getElementById('qe-date').value,
@@ -13538,6 +13932,8 @@ let qpsRoundingNoteCounter = 0;
 function initQpsRoundingInput() {
     document.getElementById('qps-rounding-related').innerHTML = renderRelatedPolicyLink('6.1');
     document.getElementById('qr-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['qr-author'] = '';
+    document.getElementById('qr-author-sig-preview').innerHTML = '';
     document.getElementById('qr-month').value = new Date().toISOString().substring(0, 7);
     document.getElementById('qps-rounding-result').textContent = '';
 
@@ -13642,6 +14038,7 @@ async function saveQpsRounding() {
         await db.collection('qps_safety_rounding').add({
             month: month,
             author: author,
+            authorSignature: genericSignatureStore['qr-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             items: QPS_ROUNDING_ITEMS.map((item, i) => ({
@@ -13761,6 +14158,8 @@ function openPsiFall() {
 
 function initPsiFallInput() {
     document.getElementById('pf-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['pf-author'] = '';
+    document.getElementById('pf-author-sig-preview').innerHTML = '';
     document.getElementById('pf-date').value = '';
     document.getElementById('pf-time').value = '';
     document.getElementById('pf-report-date').value = todayStr();
@@ -13802,6 +14201,7 @@ async function savePsiFall() {
     const data = {
         incidentType: '낙상',
         author: author,
+            authorSignature: genericSignatureStore['pf-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         occurredDate: document.getElementById('pf-date').value,
@@ -13937,6 +14337,8 @@ function openPsiPressureSore() {
 
 function initPsiPressureSoreInput() {
     document.getElementById('ps-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['ps-author'] = '';
+    document.getElementById('ps-author-sig-preview').innerHTML = '';
     document.getElementById('ps-date').value = '';
     document.getElementById('ps-time').value = '';
     document.getElementById('ps-report-date').value = todayStr();
@@ -14028,6 +14430,7 @@ async function savePsiPressureSore() {
     const data = {
         incidentType: '욕창',
         author: author,
+            authorSignature: genericSignatureStore['ps-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         occurredDate: document.getElementById('ps-date').value,
@@ -14172,6 +14575,8 @@ function openPsiMedication() {
 
 function initPsiMedicationInput() {
     document.getElementById('pm-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['pm-author'] = '';
+    document.getElementById('pm-author-sig-preview').innerHTML = '';
     document.getElementById('pm-date').value = '';
     document.getElementById('pm-time').value = '';
     document.getElementById('pm-report-date').value = todayStr();
@@ -14209,6 +14614,7 @@ async function savePsiMedication() {
     const data = {
         incidentType: '투약',
         author: author,
+            authorSignature: genericSignatureStore['pm-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         occurredDate: document.getElementById('pm-date').value,
@@ -14327,6 +14733,8 @@ function openPsiOther() {
 
 function initPsiOtherInput() {
     document.getElementById('po-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['po-author'] = '';
+    document.getElementById('po-author-sig-preview').innerHTML = '';
     document.getElementById('po-incident-name').value = '';
     document.getElementById('po-date').value = '';
     document.getElementById('po-time').value = '';
@@ -14366,6 +14774,7 @@ async function savePsiOther() {
         incidentType: '기타',
         incidentName: incidentName,
         author: author,
+            authorSignature: genericSignatureStore['po-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         occurredDate: document.getElementById('po-date').value,
@@ -14485,6 +14894,8 @@ function openPsiAnalysis() {
 
 function initPsiAnalysisInput() {
     document.getElementById('pan-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['pan-author'] = '';
+    document.getElementById('pan-author-sig-preview').innerHTML = '';
     const now = new Date();
     document.getElementById('pan-year').value = now.getFullYear();
     document.getElementById('pan-quarter').value = String(Math.floor(now.getMonth() / 3) + 1);
@@ -14661,6 +15072,7 @@ async function savePsiAnalysis() {
         await db.collection('qps_incident_analysis_reports').doc(docId).set({
             ...panLastComputed,
             author: author,
+            authorSignature: genericSignatureStore['pan-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             strategy: document.getElementById('pan-strategy').value.trim(),
@@ -14777,6 +15189,8 @@ function openQpsMinutes() {
 
 function initQpsMinutesInput() {
     document.getElementById('qm-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['qm-author'] = '';
+    document.getElementById('qm-author-sig-preview').innerHTML = '';
     document.getElementById('qm-date').value = todayStr();
     document.getElementById('qm-time-start').value = '';
     document.getElementById('qm-time-end').value = '';
@@ -14882,6 +15296,7 @@ async function saveQpsMinutes() {
     try {
         await db.collection('qps_committee_minutes').add({
             author: document.getElementById('qm-author').value.trim(),
+            authorSignature: genericSignatureStore['qm-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             date: document.getElementById('qm-date').value,
@@ -15027,6 +15442,8 @@ function openIncidentAccidentReport() {
 
 function initIncidentReportInput() {
     document.getElementById('iar-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['iar-author'] = '';
+    document.getElementById('iar-author-sig-preview').innerHTML = '';
     document.getElementById('iar-write-date').value = todayStr();
     document.getElementById('iar-type-other').value = '';
     document.getElementById('iar-date').value = '';
@@ -15065,6 +15482,7 @@ async function saveIncidentAccidentReport() {
     try {
         await db.collection('incident_reports').add({
             author: author,
+            authorSignature: genericSignatureStore['iar-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             writeDate: document.getElementById('iar-write-date').value,
@@ -15172,6 +15590,8 @@ function openQiMinutes() {
 
 function initQiMinutesInput() {
     document.getElementById('qim-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['qim-author'] = '';
+    document.getElementById('qim-author-sig-preview').innerHTML = '';
     document.getElementById('qim-session').value = '';
     document.getElementById('qim-meeting-name').value = '';
     document.getElementById('qim-date').value = todayStr();
@@ -15277,6 +15697,7 @@ async function saveQiMinutes() {
     try {
         await db.collection('qi_committee_minutes').add({
             author: document.getElementById('qim-author').value.trim(),
+            authorSignature: genericSignatureStore['qim-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             session: document.getElementById('qim-session').value,
@@ -15427,6 +15848,8 @@ function openQiPlan() {
 
 function initQiPlanInput() {
     document.getElementById('qip-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['qip-author'] = '';
+    document.getElementById('qip-author-sig-preview').innerHTML = '';
     document.getElementById('qip-year').value = new Date().getFullYear();
     document.getElementById('qip-submit-date').value = todayStr();
     document.getElementById('qip-subject').value = '환자 및 보호자의 만족도 향상';
@@ -15476,6 +15899,7 @@ async function saveQiPlan() {
     try {
         await db.collection('qi_activity_plans').add({
             author: author,
+            authorSignature: genericSignatureStore['qip-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             year: document.getElementById('qip-year').value,
@@ -15633,6 +16057,8 @@ function openQbp() {
 
 function initQbpInput() {
     document.getElementById('qbp-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['qbp-author'] = '';
+    document.getElementById('qbp-author-sig-preview').innerHTML = '';
     document.getElementById('qbp-year').value = new Date().getFullYear();
     document.getElementById('qbp-report-date').value = todayStr();
     document.getElementById('qbp-reporter').value = '';
@@ -15857,6 +16283,7 @@ async function saveQbp() {
     const data = {
         year: document.getElementById('qbp-year').value,
         author: author,
+            authorSignature: genericSignatureStore['qbp-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         reportDate: document.getElementById('qbp-report-date').value,
@@ -16156,6 +16583,9 @@ function initQpsProgressModule(cfg) {
 
     window[cfg.initFn] = function () {
         document.getElementById(`${p}-author`).value = localStorage.getItem('inspector_name_cache') || '';
+        genericSignatureStore[`${p}-author`] = '';
+        const sigPreviewEl = document.getElementById(`${p}-author-sig-preview`);
+        if (sigPreviewEl) sigPreviewEl.innerHTML = '';
         document.getElementById(`${p}-year`).value = new Date().getFullYear();
         document.getElementById(`${p}-report-date`).value = todayStr();
         document.getElementById(`${p}-reporter`).value = '';
@@ -16183,6 +16613,7 @@ function initQpsProgressModule(cfg) {
             reportType: cfg.reportType,
             year: document.getElementById(`${p}-year`).value,
             author: author,
+            authorSignature: genericSignatureStore[`${p}-author`] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             reportDate: document.getElementById(`${p}-report-date`).value,
@@ -16407,6 +16838,9 @@ function initQpsEvalModule(cfg) {
 
     window[cfg.initFn] = function () {
         document.getElementById(`${p}-author`).value = localStorage.getItem('inspector_name_cache') || '';
+        genericSignatureStore[`${p}-author`] = '';
+        const sigPreviewEl = document.getElementById(`${p}-author-sig-preview`);
+        if (sigPreviewEl) sigPreviewEl.innerHTML = '';
         document.getElementById(`${p}-year`).value = new Date().getFullYear();
         document.getElementById(`${p}-report-date`).value = todayStr();
         document.getElementById(`${p}-reporter`).value = '';
@@ -16438,6 +16872,7 @@ function initQpsEvalModule(cfg) {
             evalType: cfg.evalType,
             year: document.getElementById(`${p}-year`).value,
             author: author,
+            authorSignature: genericSignatureStore[`${p}-author`] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             reportDate: document.getElementById(`${p}-report-date`).value,
@@ -16747,6 +17182,8 @@ function initHazmatInput() {
     const now = new Date();
     document.getElementById('hz-year').value = now.getFullYear() + 1;
     document.getElementById('hz-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['hz-author'] = '';
+    document.getElementById('hz-author-sig-preview').innerHTML = '';
     document.getElementById('hz-report-date').value = todayStr();
     document.getElementById('hz-reporter').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('hazmat-result').textContent = '';
@@ -16895,6 +17332,7 @@ async function saveHazmat() {
     try {
         await db.collection('hazmat_annual_plans').add({
             author: author,
+            authorSignature: genericSignatureStore['hz-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             year: document.getElementById('hz-year').value,
@@ -16998,6 +17436,12 @@ function initEsaInput() {
     document.getElementById('esa-write-date').value = todayStr();
     document.getElementById('esa-author').value = localStorage.getItem('inspector_name_cache') || '';
     document.getElementById('esa-result').textContent = '';
+    genericSignatureStore['esa-author'] = '';
+    genericSignatureStore['esa-approver-dept-uid'] = '';
+    genericSignatureStore['esa-approver-chair-uid'] = '';
+    document.getElementById('esa-author-sig-preview').innerHTML = '';
+    document.getElementById('esa-approver-dept-sig-preview').innerHTML = '';
+    document.getElementById('esa-approver-chair-sig-preview').innerHTML = '';
 
     populateApproverSelect('esa-approver-dept-uid');
     populateApproverSelect('esa-approver-chair-uid');
@@ -17022,10 +17466,13 @@ async function saveEsaReport() {
     try {
         await db.collection('employee_safety_incidents').add({
             author: author,
+            authorSignature: genericSignatureStore['esa-author'] || '',
             approverDeptUid: deptUidSelect.value,
             approverDeptName: deptUidSelect.value ? deptUidSelect.options[deptUidSelect.selectedIndex].text : '',
+            approverDeptSignature: genericSignatureStore['esa-approver-dept-uid'] || '',
             approverChairUid: chairUidSelect.value,
             approverChairName: chairUidSelect.value ? chairUidSelect.options[chairUidSelect.selectedIndex].text : '',
+            approverChairSignature: genericSignatureStore['esa-approver-chair-uid'] || '',
             affiliation: document.getElementById('esa-affiliation').value.trim(),
             name: name,
             position: document.getElementById('esa-position').value.trim(),
@@ -17143,6 +17590,8 @@ function openGongsang() {
 function initGongsangInput() {
     document.getElementById('gongsang-related').innerHTML = renderRelatedPolicyLink('9.4');
     document.getElementById('gs-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['gs-author'] = '';
+    document.getElementById('gs-author-sig-preview').innerHTML = '';
     document.getElementById('gs-dept').value = '';
     document.getElementById('gs-position').value = '';
     document.getElementById('gs-name').value = '';
@@ -17175,6 +17624,7 @@ async function saveGongsang() {
     try {
         await db.collection('gongsang_requests').add({
             author: author,
+            authorSignature: genericSignatureStore['gs-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             dept: document.getElementById('gs-dept').value.trim(),
@@ -18487,6 +18937,8 @@ function openFacilityEnvImprovementLedger() {
 async function initFeiInput() {
     document.getElementById('fei-year').value = new Date().getFullYear();
     document.getElementById('fei-author').value = '';
+    genericSignatureStore['fei-author'] = '';
+    document.getElementById('fei-author-sig-preview').innerHTML = '';
     document.getElementById('fei-result').textContent = '';
     populateApproverSelect('fei-approver-uid');
     feiRows = [];
@@ -18565,6 +19017,7 @@ async function saveFacilityEnvImprovementLedger() {
     const data = {
         year: document.getElementById('fei-year').value,
         author: author,
+            authorSignature: genericSignatureStore['fei-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         rows: feiRows.map(({ id, ...rest }) => rest),
@@ -20121,6 +20574,8 @@ function initPzcInput() {
     document.getElementById('pzc-year').value = new Date().getFullYear();
     document.getElementById('pzc-note').value = '';
     document.getElementById('pzc-result').textContent = '';
+    genericSignatureStore['pzc-manager-uid'] = '';
+    document.getElementById('pzc-manager-sig-preview').innerHTML = '';
     populateApproverSelect('pzc-manager-uid');
     pzcData = PZC_ITEMS.map(() => MONTHS_12.map(() => ''));
     pzcSigners = MONTHS_12.map(() => '');
@@ -20173,6 +20628,7 @@ async function savePzc() {
         year: document.getElementById('pzc-year').value,
         managerUid: managerSelect.value,
         managerName: managerSelect.value ? managerSelect.options[managerSelect.selectedIndex].text : '',
+        managerSignature: genericSignatureStore['pzc-manager-uid'] || '',
         note: document.getElementById('pzc-note').value.trim(),
         data: pzcData,
         signers: pzcSigners,
@@ -20547,6 +21003,8 @@ function initMwdInput() {
     document.getElementById('mwd-date').value = todayStr();
     document.getElementById('mwd-dept').value = '시설관리';
     document.getElementById('mwd-author').value = '';
+    genericSignatureStore['mwd-author'] = '';
+    document.getElementById('mwd-author-sig-preview').innerHTML = '';
     document.getElementById('mwd-note').value = '';
     document.getElementById('mwd-result').textContent = '';
     populateApproverSelect('mwd-approver-uid');
@@ -20592,6 +21050,7 @@ async function saveMwdCheck() {
         date: document.getElementById('mwd-date').value,
         dept: document.getElementById('mwd-dept').value.trim(),
         author: author,
+            authorSignature: genericSignatureStore['mwd-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         note: document.getElementById('mwd-note').value.trim(),
@@ -21062,6 +21521,10 @@ function initSarInput() {
     document.getElementById('sar-result').textContent = '';
     populateApproverSelect('sar-author-uid');
     populateApproverSelect('sar-approver-uid');
+    genericSignatureStore['sar-author-uid'] = '';
+    genericSignatureStore['sar-approver-uid'] = '';
+    document.getElementById('sar-author-sig-preview').innerHTML = '';
+    document.getElementById('sar-approver-sig-preview').innerHTML = '';
 }
 
 async function saveSarReport() {
@@ -21080,8 +21543,10 @@ async function saveSarReport() {
         action: document.getElementById('sar-action').value.trim(),
         authorUid: authorSelect.value,
         authorName: authorSelect.value ? authorSelect.options[authorSelect.selectedIndex].text : '',
+        authorSignature: genericSignatureStore['sar-author-uid'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
+        approvalSignature: genericSignatureStore['sar-approver-uid'] || '',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     try {
@@ -21157,6 +21622,10 @@ function initCcwInput() {
     document.getElementById('ccw-result').textContent = '';
     populateApproverSelect('ccw-author-uid');
     populateApproverSelect('ccw-approver-uid');
+    genericSignatureStore['ccw-author-uid'] = '';
+    genericSignatureStore['ccw-approver-uid'] = '';
+    document.getElementById('ccw-author-sig-preview').innerHTML = '';
+    document.getElementById('ccw-approver-sig-preview').innerHTML = '';
 }
 
 async function saveCcwRequest() {
@@ -21178,8 +21647,10 @@ async function saveCcwRequest() {
         resultNote: document.getElementById('ccw-result-note').value.trim(),
         authorUid: authorSelect.value,
         authorName: authorSelect.value ? authorSelect.options[authorSelect.selectedIndex].text : '',
+        authorSignature: genericSignatureStore['ccw-author-uid'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
+        approvalSignature: genericSignatureStore['ccw-approver-uid'] || '',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     try {
@@ -21277,6 +21748,8 @@ function initSapInput() {
     document.getElementById('sap-year').value = now.getFullYear() + 1;
     document.getElementById('sap-report-date').value = todayStr();
     document.getElementById('sap-reporter').value = '';
+    genericSignatureStore['sap-reporter'] = '';
+    document.getElementById('sap-reporter-sig-preview').innerHTML = '';
     document.getElementById('sap-result').textContent = '';
     loadSapDefaults();
     renderSapTable();
@@ -21414,6 +21887,7 @@ async function saveSap() {
             year: document.getElementById('sap-year').value,
             reportDate: document.getElementById('sap-report-date').value,
             reporter: reporter,
+            authorSignature: genericSignatureStore['sap-reporter'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             rows: sapRows.map(({ id, ...rest }) => rest),
@@ -21520,6 +21994,8 @@ function initFsaInput() {
     document.getElementById('fsa-year').value = now.getFullYear() + 1;
     document.getElementById('fsa-write-date').value = todayStr();
     document.getElementById('fsa-author').value = '';
+    genericSignatureStore['fsa-author'] = '';
+    document.getElementById('fsa-author-sig-preview').innerHTML = '';
     document.getElementById('fsa-result').textContent = '';
     loadFsaDefaults();
     renderFsaTable();
@@ -21655,6 +22131,7 @@ async function saveFsa() {
             year: document.getElementById('fsa-year').value,
             writeDate: document.getElementById('fsa-write-date').value,
             author: author,
+            authorSignature: genericSignatureStore['fsa-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             rows: fsaRows.map(({ id, ...rest }) => rest),
@@ -21880,6 +22357,8 @@ function openFireImprovementLedger() {
 async function initFirInput() {
     document.getElementById('fir-year').value = new Date().getFullYear();
     document.getElementById('fir-author').value = '';
+    genericSignatureStore['fir-author'] = '';
+    document.getElementById('fir-author-sig-preview').innerHTML = '';
     document.getElementById('fir-result').textContent = '';
     populateApproverSelect('fir-approver-uid');
     firRows = [];
@@ -21958,6 +22437,7 @@ async function saveFireImprovementLedger() {
     const data = {
         year: document.getElementById('fir-year').value,
         author: author,
+            authorSignature: genericSignatureStore['fir-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         rows: firRows.map(({ id, ...rest }) => rest),
@@ -24017,6 +24497,8 @@ function initNdaInput() {
     document.getElementById('nda-dept').value = '약제팀';
     document.getElementById('nda-date').value = todayStr();
     document.getElementById('nda-author').value = '';
+    genericSignatureStore['nda-author'] = '';
+    document.getElementById('nda-author-sig-preview').innerHTML = '';
     document.getElementById('nda-approver-uid').value = '';
     populateApproverSelect('nda-approver-uid');
     document.getElementById('nda-name-kr').value = '';
@@ -24050,6 +24532,7 @@ async function saveNda() {
             dept: document.getElementById('nda-dept').value.trim(),
             date: document.getElementById('nda-date').value,
             author: document.getElementById('nda-author').value.trim(),
+            authorSignature: genericSignatureStore['nda-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             category: getRadioGroup('nda-category'),
@@ -25113,6 +25596,8 @@ function initRdrInput() {
     document.getElementById('rdr-return-date').value = '';
     document.getElementById('rdr-note').value = '';
     document.getElementById('rdr-author').value = '';
+    genericSignatureStore['rdr-author'] = '';
+    document.getElementById('rdr-author-sig-preview').innerHTML = '';
     populateApproverSelect('rdr-approver-uid');
     document.getElementById('rdr-result').textContent = '';
 }
@@ -25155,6 +25640,7 @@ async function saveRdr() {
             returnDate: document.getElementById('rdr-return-date').value,
             note: document.getElementById('rdr-note').value.trim(),
             author: author,
+            authorSignature: genericSignatureStore['rdr-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -27606,6 +28092,8 @@ function initPmsInput() {
     document.getElementById('pms-indication').value = '';
     document.getElementById('pms-reason').value = '';
     document.getElementById('pms-author').value = '';
+    genericSignatureStore['pms-author'] = '';
+    document.getElementById('pms-author-sig-preview').innerHTML = '';
     populateApproverSelect('pms-approver-uid');
     document.getElementById('pms-result').textContent = '';
 }
@@ -27632,6 +28120,7 @@ async function savePms() {
             indication: document.getElementById('pms-indication').value.trim(),
             reason: document.getElementById('pms-reason').value.trim(),
             author: author,
+            authorSignature: genericSignatureStore['pms-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -28451,6 +28940,8 @@ function openReferralOrgEval() {
 function initRieInput() {
     document.getElementById('rie-write-date').value = todayStr();
     document.getElementById('rie-author').value = '';
+    genericSignatureStore['rie-author'] = '';
+    document.getElementById('rie-author-sig-preview').innerHTML = '';
     populateApproverSelect('rie-approver-uid');
     document.getElementById('rie-file-input').value = '';
     document.getElementById('rie-result').textContent = '';
@@ -28557,6 +29048,7 @@ async function saveRie() {
         await db.collection('referral_org_evaluations').add({
             writeDate: document.getElementById('rie-write-date').value,
             author: author,
+            authorSignature: genericSignatureStore['rie-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             rows: rieRows.map(({ id, ...r }) => r),
@@ -28799,6 +29291,8 @@ function initImrInput() {
     select.innerHTML = indicatorOptionsHtml(initialCode);
     document.getElementById('imr-period').value = '';
     document.getElementById('imr-author').value = '';
+    genericSignatureStore['imr-author'] = '';
+    document.getElementById('imr-author-sig-preview').innerHTML = '';
     populateApproverSelect('imr-approver-uid');
     const def = IND_DEFAULTS[initialCode] || {};
     document.getElementById('imr-indicator-name').value = def.indicatorName || '';
@@ -28962,6 +29456,7 @@ async function saveImr() {
             code: document.getElementById('imr-code-select').value,
             period: period,
             author: document.getElementById('imr-author').value.trim(),
+            authorSignature: genericSignatureStore['imr-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             indicatorName: document.getElementById('imr-indicator-name').value.trim(),
@@ -29446,6 +29941,8 @@ function initSieInput() {
     document.getElementById('sie-dept-options').innerHTML = sieDeptOptionsHtml();
     document.getElementById('sie-write-date').value = todayStr();
     document.getElementById('sie-author').value = '';
+    genericSignatureStore['sie-author'] = '';
+    document.getElementById('sie-author-sig-preview').innerHTML = '';
     populateApproverSelect('sie-approver-uid');
     ['sie-name', 'sie-birth', 'sie-position', 'sie-career',
      'sie-place-other', 'sie-duty-other', 'sie-cause-other', 'sie-route-other',
@@ -29489,6 +29986,7 @@ async function saveSie() {
         await db.collection('staff_infection_exposure_reports').add({
             writeDate: document.getElementById('sie-write-date').value,
             author: document.getElementById('sie-author').value.trim(),
+            authorSignature: genericSignatureStore['sie-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             name: name,
@@ -29598,6 +30096,8 @@ function openStaffSafetyRca() {
 function initSirInput() {
     document.getElementById('sir-write-date').value = todayStr();
     document.getElementById('sir-author').value = '';
+    genericSignatureStore['sir-author'] = '';
+    document.getElementById('sir-author-sig-preview').innerHTML = '';
     populateApproverSelect('sir-approver-uid');
     ['sir-incident-datetime', 'sir-dept', 'sir-idnum', 'sir-name', 'sir-phone', 'sir-hire-date', 'sir-job',
      'sir-incident-course', 'sir-injury-part', 'sir-injury-type', 'sir-occur-form', 'sir-agent',
@@ -29621,6 +30121,7 @@ async function saveSir() {
         await db.collection('staff_safety_rca_reports').add({
             writeDate: document.getElementById('sir-write-date').value,
             author: document.getElementById('sir-author').value.trim(),
+            authorSignature: genericSignatureStore['sir-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             incidentDatetime: document.getElementById('sir-incident-datetime').value,
@@ -29743,6 +30244,8 @@ let iactPendingType = '중간';
 function initIactInput() {
     document.getElementById('iact-type').value = iactPendingType || '중간';
     document.getElementById('iact-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['iact-author'] = '';
+    document.getElementById('iact-author-sig-preview').innerHTML = '';
     document.getElementById('iact-date').value = todayStr();
     document.getElementById('iact-notes').value = `1. 위원회 활동 – 분기별 회의\n1) 분기별 정기회의 : _월, _월, _월, _월\n\n2. 대표적인 감염감시활동 : 감염관리위원회에서 우선순위를 선정하여 대표적인 감염감시활동으로 "손위생관련 감염활동"을 하기로 결정함\n\n3. 지표관리 : 감염관리위원회에서 심의하여 의료기관평가기준에 맞추어 2가지 지표관리를 시행함 (손위생수행률, 직원안전사고보고율)\n\n4. 병원 환경관리 : 월별 1회 병원환경관리점검표를 이용하여 감염관리담당자가 라운딩 실시하여 환경을 관리함. 정기적인 청소 및 소독을 시행함 (주1회 감염점검 병행 시행)\n\n5. 직원교육보고 : (교육 진행 현황 작성)\n\n6. 예산관리 : 손소독제구입 및 교육.`;
     document.getElementById('iact-hh-target-q1').value = '90% 이상';
@@ -29841,6 +30344,7 @@ async function saveInfectionActReport() {
     const data = {
         type: document.getElementById('iact-type').value,
         author: author,
+            authorSignature: genericSignatureStore['iact-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         date: document.getElementById('iact-date').value,
@@ -31408,6 +31912,8 @@ function openInfectiousDiseaseReport() {
 
 function initIcdInput() {
     document.getElementById('icd-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['icd-author'] = '';
+    document.getElementById('icd-author-sig-preview').innerHTML = '';
     document.getElementById('icd-name').value = '';
     document.getElementById('icd-regno').value = '';
     document.getElementById('icd-gender').value = '';
@@ -31447,6 +31953,7 @@ async function saveInfectiousDiseaseReport() {
     const approverSelect = document.getElementById('icd-approver-uid');
     const data = {
         author: author,
+            authorSignature: genericSignatureStore['icd-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         name: document.getElementById('icd-name').value.trim(),
@@ -31735,6 +32242,8 @@ function openInfectionAnnualPlan() {
 function initIapInput() {
     document.getElementById('iap-year').value = new Date().getFullYear();
     document.getElementById('iap-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['iap-author'] = '';
+    document.getElementById('iap-author-sig-preview').innerHTML = '';
     document.getElementById('iap-reportdate').value = todayStr();
     document.getElementById('iap-reporter').value = '';
     document.getElementById('iap-result').textContent = '';
@@ -31804,6 +32313,7 @@ async function saveInfectionAnnualPlan() {
     const data = {
         year: document.getElementById('iap-year').value,
         author: author,
+            authorSignature: genericSignatureStore['iap-author'] || '',
         approverUid: approverSelect.value,
         approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
         reportDate: document.getElementById('iap-reportdate').value,
@@ -32575,6 +33085,8 @@ function openFacilityRepairRequest(dept) {
 function initFmrInput() {
     document.getElementById('fmr-date').value = todayStr();
     document.getElementById('fmr-author').value = '';
+    genericSignatureStore['fmr-author'] = '';
+    document.getElementById('fmr-author-sig-preview').innerHTML = '';
     document.getElementById('fmr-affiliation').value = '';
     document.getElementById('fmr-job').value = '';
     document.getElementById('fmr-name').value = '';
@@ -32597,6 +33109,7 @@ async function saveFacilityRepairRequest() {
     const data = {
         date: document.getElementById('fmr-date').value,
         author: author,
+            authorSignature: genericSignatureStore['fmr-author'] || '',
         affiliation: document.getElementById('fmr-affiliation').value.trim(),
         job: document.getElementById('fmr-job').value.trim(),
         name: document.getElementById('fmr-name').value.trim(),
@@ -32700,6 +33213,8 @@ function openNutritionCommitteeAnnualPlan() {
 function initNapInput() {
     document.getElementById('nap-year').value = new Date().getFullYear();
     document.getElementById('nap-author').value = '';
+    genericSignatureStore['nap-author'] = '';
+    document.getElementById('nap-author-sig-preview').innerHTML = '';
     document.getElementById('nap-chairman-name').value = '';
     document.getElementById('nap-secretary-name').value = '';
     document.getElementById('nap-member').value = '병원장';
@@ -32723,6 +33238,7 @@ async function saveNutritionCommitteeAnnualPlan() {
     const data = {
         year: document.getElementById('nap-year').value,
         author: author,
+            authorSignature: genericSignatureStore['nap-author'] || '',
         chairmanName: document.getElementById('nap-chairman-name').value.trim(),
         secretaryName: document.getElementById('nap-secretary-name').value.trim(),
         member: document.getElementById('nap-member').value.trim(),
@@ -33102,6 +33618,8 @@ function openFacilityQuarterlyInspection() {
 function initFqiInput() {
     document.getElementById('fqi-date').value = todayStr();
     document.getElementById('fqi-author').value = '';
+    genericSignatureStore['fqi-author'] = '';
+    document.getElementById('fqi-author-sig-preview').innerHTML = '';
     document.getElementById('fqi-note').value = '';
     document.getElementById('fqi-result').textContent = '';
     populateApproverSelect('fqi-approver-uid');
@@ -33177,6 +33695,7 @@ async function saveFacilityQuarterlyInspection() {
     const data = {
         date: document.getElementById('fqi-date').value,
         author: author,
+            authorSignature: genericSignatureStore['fqi-author'] || '',
         note: document.getElementById('fqi-note').value.trim(),
         generalData: fqiGeneralData,
         specialData: fqiSpecialData,
@@ -33245,6 +33764,8 @@ function openFacilityAccidentReport() {
 function initFacInput() {
     document.getElementById('fac-date').value = todayStr();
     document.getElementById('fac-author').value = '';
+    genericSignatureStore['fac-author'] = '';
+    document.getElementById('fac-author-sig-preview').innerHTML = '';
     document.getElementById('fac-datetime').value = '';
     document.getElementById('fac-location').value = '';
     document.getElementById('fac-witness1-name').value = '';
@@ -33269,6 +33790,7 @@ async function saveFacilityAccidentReport() {
     const data = {
         date: document.getElementById('fac-date').value,
         author: author,
+            authorSignature: genericSignatureStore['fac-author'] || '',
         datetime: document.getElementById('fac-datetime').value,
         location: document.getElementById('fac-location').value.trim(),
         witness1Name: document.getElementById('fac-witness1-name').value.trim(),
@@ -33571,6 +34093,8 @@ function openRegProposal() {
 function initRegProposalInput() {
     document.getElementById('reg-proposal-related').innerHTML = renderRelatedPolicyLink('8.1');
     document.getElementById('rp-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['rp-author'] = '';
+    document.getElementById('rp-author-sig-preview').innerHTML = '';
     document.getElementById('rp-dept').value = '';
     document.getElementById('rp-date').value = todayStr();
     document.getElementById('rp-reg-names').value = '';
@@ -33597,6 +34121,7 @@ async function saveRegProposal() {
     try {
         await db.collection('regulation_proposals').add({
             author: author,
+            authorSignature: genericSignatureStore['rp-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             dept: document.getElementById('rp-dept').value.trim(),
@@ -33690,6 +34215,8 @@ function openRegAmendment() {
 function initRegAmendmentInput() {
     document.getElementById('reg-amendment-related').innerHTML = renderRelatedPolicyLink('8.1');
     document.getElementById('ram-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['ram-author'] = '';
+    document.getElementById('ram-author-sig-preview').innerHTML = '';
     document.getElementById('ram-reg-num').value = '';
     document.getElementById('ram-reg-name').value = '';
     document.getElementById('ram-reason').value = '';
@@ -33716,6 +34243,7 @@ async function saveRegAmendment() {
     try {
         await db.collection('regulation_amendments').add({
             author: author,
+            authorSignature: genericSignatureStore['ram-author'] || '',
             approverUid: approverSelect.value,
             approverName: approverSelect.value ? approverSelect.options[approverSelect.selectedIndex].text : '',
             regNum: document.getElementById('ram-reg-num').value.trim(),
@@ -33943,6 +34471,8 @@ function openGrievanceApp() {
 function initGrievanceAppInput() {
     document.getElementById('grievance-app-related').innerHTML = renderRelatedPolicyLink('8.3');
     document.getElementById('ga-author').value = localStorage.getItem('inspector_name_cache') || '';
+    genericSignatureStore['ga-author'] = '';
+    document.getElementById('ga-author-sig-preview').innerHTML = '';
     document.getElementById('ga-date').value = todayStr();
     ['ga-reporter-name', 'ga-reporter-dept', 'ga-reporter-phone', 'ga-reporter-position',
      'ga-agent-name', 'ga-agent-dept', 'ga-agent-phone', 'ga-agent-position',
@@ -33969,7 +34499,7 @@ async function saveGrievanceApp() {
 
     try {
         await db.collection('grievance_applications').add({
-            author, date: document.getElementById('ga-date').value,
+            author, authorSignature: genericSignatureStore['ga-author'] || '', date: document.getElementById('ga-date').value,
             reporter: {
                 name: reporterName,
                 dept: document.getElementById('ga-reporter-dept').value.trim(),
@@ -35240,6 +35770,63 @@ async function getMyAllowedSignatureUsers() {
         }
     }
     return results;
+}
+
+// ---- 범용 "서명 불러오기" (여러 서류의 작성자란에 공통으로 사용) ----
+// key: 이 서류에서 불러온 서명을 구분해 담아둘 이름표 (저장할 때 genericSignatureStore[key]로 꺼내 씁니다)
+// nameInputId: 서명을 불러오면 이름도 같이 채워 넣을 입력칸 id (없으면 null)
+// previewElId: 불러온 서명 미리보기를 보여줄 요소 id
+const genericSignatureStore = {};
+
+async function loadNamedSignature(key, nameInputId, previewElId) {
+    const users = await getMyAllowedSignatureUsers();
+    if (users.length === 0) {
+        alert('불러올 수 있는 서명이 없습니다. "내 서명 관리"에서 서명을 먼저 등록해 주세요.');
+        return;
+    }
+    let chosen = users[0];
+    if (users.length > 1) {
+        const names = users.map((u, i) => `${i + 1}. ${u.name}`).join('\n');
+        const choice = prompt(`누구 서명을 불러올까요?\n${names}`, '1');
+        const idx = parseInt(choice, 10) - 1;
+        if (isNaN(idx) || !users[idx]) return;
+        chosen = users[idx];
+    }
+    genericSignatureStore[key] = chosen.signature;
+    if (nameInputId) {
+        const nameEl = document.getElementById(nameInputId);
+        if (nameEl) nameEl.value = chosen.name;
+    }
+    if (previewElId) {
+        const previewEl = document.getElementById(previewElId);
+        if (previewEl) previewEl.innerHTML = `<img src="${chosen.signature}" style="max-height:28px; vertical-align:middle; margin-left:8px;"> <span style="font-size:12px; color:#28a745;">${chosen.name} 서명 첨부됨</span>`;
+    }
+}
+
+function clearNamedSignature(key, previewElId) {
+    delete genericSignatureStore[key];
+    if (previewElId) {
+        const previewEl = document.getElementById(previewElId);
+        if (previewEl) previewEl.innerHTML = '';
+    }
+}
+
+// 부서장/위원장처럼 "이름 입력칸" 없이 승인자를 드롭다운으로 고르는 칸에서, 고른 사람의 서명을 대리로 불러올 때 씁니다.
+async function loadSelectSignature(key, selectId, previewElId) {
+    const select = document.getElementById(selectId);
+    const uid = select ? select.value : '';
+    if (!uid) { alert('먼저 대상자를 선택해 주세요.'); return; }
+    const users = await getMyAllowedSignatureUsers();
+    const match = users.find(u => u.uid === uid);
+    if (!match) {
+        alert('이 사람의 서명을 대리로 불러올 권한이 없습니다. 관리자에게 권한을 요청해 주세요.');
+        return;
+    }
+    genericSignatureStore[key] = match.signature;
+    if (previewElId) {
+        const previewEl = document.getElementById(previewElId);
+        if (previewEl) previewEl.innerHTML = `<img src="${match.signature}" style="max-height:28px; vertical-align:middle; margin-left:8px;"> <span style="font-size:12px; color:#28a745;">${match.name} 서명 첨부됨</span>`;
+    }
 }
 
 async function loadAuthorSignature() {
