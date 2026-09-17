@@ -35784,14 +35784,16 @@ async function loadNamedSignature(key, nameInputId, previewElId) {
         alert('불러올 수 있는 서명이 없습니다. "내 서명 관리"에서 서명을 먼저 등록해 주세요.');
         return;
     }
-    let chosen = users[0];
-    if (users.length > 1) {
-        const names = users.map((u, i) => `${i + 1}. ${u.name}`).join('\n');
-        const choice = prompt(`누구 서명을 불러올까요?\n${names}`, '1');
-        const idx = parseInt(choice, 10) - 1;
-        if (isNaN(idx) || !users[idx]) return;
-        chosen = users[idx];
+    if (users.length === 1) {
+        applyNamedSignature(users[0], key, nameInputId, previewElId);
+        return;
     }
+    // 불러올 수 있는 서명이 여러 개면(관리자가 대리서명 권한을 준 경우), 브라우저의 prompt() 창은
+    // 일부 환경(웹뷰 등)에서 뜨지 않을 수 있어, 화면에 직접 고를 수 있는 드롭다운을 보여줍니다.
+    showSignaturePicker(users, previewElId, (chosen) => applyNamedSignature(chosen, key, nameInputId, previewElId));
+}
+
+function applyNamedSignature(chosen, key, nameInputId, previewElId) {
     genericSignatureStore[key] = chosen.signature;
     if (nameInputId) {
         const nameEl = document.getElementById(nameInputId);
@@ -35801,6 +35803,35 @@ async function loadNamedSignature(key, nameInputId, previewElId) {
         const previewEl = document.getElementById(previewElId);
         if (previewEl) previewEl.innerHTML = `<img src="${chosen.signature}" style="max-height:28px; vertical-align:middle; margin-left:8px;"> <span style="font-size:12px; color:#28a745;">${chosen.name} 서명 첨부됨</span>`;
     }
+}
+
+// prompt() 대신 화면에 직접 그려주는 서명 선택 드롭다운. previewElId 자리에 임시로 나타났다가,
+// 고르고 나면 onChoose 콜백이 실제 미리보기(이미지+이름)로 다시 채웁니다.
+let signaturePickerCounter = 0;
+function showSignaturePicker(users, previewElId, onChoose) {
+    const previewEl = document.getElementById(previewElId);
+    if (!previewEl) return;
+    const pickerId = `sig-picker-${signaturePickerCounter++}`;
+    window[`__sigPickerUsers_${pickerId}`] = users;
+    window[`__sigPickerChoose_${pickerId}`] = onChoose;
+    previewEl.innerHTML = `
+        <select id="${pickerId}" style="font-size:11px; max-width:110px;">
+            ${users.map((u, i) => `<option value="${i}">${escapeAttr(u.name)}</option>`).join('')}
+        </select>
+        <button class="nav-btn" style="margin:0 0 0 3px; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="confirmSignaturePicker('${pickerId}')">선택</button>
+    `;
+}
+
+function confirmSignaturePicker(pickerId) {
+    const sel = document.getElementById(pickerId);
+    const users = window[`__sigPickerUsers_${pickerId}`] || [];
+    const onChoose = window[`__sigPickerChoose_${pickerId}`];
+    if (!sel || !onChoose) return;
+    const idx = parseInt(sel.value, 10);
+    if (isNaN(idx) || !users[idx]) return;
+    onChoose(users[idx]);
+    delete window[`__sigPickerUsers_${pickerId}`];
+    delete window[`__sigPickerChoose_${pickerId}`];
 }
 
 function clearNamedSignature(key, previewElId) {
