@@ -9072,12 +9072,9 @@
                 <line x1="270" y1="122" x2="330" y2="122" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
                 <text x="278" y="117" font-size="11">YES</text>
                 <line x1="150" y1="175" x2="150" y2="200" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
-                <line x1="150" y1="235" x2="150" y2="270" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
-                <text x="158" y="256" font-size="11">해당없음</text>
+                <line x1="150" y1="235" x2="150" y2="305" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
                 <line x1="270" y1="250" x2="330" y2="250" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
-                <text x="278" y="245" font-size="11">필요시</text>
-                <line x1="330" y1="275" x2="150" y2="275" stroke="#333" stroke-width="1.5"/>
-                <line x1="150" y1="275" x2="150" y2="305" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
+                <text x="278" y="245" font-size="11">NO</text>
                 <line x1="150" y1="340" x2="150" y2="365" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
                 <line x1="150" y1="400" x2="150" y2="425" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
                 <line x1="150" y1="460" x2="150" y2="485" stroke="#333" stroke-width="1.5" marker-end="url(#arrowB)"/>
@@ -9099,7 +9096,7 @@
                 <text x="150" y="222" text-anchor="middle" font-size="12">윤리위원회 심의 필요시</text>
 
                 <rect x="330" y="230" width="140" height="40" fill="white" stroke="#333"/>
-                <text x="400" y="254" text-anchor="middle" font-size="12">해당사항 처리</text>
+                <text x="400" y="254" text-anchor="middle" font-size="13">종결</text>
 
                 <rect x="30" y="305" width="240" height="35" fill="white" stroke="#333"/>
                 <text x="150" y="327" text-anchor="middle" font-size="12">윤리위원회 개최 / 심의</text>
@@ -10070,10 +10067,25 @@
     const rtdb = firebase.database();
 
 
+    // 화면 id별로 마지막 스크롤 위치를 기억해뒀다가, 다시 그 화면으로 돌아오면
+    // 맨 위가 아니라 보던 자리로 이어서 볼 수 있게 합니다. (목록을 하나씩 눌러보고
+    // 뒤로가기 할 때마다 위로 튕기는 문제 방지)
+    let pageScrollPositions = {};
+    function rememberCurrentScroll() {
+        const current = document.querySelector('.container > div:not(.hidden)');
+        if (current) pageScrollPositions[current.id] = window.scrollY;
+    }
+    function restoreScrollFor(pageElId) {
+        const y = pageScrollPositions[pageElId] || 0;
+        // 화면 전환 직후 레이아웃이 자리 잡을 시간을 한 프레임 준 다음 스크롤을 맞춥니다.
+        requestAnimationFrame(() => window.scrollTo(0, y));
+    }
+
     function showPage(pageId) {
+        rememberCurrentScroll();
         document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
         document.getElementById('page-' + pageId).classList.remove('hidden');
-        
+
         if(pageId === 'policy-library') renderPolicyLibrary();
         if(pageId === 'admin-accounts') initAdminPanel();
         if(pageId === 'my-signature') initMySignaturePage();
@@ -10413,11 +10425,15 @@
         if(pageId === 'sie-history') initSieHistoryPage();
         if(pageId === 'sir-input') initSirInput();
         if(pageId === 'sir-history') initSirHistoryPage();
+
+        restoreScrollFor('page-' + pageId);
     }
 
     function showMain() {
+        rememberCurrentScroll();
         document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
         document.getElementById('main-menu').classList.remove('hidden');
+        restoreScrollFor('main-menu');
     }
 
     // 사진을 최대 800px, JPEG 품질 0.7로 압축해서 지정한 <img id="previewId"> 에 표시.
@@ -10716,6 +10732,7 @@ function showPolicyDetail(docId, source) {
     // (예: 작성 중이던 폼 내용이 사라지지 않게)
     const currentVisible = document.querySelector('.container > div:not(.hidden)');
     policyDetailPreviousPageId = currentVisible ? currentVisible.id : null;
+    rememberCurrentScroll();
 
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     document.getElementById('page-policy-detail').classList.remove('hidden');
@@ -10725,6 +10742,7 @@ function showPolicyDetail(docId, source) {
     document.getElementById('policy-edit-area').classList.add('hidden');
     document.getElementById('policy-edit-result').textContent = '';
     document.getElementById('policy-edit-btn').classList.toggle('hidden', !(currentUserProfile && currentUserProfile.isAdmin));
+    restoreScrollFor('page-policy-detail');
 }
 
 function backToPolicySource() {
@@ -10733,8 +10751,10 @@ function backToPolicySource() {
         policyDetailPreviousPageId = null;
         const target = document.getElementById(pageId);
         if (target) {
+            rememberCurrentScroll();
             document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
             target.classList.remove('hidden');
+            restoreScrollFor(pageId);
             return;
         }
     }
@@ -18027,12 +18047,14 @@ function showCatalogStatus(num) {
 
     const currentVisible = document.querySelector('.container > div:not(.hidden)');
     catalogStatusPreviousPageId = currentVisible ? currentVisible.id : null;
+    rememberCurrentScroll();
 
     document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
     document.getElementById('page-catalog-status').classList.remove('hidden');
     document.getElementById('catalog-status-title').textContent = `${doc.num} ${doc.title}`;
     document.getElementById('catalog-status-message').innerHTML = catalogStatusMessage(doc);
     document.getElementById('catalog-status-policy-link').innerHTML = renderRelatedPolicyLinkForNum(doc.num, 'catalog-status');
+    restoreScrollFor('page-catalog-status');
 }
 
 function backFromCatalogStatus() {
@@ -18041,8 +18063,10 @@ function backFromCatalogStatus() {
         catalogStatusPreviousPageId = null;
         const target = document.getElementById(pageId);
         if (target) {
+            rememberCurrentScroll();
             document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
             target.classList.remove('hidden');
+            restoreScrollFor(pageId);
             return;
         }
     }
