@@ -10011,6 +10011,7 @@
             <button class="toggle-history-btn no-print" id="policy-edit-btn" onclick="togglePolicyEdit()">✏️ 규정 수정</button>
         </div>
         <div id="policy-detail-body" class="policy-detail-body"></div>
+        <div id="policy-detail-related-docs"></div>
         <div id="policy-edit-area" class="hidden no-print" style="margin-top: 15px;">
             <p style="font-size: 13px; color: #6c757d;">아래 내용을 그대로 클릭해서 고치면 돼요. 표 안 글자도 클릭하면 바로 수정할 수 있어요.</p>
             <div style="position: sticky; top: 10px; z-index: 10; background: #f4f6f9; padding: 8px 0; margin-bottom: 8px; border-radius: 8px;">
@@ -10739,10 +10740,47 @@ function showPolicyDetail(docId, source) {
     document.getElementById('policy-detail-title').textContent = `${doc.code} ${doc.title}`;
     document.getElementById('policy-detail-body').innerHTML = getEffectivePolicyBodyHtml(doc);
     document.getElementById('policy-detail-body').classList.remove('hidden');
+    document.getElementById('policy-detail-related-docs').innerHTML = renderRelatedCatalogDocsForPolicy(doc.code);
     document.getElementById('policy-edit-area').classList.add('hidden');
     document.getElementById('policy-edit-result').textContent = '';
     document.getElementById('policy-edit-btn').classList.toggle('hidden', !(currentUserProfile && currentUserProfile.isAdmin));
     restoreScrollFor('page-policy-detail');
+}
+
+// 규정 상세 화면에 "이 규정과 관련된 서류(실제 작성 양식)" 목록을 보여줍니다.
+// 서류 번호(예: 1.1.1)가 규정 코드(예: 1.1)로 시작하는 서류들을 모아서 보여주고,
+// 본인이 속하지 않은 팀의 서류는 아예 안 보이게 걸러냅니다. 제목을 누르면 그 서류 화면으로 바로 이동해요.
+function renderRelatedCatalogDocsForPolicy(code) {
+    if (!code || !currentUserProfile) return '';
+    const prefix = code + '.';
+    const docs = getEffectiveCatalog().filter(d => d.num === code || d.num.startsWith(prefix));
+    if (docs.length === 0) return '';
+
+    const visible = docs.filter(d => currentUserProfile.isAdmin || d.teams.some(t => currentUserProfile.allowedTeams.includes(t)));
+    if (visible.length === 0) return '';
+
+    const sorted = [...visible].sort((a, b) => {
+        const na = a.num.split('.').map(Number);
+        const nb = b.num.split('.').map(Number);
+        for (let i = 0; i < Math.max(na.length, nb.length); i++) {
+            const diff = (na[i] || 0) - (nb[i] || 0);
+            if (diff !== 0) return diff;
+        }
+        return 0;
+    });
+
+    const items = sorted.map(d => {
+        const action = d.built ? d.builtAction : `showCatalogStatus('${d.num}')`;
+        const badge = d.built ? '' : ' <span style="color:#adb5bd; font-size:11px;">(준비중 등)</span>';
+        return `<span class="policy-related-link" onclick="${action}">📄 ${d.num} ${d.title}</span>${badge}`;
+    }).join('<br>');
+
+    return `
+        <div class="no-print" style="max-width: 760px; margin: 15px auto 0;">
+            <p style="font-size:13px; font-weight:bold; color:#495057; margin-bottom:8px;">📎 관련 서류</p>
+            ${items}
+        </div>
+    `;
 }
 
 function backToPolicySource() {
