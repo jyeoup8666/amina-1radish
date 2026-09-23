@@ -4586,11 +4586,8 @@
                 <tr><th style="width:100px;">점검부서</th><td><input type="text" id="ffe-dept" style="width:100%; box-sizing:border-box;"></td>
                     <th style="width:100px;">연도</th><td><input type="number" id="ffe-year" style="width:100%; box-sizing:border-box;"></td>
                     <th style="width:100px;">부서장 서명</th><td>
-                        <input type="text" id="ffe-deptmanager-name" style="width:100%; box-sizing:border-box;">
-                        <div style="margin-top:4px;">
-                            <button class="nav-btn" style="margin:0; padding:1px 5px; font-size:9px; width:auto; display:inline-block;" onclick="loadNamedSignature('ffe-deptmanager', 'ffe-deptmanager-name', 'ffe-deptmanager-sig-preview')">🖊️ 서명</button>
-                            <div id="ffe-deptmanager-sig-preview" style="display:inline-block;"></div>
-                        </div>
+                        <button class="nav-btn" style="margin:0; padding:3px 8px; font-size:11px; width:auto; display:inline-block;" onclick="loadNamedSignature('ffe-deptmanager', null, 'ffe-deptmanager-sig-preview')">🖊️ 서명 불러오기</button>
+                        <div id="ffe-deptmanager-sig-preview" style="display:inline-block; margin-left:4px;"></div>
                     </td></tr>
             </table>
 
@@ -33643,13 +33640,10 @@ function openFallFacilityEnvCheck(dept) {
 function initFfeInput() {
     document.getElementById('ffe-year').value = new Date().getFullYear();
     document.getElementById('ffe-dept').value = ffePendingDept || '';
-    document.getElementById('ffe-deptmanager-name').value = '';
     document.getElementById('ffe-note').value = '';
     document.getElementById('ffe-result').textContent = '';
     genericSignatureStore['ffe-deptmanager'] = '';
     document.getElementById('ffe-deptmanager-sig-preview').innerHTML = '';
-    const ffeDeptManagerEl = document.getElementById('ffe-deptmanager-name');
-    if (ffeDeptManagerEl) ffeDeptManagerEl.style.display = '';
     ffeData = FFE_ITEMS.map(() => MONTHS_12.map(() => ''));
     ffeNurseSigners = MONTHS_12.map(() => ({ name: '', signature: '' }));
     ffeFacilitySigners = MONTHS_12.map(() => ({ name: '', signature: '' }));
@@ -33666,12 +33660,6 @@ function toggleFfeCell(itemIdx, monthIdx) {
 function normalizeFfeSigner(raw) {
     if (raw && typeof raw === 'object') return { name: raw.name || '', signature: raw.signature || '' };
     return { name: raw || '', signature: '' };
-}
-
-function updateFfeSigner(kind, monthIdx, value) {
-    const arr = kind === 'nurse' ? ffeNurseSigners : ffeFacilitySigners;
-    if (!arr[monthIdx] || typeof arr[monthIdx] !== 'object') arr[monthIdx] = { name: '', signature: '' };
-    arr[monthIdx].name = value;
 }
 
 // 달마다 점검하는 사람이 바뀔 수 있어서, 칸마다 따로 서명을 불러올 수 있게 합니다.
@@ -33710,13 +33698,12 @@ function ffeSignerRowHtml(label, kind, signers, editable) {
                     <button class="back-btn" style="margin:2px 0 0; padding:1px 4px; font-size:8px; width:auto; display:inline-block;" onclick="clearFfeSignerSignature('${kind}', ${c})">지우기</button>
                 </td>`;
             }
-            return `<td style="padding:3px 2px;">
-                <input type="text" value="${escapeAttr(s.name)}" placeholder="이름" style="width:100%; box-sizing:border-box; border:1px solid #ddd; border-radius:3px; text-align:center; font-size:10px; margin-bottom:3px;" oninput="updateFfeSigner('${kind}', ${c}, this.value)">
-                <button class="nav-btn" style="margin:0; padding:2px 0; font-size:9px; width:100%; display:block;" onclick="loadFfeSignerSignature('${kind}', ${c})">🖊️ 서명</button>
+            return `<td style="text-align:center; padding:3px 2px;">
+                <button class="nav-btn" style="margin:0; padding:5px 2px; font-size:9px; width:100%; display:block;" onclick="loadFfeSignerSignature('${kind}', ${c})">🖊️ 서명</button>
                 <div id="ffe-signer-preview-${kind}-${c}"></div>
             </td>`;
         }
-        return `<td style="text-align:center; font-size:11px;">${s.signature ? `<img src="${s.signature}" style="max-height:24px;">` : (s.name || '')}</td>`;
+        return `<td style="text-align:center; font-size:11px;">${s.signature ? `<img src="${s.signature}" style="max-height:24px;">` : ''}</td>`;
     }).join('') + '</tr>';
 }
 
@@ -33754,7 +33741,6 @@ async function saveFallFacilityEnvCheck() {
     const data = {
         year: document.getElementById('ffe-year').value,
         dept: document.getElementById('ffe-dept').value.trim(),
-        deptManagerName: document.getElementById('ffe-deptmanager-name').value.trim(),
         deptManagerSignature: genericSignatureStore['ffe-deptmanager'] || '',
         note: document.getElementById('ffe-note').value.trim(),
         data: ffeData,
