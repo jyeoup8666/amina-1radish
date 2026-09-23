@@ -469,9 +469,20 @@
     <!-- 유사발음/유사모양/용량주의 의약품 목록 (공용 화면) -->
     <div id="page-med-pairs" class="hidden">
         <button class="back-btn" onclick="backFromSharedTool()">← 이전 메뉴로</button>
-        <h2 id="med-pairs-title">💊 유사발음 의약품 목록</h2>
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 id="med-pairs-title" style="margin:0;">💊 유사발음 의약품 목록</h2>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <button class="nav-btn" id="med-pairs-edit-btn" style="margin:0; padding:6px 12px; font-size:13px;" onclick="toggleMedPairsEditMode()">✏️ 수정</button>
+                <button class="save-btn hidden" id="med-pairs-save-btn" style="margin:0; width:auto; padding:6px 12px; font-size:13px;" onclick="saveMedPairsEdit()">☁️ 저장</button>
+                <button class="back-btn hidden" id="med-pairs-reset-btn" style="margin:0; background:#dc3545; color:white; padding:6px 12px; font-size:13px;" onclick="resetMedPairsToDefault()">↩️ 원본으로</button>
+            </div>
+        </div>
         <div id="med-pairs-related"></div>
+        <div id="med-pairs-result" class="no-print" style="font-weight:bold; margin:6px 0;"></div>
         <div id="med-pairs-body"></div>
+        <div class="no-print hidden" id="med-pairs-add-category-area" style="margin-top:15px;">
+            <button class="nav-btn" style="margin:0; font-size:13px;" onclick="addMedPairsCategory()">➕ 분류(카테고리) 추가</button>
+        </div>
     </div>
 
     <!-- 운영위원회 조직도 -->
@@ -11489,7 +11500,12 @@ function initPrnMedList() {
 }
 
 // 유사발음/유사모양/용량주의 세 화면이 구조가 같아서 공용으로 그립니다.
+// 기본 목록은 DRUG_PAIR_LISTS(코드에 고정)이고, 수정한 내용은 drug_pair_overrides/{type} 문서에
+// 저장해서 다음에 열 때도 그 내용이 보이게 합니다. (규정집 관리자 수정과 같은 방식)
 let currentMedPairType = 'soundalike';
+let medPairsGroups = [];
+let medPairsEditMode = false;
+let medPairsHasOverride = false;
 
 function showMedPairs(type) {
     sharedToolEntryTeam = currentTeamName;
@@ -11497,32 +11513,188 @@ function showMedPairs(type) {
     showPage('med-pairs');
 }
 
-function initMedPairsPage() {
-    const data = DRUG_PAIR_LISTS[currentMedPairType];
-    if (!data) return;
-    document.getElementById('med-pairs-title').textContent = `💊 ${data.title}`;
+async function initMedPairsPage() {
+    const defaultData = DRUG_PAIR_LISTS[currentMedPairType];
+    if (!defaultData) return;
+    document.getElementById('med-pairs-title').textContent = `💊 ${defaultData.title}`;
     document.getElementById('med-pairs-related').innerHTML = renderRelatedPolicyLink('1.1');
+    document.getElementById('med-pairs-result').textContent = '';
+    medPairsEditMode = false;
+    medPairsHasOverride = false;
+    medPairsGroups = defaultData.groups.map(g => ({ category: g.category, pairs: g.pairs.map(p => p.slice()) }));
 
-    document.getElementById('med-pairs-body').innerHTML = data.groups.map(group => `
-        <h3 class="policy-chapter-title">${group.category}</h3>
-        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-            ${group.pairs.map(p => {
-                const [name1, name2, photo1, photo2] = p;
-                return `
-                    <div style="display:flex; border:1px solid #e9ecef; border-radius:8px; overflow:hidden;">
-                        <div style="flex:1; padding:10px; text-align:center; border-right:1px solid #e9ecef;">
-                            <div style="font-weight:bold; margin-bottom:6px; font-size:13px;">${name1}</div>
-                            ${photo1 ? `<img src="${photo1}" style="max-width:100%; max-height:110px; cursor:pointer;" onclick="openImageModal('${photo1}')">` : ''}
-                        </div>
-                        <div style="flex:1; padding:10px; text-align:center;">
-                            <div style="font-weight:bold; margin-bottom:6px; font-size:13px;">${name2}</div>
-                            ${photo2 ? `<img src="${photo2}" style="max-width:100%; max-height:110px; cursor:pointer;" onclick="openImageModal('${photo2}')">` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('')}
+    try {
+        const doc = await db.collection('drug_pair_overrides').doc(currentMedPairType).get();
+        if (doc.exists && doc.data().groups && doc.data().groups.length) {
+            medPairsGroups = doc.data().groups.map(g => ({ category: g.category, pairs: (g.pairs || []).map(p => p.slice()) }));
+            medPairsHasOverride = true;
+        }
+    } catch (err) { console.error(err); }
+
+    renderMedPairsEditControls();
+    renderMedPairsBody();
+}
+
+function renderMedPairsEditControls() {
+    document.getElementById('med-pairs-edit-btn').textContent = medPairsEditMode ? '✖️ 수정 취소' : '✏️ 수정';
+    document.getElementById('med-pairs-save-btn').classList.toggle('hidden', !medPairsEditMode);
+    document.getElementById('med-pairs-add-category-area').classList.toggle('hidden', !medPairsEditMode);
+    document.getElementById('med-pairs-reset-btn').classList.toggle('hidden', !(medPairsEditMode && medPairsHasOverride));
+}
+
+function toggleMedPairsEditMode() {
+    if (medPairsEditMode) {
+        // 취소: 편집 중이던 내용은 버리고, 저장돼 있던 내용(또는 기본 목록)을 다시 불러옵니다.
+        initMedPairsPage();
+        return;
+    }
+    medPairsEditMode = true;
+    renderMedPairsEditControls();
+    renderMedPairsBody();
+}
+
+function renderMedPairsBody() {
+    const isLookalike = currentMedPairType === 'lookalike';
+    document.getElementById('med-pairs-body').innerHTML = medPairsGroups.map((group, gi) => `
+        <div style="margin-bottom:20px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                ${medPairsEditMode
+                    ? `<input type="text" value="${escapeAttr(group.category)}" style="font-weight:bold; font-size:14px; border:1px solid #ccc; border-radius:4px; padding:4px 8px;" oninput="updateMedPairsCategory(${gi}, this.value)">
+                       <button class="back-btn" style="margin:0; padding:2px 8px; font-size:11px; width:auto; display:inline-block;" onclick="removeMedPairsCategory(${gi})">🗑️ 분류 삭제</button>`
+                    : `<h3 class="policy-chapter-title" style="margin:0;">${group.category}</h3>`
+                }
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                ${group.pairs.map((p, pi) => renderMedPairRow(gi, pi, p, isLookalike)).join('')}
+            </div>
+            ${medPairsEditMode ? `<button class="nav-btn" style="margin:10px 0 0; font-size:12px; padding:5px 10px;" onclick="addMedPairsPair(${gi})">➕ 짝 추가</button>` : ''}
         </div>
     `).join('');
+}
+
+function renderMedPairRow(gi, pi, p, isLookalike) {
+    const [name1, name2, photo1, photo2] = p;
+
+    const nameCell = (name, idx) => medPairsEditMode
+        ? `<input type="text" value="${escapeAttr(name || '')}" placeholder="약품명" style="width:100%; box-sizing:border-box; text-align:center; font-weight:bold; font-size:13px; border:1px solid #ccc; border-radius:4px; padding:4px;" oninput="updateMedPairsField(${gi}, ${pi}, ${idx}, this.value)">`
+        : `<div style="font-weight:bold; margin-bottom:6px; font-size:13px;">${name || ''}</div>`;
+
+    const photoCell = (photo, idx) => {
+        if (!isLookalike) return '';
+        const inputId = `mp-photo-input-${gi}-${pi}-${idx}`;
+        const imgId = `mp-photo-img-${gi}-${pi}-${idx}`;
+        if (medPairsEditMode) {
+            return `
+                <div style="margin-top:6px;">
+                    <img id="${imgId}" src="${photo || ''}" class="${photo ? '' : 'hidden'}" style="max-width:100%; max-height:90px; display:block; margin:0 auto 4px;">
+                    <input type="file" accept="image/*" id="${inputId}" class="hidden" onchange="compressImageToPreview(this, '${imgId}', (dataUrl) => setMedPairsPhoto(${gi}, ${pi}, ${idx}, dataUrl))">
+                    <button class="nav-btn" style="margin:0; padding:2px 6px; font-size:10px; width:auto; display:inline-block;" onclick="document.getElementById('${inputId}').click()">📷 사진 올리기</button>
+                    ${photo ? `<button class="back-btn" style="margin:0 0 0 3px; padding:2px 6px; font-size:10px; width:auto; display:inline-block;" onclick="clearMedPairsPhoto(${gi}, ${pi}, ${idx})">지우기</button>` : ''}
+                </div>
+            `;
+        }
+        return photo ? `<img src="${photo}" style="max-width:100%; max-height:110px; cursor:pointer;" onclick="openImageModal('${photo}')">` : '';
+    };
+
+    return `
+        <div style="display:flex; border:1px solid #e9ecef; border-radius:8px; overflow:hidden; position:relative;">
+            <div style="flex:1; padding:10px; text-align:center; border-right:1px solid #e9ecef;">
+                ${nameCell(name1, 0)}
+                ${photoCell(photo1, 2)}
+            </div>
+            <div style="flex:1; padding:10px; text-align:center;">
+                ${nameCell(name2, 1)}
+                ${photoCell(photo2, 3)}
+            </div>
+            ${medPairsEditMode ? `<button class="back-btn" style="position:absolute; top:4px; right:4px; margin:0; padding:2px 6px; font-size:10px; width:auto; display:inline-block;" onclick="removeMedPairsPair(${gi}, ${pi})">🗑️</button>` : ''}
+        </div>
+    `;
+}
+
+function updateMedPairsField(gi, pi, idx, value) {
+    medPairsGroups[gi].pairs[pi][idx] = value;
+}
+
+function updateMedPairsCategory(gi, value) {
+    medPairsGroups[gi].category = value;
+}
+
+function setMedPairsPhoto(gi, pi, idx, dataUrl) {
+    medPairsGroups[gi].pairs[pi][idx] = dataUrl;
+    renderMedPairsBody();
+}
+
+function clearMedPairsPhoto(gi, pi, idx) {
+    medPairsGroups[gi].pairs[pi][idx] = '';
+    renderMedPairsBody();
+}
+
+function addMedPairsPair(gi) {
+    medPairsGroups[gi].pairs.push(currentMedPairType === 'lookalike' ? ['', '', '', ''] : ['', '']);
+    renderMedPairsBody();
+}
+
+function removeMedPairsPair(gi, pi) {
+    medPairsGroups[gi].pairs.splice(pi, 1);
+    renderMedPairsBody();
+}
+
+function addMedPairsCategory() {
+    medPairsGroups.push({ category: '새 분류', pairs: [currentMedPairType === 'lookalike' ? ['', '', '', ''] : ['', '']] });
+    renderMedPairsBody();
+}
+
+function removeMedPairsCategory(gi) {
+    if (!confirm('이 분류를 통째로 삭제할까요?')) return;
+    medPairsGroups.splice(gi, 1);
+    renderMedPairsBody();
+}
+
+async function saveMedPairsEdit() {
+    const resultEl = document.getElementById('med-pairs-result');
+    // 이름이 둘 다 빈 짝은 저장에서 제외하고, 짝이 하나도 안 남은 분류도 함께 정리합니다.
+    const cleaned = medPairsGroups
+        .map(g => ({
+            category: (g.category || '').trim() || '(제목 없음)',
+            pairs: g.pairs.filter(p => (p[0] || '').trim() || (p[1] || '').trim())
+        }))
+        .filter(g => g.pairs.length > 0);
+
+    try {
+        await db.collection('drug_pair_overrides').doc(currentMedPairType).set({
+            groups: cleaned,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        medPairsGroups = cleaned;
+        medPairsHasOverride = true;
+        medPairsEditMode = false;
+        renderMedPairsEditControls();
+        renderMedPairsBody();
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 저장되었습니다!';
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 저장 실패: ' + err.message;
+    }
+}
+
+async function resetMedPairsToDefault() {
+    if (!confirm('저장된 수정 내용을 지우고 기본 목록으로 되돌릴까요?')) return;
+    const resultEl = document.getElementById('med-pairs-result');
+    try {
+        await db.collection('drug_pair_overrides').doc(currentMedPairType).delete();
+        await initMedPairsPage();
+        medPairsEditMode = true;
+        renderMedPairsEditControls();
+        renderMedPairsBody();
+        resultEl.style.color = '#28a745';
+        resultEl.textContent = '✅ 원본으로 되돌렸습니다.';
+    } catch (err) {
+        console.error(err);
+        resultEl.style.color = '#dc3545';
+        resultEl.textContent = '❌ 되돌리기 실패: ' + err.message;
+    }
 }
 
 // =========================================================
